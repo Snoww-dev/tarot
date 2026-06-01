@@ -103,7 +103,7 @@
     /* ─── Divider ─── */
     .divider {
       display: flex; align-items: center; gap: 14px;
-      margin: 24px auto; max-width: 500px;
+      margin: 12px auto; max-width: 500px;
     }
     .divider-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
     .divider-star { color: var(--gold); font-size: 1.1rem; }
@@ -711,7 +711,7 @@
 
     /* ─── Daily card (collapsible sidebar style) ─── */
     .daily-bar {
-      max-width: 720px; margin: 0 auto 30px;
+      max-width: 720px; margin: 0 auto 12px;
       background: linear-gradient(135deg, rgba(12,12,12,0.7), rgba(0,0,0,0.88));
       border: 1px solid var(--gold-dark); border-radius: 18px;
       overflow: hidden;
@@ -725,11 +725,17 @@
     .daily-bar-header:hover { background: rgba(212,169,67,0.05); }
     .daily-bar-arrow { transition: transform 0.3s; }
     .daily-bar-arrow.open { transform: rotate(180deg); }
-    .daily-bar-body { display: none; padding: 0 24px 22px; }
+    .daily-bar-body { display: none; padding: 0 24px 14px; }
     .daily-bar-body.open { display: block; animation: fadeInUp 0.35s ease; }
-    .daily-date-text {
-      text-align: center; font-style: italic; color: #a0a0a0;
-      font-size: 0.9rem; margin-bottom: 16px;
+    .daily-bar-title {
+      display: flex; align-items: center; justify-content: center; gap: 16px;
+      padding: 10px 0 10px; margin-bottom: 12px;
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.8rem;
+      color: var(--gold); letter-spacing: 3px;
+      border-bottom: 1px solid rgba(212,169,67,0.2);
+    }
+    .daily-title-date {
+      font-style: italic; color: #a0a0a0; letter-spacing: 1px; font-size: 0.85rem;
     }
     .daily-layout-mini {
       display: flex; align-items: flex-start; gap: 24px; flex-wrap: wrap;
@@ -737,7 +743,7 @@
     }
     .daily-card-wrap { cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; }
     .daily-card {
-      width: 110px; height: 180px; position: relative;
+      width: 160px; height: 260px; position: relative;
       transform-style: preserve-3d;
       transition: transform 0.8s cubic-bezier(0.4,0,0.2,1); border-radius: 10px;
     }
@@ -791,7 +797,7 @@
 
     /* ─── Footer ─── */
     footer {
-      text-align: center; padding: 30px;
+      text-align: center; padding: 12px 30px;
       color: #a89bc2; font-size: 0.88rem; letter-spacing: 2px;
       position: relative; z-index: 5;
     }
@@ -829,13 +835,10 @@
     <div class="divider-line"></div>
   </div>
 
-  <!-- Daily card collapsible -->
+  <!-- Daily card -->
   <div class="daily-bar">
-    <div class="daily-bar-header" id="dailyBarToggle">
-      <span>✦ LÁ BÀI TRONG NGÀY</span>
-      <span class="daily-bar-arrow" id="dailyArrow">▼</span>
-    </div>
-    <div class="daily-bar-body" id="dailyBarBody">
+    <div class="daily-bar-body open" id="dailyBarBody">
+      <div class="daily-bar-title" id="dailyBarTitle">✦ LÁ BÀI TRONG NGÀY</div>
       <div id="dailyCardSection"></div>
     </div>
   </div>
@@ -1740,13 +1743,6 @@ function spawnParticles(el) {
 // ══════════════════════════════════════════════════════
 //  Daily Card
 // ══════════════════════════════════════════════════════
-// Toggle collapsible
-document.getElementById('dailyBarToggle').addEventListener('click', () => {
-  const body  = document.getElementById('dailyBarBody');
-  const arrow = document.getElementById('dailyArrow');
-  const open  = body.classList.toggle('open');
-  arrow.classList.toggle('open', open);
-});
 
 const DAILY_AFFIRMATIONS = [
   "Hôm nay tôi không cần phải hoàn hảo — tôi chỉ cần thành thật.",
@@ -1800,8 +1796,10 @@ function renderDailyCard() {
   const imgSrc = CARD_IMAGES[card.id] || 'cards/mat-sau.jpg';
   const meaning = reversed ? card.reversed : card.upright;
 
+  const titleEl = document.getElementById('dailyBarTitle');
+  if (titleEl) titleEl.innerHTML = `✦ LÁ BÀI TRONG NGÀY <span class="daily-title-date">— ${dateStr}</span>`;
+
   sec.innerHTML = `
-    <div class="daily-date-text">${dateStr}</div>
     <div class="daily-layout-mini">
       <div class="daily-card-wrap" id="dailyWrap">
         <div class="daily-card" id="dailyCardEl">
