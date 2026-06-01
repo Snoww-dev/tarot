@@ -1,0 +1,99 @@
+ĐẶT ẢNH VÀO THƯ MỤC NÀY (cards/)
+Định dạng: JPG hoặc PNG
+Tên file phải đúng chính xác như bên dưới.
+Nguồn ảnh Rider-Waite: https://commons.wikimedia.org/wiki/Category:Rider-Waite_tarot_card_illustrations
+
+== 22 LÁ MAJOR ARCANA (ĐÃ CÓ ĐỦ) ✓ ==
+00_the-fool.jpg
+01_the-magician.jpg
+02_the-high-priestess.jpg
+03_the-empress.jpg
+04_the-emperor.jpg
+05_the-hierophant.jpg
+06_the-lovers.jpg
+07_the-chariot.jpg
+08_strength.jpg
+09_the-hermit.jpg
+10_wheel-of-fortune.jpg
+11_justice.jpg
+12_the-hanged-man.jpg
+13_death.jpg
+14_temperance.jpg
+15_the-devil.jpg
+16_the-tower.jpg
+17_the-star.jpg
+18_the-moon.jpg
+19_the-sun.jpg
+20_judgement.jpg
+21_the-world.jpg
+
+== 56 LÁ MINOR ARCANA (CẦN THÊM) ==
+
+-- WANDS (14 lá) --
+22_ace-of-wands.jpg
+23_two-of-wands.jpg
+24_three-of-wands.jpg
+25_four-of-wands.jpg
+26_five-of-wands.jpg
+27_six-of-wands.jpg
+28_seven-of-wands.jpg
+29_eight-of-wands.jpg
+30_nine-of-wands.jpg
+31_ten-of-wands.jpg
+32_page-of-wands.jpg
+33_knight-of-wands.jpg
+34_queen-of-wands.jpg
+35_king-of-wands.jpg
+
+-- CUPS (14 lá) --
+36_ace-of-cups.jpg
+37_two-of-cups.jpg
+38_three-of-cups.jpg
+39_four-of-cups.jpg
+40_five-of-cups.jpg
+41_six-of-cups.jpg
+42_seven-of-cups.jpg
+43_eight-of-cups.jpg
+44_nine-of-cups.jpg
+45_ten-of-cups.jpg
+46_page-of-cups.jpg
+47_knight-of-cups.jpg
+48_queen-of-cups.jpg
+49_king-of-cups.jpg
+
+-- SWORDS (14 lá) --
+50_ace-of-swords.jpg
+51_two-of-swords.jpg
+52_three-of-swords.jpg
+53_four-of-swords.jpg
+54_five-of-swords.jpg
+55_six-of-swords.jpg
+56_seven-of-swords.jpg
+57_eight-of-swords.jpg
+58_nine-of-swords.jpg
+59_ten-of-swords.jpg
+60_page-of-swords.jpg
+61_knight-of-swords.jpg
+62_queen-of-swords.jpg
+63_king-of-swords.jpg
+
+-- PENTACLES (14 lá) --
+64_ace-of-pentacles.jpg
+65_two-of-pentacles.jpg
+66_three-of-pentacles.jpg
+67_four-of-pentacles.jpg
+68_five-of-pentacles.jpg
+69_six-of-pentacles.jpg
+70_seven-of-pentacles.jpg
+71_eight-of-pentacles.jpg
+72_nine-of-pentacles.jpg
+73_ten-of-pentacles.jpg
+74_page-of-pentacles.jpg
+75_knight-of-pentacles.jpg
+76_queen-of-pentacles.jpg
+77_king-of-pentacles.jpg
+
+== LƯU Ý ==
+- Đặt tất cả file vào thư mục cards/ (cùng cấp với index.html)
+- App tự dùng ảnh nếu có, hiển thị SVG màu nếu không có
+- Tỷ lệ ảnh lý tưởng: 2:3 (ví dụ 300×450px)

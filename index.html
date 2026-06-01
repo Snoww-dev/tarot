@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tarot Huyền Bí — Bói Bài Online</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
+
+    :root {
+      --gold: #d4a943;
+      --gold-light: #f0d080;
+      --gold-dark: #8b6914;
+      --purple-deep: #000000;
+      --purple-mid: #0d0d0d;
+      --purple-light: #1a1a1a;
+      --mystic-blue: #000000;
+      --star-white: #f0ecff;
+      --card-back: #111111;
+      --glow: rgba(212,169,67,0.4);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: #000000;
+      font-family: 'Be Vietnam Pro', sans-serif;
+      color: var(--star-white);
+      overflow-x: hidden;
+    }
+
+    /* Stars */
+    .stars {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; z-index: 20;
+    }
+    .star {
+      position: absolute; background: white; border-radius: 50%;
+      animation: twinkle var(--dur, 3s) ease-in-out infinite;
+    }
+    @keyframes twinkle {
+      0%,100% { opacity: 0.1; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.3); }
+    }
+
+    #smokeCanvas {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; z-index: 18;
+    }
+
+    .candle-left, .candle-right {
+      position: fixed; bottom: 0; width: 200px;
+      pointer-events: none; z-index: 5;
+      opacity: 0; transform: translateY(60px);
+      transition: opacity 4.5s ease, transform 4.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    .candle-left.visible, .candle-right.visible { opacity: 1; transform: translateY(0); }
+    .candle-left { left: 0; }
+    .candle-right { right: 0; }
+    .candle-left video, .candle-right video { width: 200px; display: block; mix-blend-mode: lighten; }
+    .candle-left::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 60px; height: 100%;
+      background: linear-gradient(to right, #000 40%, transparent); z-index: 1;
+    }
+    .candle-right::before {
+      content: ''; position: absolute; top: 0; right: 0;
+      width: 60px; height: 100%;
+      background: linear-gradient(to left, #000 40%, transparent); z-index: 1;
+    }
+
+    .moon-top {
+      position: fixed; top: -60px; left: 50%;
+      transform: translateX(-50%);
+      width: 220px; pointer-events: none; z-index: 22;
+      filter: drop-shadow(0 0 30px rgba(255,220,100,0.4));
+    }
+
+    /* ─── Layout ─── */
+    .container {
+      position: relative; z-index: 25;
+      max-width: 900px; margin: 0 auto; padding: 20px;
+    }
+
+    header {
+      text-align: center; padding: 50px 20px 24px;
+    }
+    h1 {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(1.6rem, 4vw, 2.8rem);
+      color: var(--gold-light);
+      text-shadow: 0 0 30px var(--glow), 0 0 60px var(--glow);
+      letter-spacing: 4px; margin-bottom: 8px;
+    }
+    .subtitle {
+      font-style: italic; color: #a0a0a0;
+      font-size: 1.1rem; letter-spacing: 2px;
+    }
+
+    /* ─── Divider ─── */
+    .divider {
+      display: flex; align-items: center; gap: 14px;
+      margin: 24px auto; max-width: 500px;
+    }
+    .divider-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+    .divider-star { color: var(--gold); font-size: 1.1rem; }
+
+    /* ─── Step Indicator ─── */
+    .step-indicator {
+      display: flex; justify-content: center; align-items: center;
+      gap: 0; margin: 0 auto 32px; max-width: 680px; padding: 0 10px;
+    }
+    .step-item {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      flex: 1;
+    }
+    .step-circle {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 2px solid var(--gold-dark);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.75rem;
+      color: #555555; background: transparent;
+      transition: all 0.4s;
+    }
+    .step-circle.active {
+      border-color: var(--gold); color: var(--gold);
+      box-shadow: 0 0 14px var(--glow);
+    }
+    .step-circle.done {
+      border-color: var(--gold); background: var(--gold-dark); color: #fff;
+    }
+    .step-label {
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.72rem;
+      color: #505050; letter-spacing: 0.5px; text-align: center;
+      transition: color 0.4s;
+    }
+    .step-item.active .step-label { color: var(--gold-light); }
+    .step-item.done .step-label { color: var(--gold); }
+    .step-connector {
+      flex: 1; height: 1px; background: var(--gold-dark);
+      margin-top: -22px; max-width: 60px; opacity: 0.5;
+    }
+    .step-connector.done { background: var(--gold); opacity: 1; }
+
+    /* ─── Main card panel (wizard wrapper) ─── */
+    .wizard-panel {
+      background: linear-gradient(135deg, rgba(15,15,15,0.85), rgba(0,0,0,0.95));
+      border: 1px solid var(--gold-dark);
+      border-radius: 24px; padding: 36px 40px;
+      max-width: 720px; margin: 0 auto 40px;
+      box-shadow: 0 8px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(212,169,67,0.1);
+      transition: border-color 0.5s, background 0.5s, box-shadow 0.5s, padding 0.5s;
+    }
+    .wizard-panel.result-mode {
+      background: transparent;
+      border-color: transparent;
+      box-shadow: none;
+      padding: 0;
+    }
+
+    .step-screen { display: none; animation: fadeInUp 0.45s ease both; }
+    .step-screen.active { display: block; }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .screen-title {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 1rem; color: var(--gold-light);
+      text-align: center; letter-spacing: 3px;
+      margin-bottom: 24px;
+      text-shadow: 0 0 18px var(--glow);
+    }
+
+    /* ─── Step 1: Phương thức ─── */
+    .method-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    }
+    .method-card {
+      border: 2px solid var(--gold-dark); border-radius: 16px;
+      padding: 24px 20px; text-align: center; cursor: pointer;
+      transition: all 0.3s; background: transparent;
+      color: var(--star-white); position: relative;
+    }
+    .method-card:hover {
+      border-color: var(--gold);
+      background: rgba(212,169,67,0.08);
+      box-shadow: 0 0 20px var(--glow);
+    }
+    .method-card.selected {
+      border-color: var(--gold);
+      background: linear-gradient(135deg, rgba(212,169,67,0.18) 0%, rgba(212,169,67,0.08) 100%);
+      box-shadow: 0 0 28px var(--glow), inset 0 0 20px rgba(212,169,67,0.06);
+      transform: translateY(-2px);
+    }
+    .method-card.selected::before {
+      content: '✓';
+      position: absolute; top: 10px; right: 14px;
+      width: 22px; height: 22px;
+      background: var(--gold); color: #1a0a2e;
+      border-radius: 50%; font-size: 0.75rem; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      line-height: 22px; text-align: center;
+      box-shadow: 0 0 8px rgba(212,169,67,0.6);
+    }
+    .method-icon { font-size: 2.2rem; margin-bottom: 10px; display: block; }
+    .method-name {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 0.85rem; color: var(--gold-light);
+      letter-spacing: 2px; margin-bottom: 8px;
+    }
+    .method-desc { font-size: 0.95rem; color: #a0a0a0; line-height: 1.5; }
+
+    /* ─── Step 2: Kiểu trải ─── */
+    .spread-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    }
+    .spread-option {
+      border: 2px solid var(--gold-dark); border-radius: 16px;
+      padding: 22px 16px; text-align: center; cursor: pointer;
+      transition: all 0.3s; background: transparent; color: var(--star-white);
+      position: relative;
+    }
+    .spread-option:hover {
+      border-color: var(--gold); background: rgba(212,169,67,0.08);
+      box-shadow: 0 0 18px var(--glow);
+    }
+    .spread-option.selected {
+      border-color: var(--gold);
+      border-width: 2px;
+      background: linear-gradient(135deg, rgba(212,169,67,0.18) 0%, rgba(212,169,67,0.08) 100%);
+      box-shadow: 0 0 28px var(--glow), inset 0 0 20px rgba(212,169,67,0.06);
+      transform: translateY(-2px);
+    }
+    .spread-option.selected::before {
+      content: '✓';
+      position: absolute; top: 10px; right: 14px;
+      width: 22px; height: 22px;
+      background: var(--gold); color: #1a0a2e;
+      border-radius: 50%; font-size: 0.75rem; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      line-height: 22px; text-align: center;
+      box-shadow: 0 0 8px rgba(212,169,67,0.6);
+    }
+    .spread-option.selected .spread-name {
+      color: var(--gold);
+    }
+    .spread-option.selected .mini-card {
+      border-color: var(--gold);
+      background: linear-gradient(180deg, #2d1a5e 0%, #1a0a2e 100%);
+      box-shadow: 0 0 6px rgba(212,169,67,0.4);
+    }
+    .spread-cards-preview {
+      display: flex; justify-content: center; gap: 5px; margin-bottom: 12px;
+    }
+    .mini-card {
+      width: 28px; height: 44px; background: var(--card-back);
+      border: 1px solid var(--gold-dark); border-radius: 4px;
+    }
+    .spread-name {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 0.8rem; color: var(--gold-light);
+      letter-spacing: 2px; margin-bottom: 6px;
+    }
+    .spread-desc { font-size: 0.9rem; color: #a0a0a0; line-height: 1.45; }
+    .spread-tag {
+      display: inline-block; margin-top: 8px;
+      padding: 3px 12px; border-radius: 20px;
+      font-size: 0.78rem; letter-spacing: 1px;
+      border: 1px solid var(--gold-dark); color: var(--gold);
+    }
+
+    /* ─── Step 3: Câu hỏi / chủ đề ─── */
+    .input-mode-tabs {
+      display: flex; gap: 8px; justify-content: center; margin-bottom: 20px;
+    }
+    .input-tab {
+      background: transparent; border: 1px solid var(--gold-dark);
+      color: #a0a0a0; padding: 7px 22px;
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 1rem;
+      cursor: pointer; border-radius: 24px; transition: all 0.25s;
+      letter-spacing: 0.5px;
+    }
+    .input-tab:hover { border-color: var(--gold); color: var(--gold-light); }
+    .input-tab.active { background: var(--gold-dark); border-color: var(--gold); color: #fff; }
+
+    .input-panel { display: none; }
+    .input-panel.active { display: block; animation: fadeInUp 0.35s ease; }
+
+    .question-label {
+      display: block; font-size: 0.92rem; color: #a0a0a0;
+      margin-bottom: 10px; letter-spacing: 0.5px; text-align: center;
+    }
+    .question-input {
+      width: 100%; background: rgba(255,255,255,0.05);
+      border: 1px solid var(--gold-dark); color: var(--star-white);
+      padding: 13px 20px; font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 1.1rem; border-radius: 30px; outline: none;
+      text-align: center; letter-spacing: 1px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      resize: none;
+    }
+    .question-input::placeholder { color: #555555; }
+    .question-input:focus { border-color: var(--gold); box-shadow: 0 0 16px var(--glow); }
+    .char-count { text-align: right; font-size: 0.8rem; color: #555555; margin-top: 6px; }
+
+    .theme-row { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    .theme-select, .preset-select {
+      flex: 1; min-width: 180px;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--gold-dark);
+      color: var(--star-white); padding: 11px 16px;
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 1rem;
+      border-radius: 14px; outline: none; cursor: pointer;
+      transition: border-color 0.3s;
+    }
+    .theme-select:focus, .preset-select:focus { border-color: var(--gold); }
+    .theme-select option, .preset-select option { background: #0a0a0a; }
+
+    /* ─── Theme image grid ─── */
+    .theme-img-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+      margin-bottom: 20px;
+      transition: grid-template-columns 0.4s ease;
+    }
+    .theme-img-card {
+      position: relative; border-radius: 16px; overflow: hidden;
+      cursor: pointer; border: 2px solid transparent;
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s, opacity 0.35s, max-height 0.4s;
+      background: #0a0a0a;
+    }
+    .theme-img-card:hover {
+      border-color: var(--gold);
+      box-shadow: 0 0 24px var(--glow);
+      transform: translateY(-3px);
+    }
+    .theme-img-card.selected {
+      border-color: var(--gold);
+      box-shadow: 0 0 32px var(--glow), inset 0 0 0 1px rgba(212,169,67,0.3);
+    }
+    /* Khi một thẻ đã được chọn */
+    .theme-img-grid.has-selection {
+      grid-template-columns: 1fr;
+    }
+    .theme-img-grid.has-selection .theme-img-card.selected {
+      max-width: 260px; margin: 0 auto; width: 100%;
+    }
+    .theme-img-card.hiding {
+      opacity: 0; transform: scale(0.92);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .theme-img-card.showing {
+      animation: fadeInCard 0.35s ease;
+    }
+    @keyframes fadeInCard {
+      from { opacity: 0; transform: scale(0.92); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .theme-img-card img {
+      width: 100%; aspect-ratio: 3/4; object-fit: cover;
+      display: block; opacity: 0.82;
+      transition: opacity 0.3s;
+    }
+    .theme-img-card:hover img, .theme-img-card.selected img { opacity: 1; }
+    .theme-img-overlay {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.88) 50%);
+      padding: 32px 14px 16px;
+      text-align: center;
+    }
+    .theme-img-title {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 0.82rem; color: var(--gold-light);
+      letter-spacing: 3px; font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .theme-img-desc {
+      font-size: 0.8rem; color: #c0c0c0; line-height: 1.45;
+    }
+    .theme-img-btn {
+      display: inline-block; margin-top: 10px;
+      font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 0.72rem; color: var(--gold);
+      letter-spacing: 2px; opacity: 0.75;
+    }
+    .theme-img-card.selected .theme-img-btn { opacity: 1; color: var(--gold-light); }
+
+    /* Nút quay lại chọn chủ đề khác */
+    .theme-back-btn {
+      display: none; margin: 0 auto 16px; padding: 7px 20px;
+      background: transparent; border: 1px solid var(--gold-dark);
+      color: var(--gold); border-radius: 20px; cursor: pointer;
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.78rem;
+      letter-spacing: 1.5px; transition: border-color 0.3s, color 0.3s;
+      text-align: center;
+    }
+    .theme-back-btn:hover { border-color: var(--gold); color: var(--gold-light); }
+    .theme-back-btn.visible { display: block; }
+
+    /* Câu hỏi gợi ý sau khi chọn chủ đề ảnh */
+    .theme-preset-area {
+      display: none; animation: fadeInUp 0.35s ease;
+    }
+    .theme-preset-area.visible { display: block; }
+    .preset-chips {
+      display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;
+    }
+    .preset-chip {
+      background: rgba(255,255,255,0.04); border: 1px solid var(--gold-dark);
+      color: #c0c0c0; padding: 8px 16px; border-radius: 24px;
+      font-size: 0.9rem; cursor: pointer;
+      transition: all 0.25s; line-height: 1.4;
+    }
+    .preset-chip:hover { border-color: var(--gold); color: var(--gold-light); background: rgba(212,169,67,0.07); }
+    .preset-chip.selected { border-color: var(--gold); background: rgba(212,169,67,0.12); color: var(--gold-light); }
+
+    /* ─── Navigation buttons ─── */
+    .nav-row {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-top: 28px; gap: 12px;
+    }
+    .nav-row.center { justify-content: center; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      border: none; color: #0a0a0a;
+      padding: 13px 36px; font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 0.82rem; letter-spacing: 3px; cursor: pointer;
+      border-radius: 40px; transition: all 0.3s;
+      box-shadow: 0 4px 24px rgba(212,169,67,0.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 36px rgba(212,169,67,0.5); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .btn-secondary {
+      background: transparent; border: 1px solid var(--gold-dark);
+      color: var(--gold-light); padding: 11px 24px;
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.78rem;
+      letter-spacing: 2px; cursor: pointer; border-radius: 40px;
+      transition: all 0.3s;
+    }
+    .btn-secondary:hover { background: rgba(212,169,67,0.1); border-color: var(--gold); }
+
+    /* ─── Step 4: Xáo bài ─── */
+    .shuffle-area {
+      display: flex; flex-direction: column; align-items: center; gap: 24px;
+    }
+    .shuffle-card-anim {
+      position: relative; width: 110px; height: 170px;
+    }
+    .shuffle-card-anim .sc {
+      position: absolute; width: 88px; height: 140px;
+      border-radius: 10px; overflow: hidden;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.6);
+      border: 1px solid var(--gold-dark);
+      top: 50%; left: 50%; transform: translate(-50%,-50%);
+    }
+    .shuffle-card-anim .sc img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .shuffle-card-anim .sc:nth-child(1) { animation: sh1 1.4s ease-in-out infinite; }
+    .shuffle-card-anim .sc:nth-child(2) { animation: sh2 1.4s ease-in-out infinite 0.2s; }
+    .shuffle-card-anim .sc:nth-child(3) { animation: sh3 1.4s ease-in-out infinite 0.4s; }
+    @keyframes sh1 {
+      0%,100% { transform: translate(-50%,-50%) rotate(-14deg) translateX(-22px); }
+      50%      { transform: translate(-50%,-50%) rotate(4deg) translateX(16px); }
+    }
+    @keyframes sh2 {
+      0%,100% { transform: translate(-50%,-50%) rotate(0deg); }
+      50%      { transform: translate(-50%,-50%) rotate(-6deg) translateX(-8px); }
+    }
+    @keyframes sh3 {
+      0%,100% { transform: translate(-50%,-50%) rotate(14deg) translateX(22px); }
+      50%      { transform: translate(-50%,-50%) rotate(-3deg) translateX(-12px); }
+    }
+    .shuffle-label {
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.88rem;
+      color: var(--gold-light); letter-spacing: 2px; text-align: center;
+    }
+    .shuffle-bar-wrap {
+      width: 240px; height: 5px;
+      background: rgba(255,255,255,0.08); border-radius: 5px; overflow: hidden;
+    }
+    #shuffleBar {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+      border-radius: 5px; transition: width 0.55s ease;
+    }
+    .shuffle-steps-text {
+      font-size: 0.88rem; color: #a0a0a0; letter-spacing: 1px;
+    }
+
+    /* ─── Step 5: Fan chọn bài ─── */
+    #deckFanSection { text-align: center; }
+    .select-counter {
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.88rem;
+      color: var(--gold); letter-spacing: 2px; margin-bottom: 6px;
+    }
+    .fan-hint {
+      font-size: 0.9rem; color: rgba(200,200,200,0.55); margin-bottom: 12px;
+    }
+    #deckGrid {
+      display: grid;
+      justify-content: center; justify-items: center;
+      width: 100%;
+      margin: 0 auto; padding: 8px 0; row-gap: 6px;
+    }
+    .deck-card {
+      width: 54px; height: 88px;
+      flex-shrink: 0;
+      margin: 0;
+      cursor: pointer;
+      transition: transform 0.2s ease, filter 0.2s ease;
+      position: relative;
+    }
+    .deck-card-inner {
+      width: 100%; height: 100%;
+      position: relative; transform-style: preserve-3d;
+      transition: transform 0.65s ease; border-radius: 5px;
+    }
+    .deck-card.flipped .deck-card-inner { transform: rotateY(180deg); }
+    .deck-card-back, .deck-card-front {
+      position: absolute; width: 100%; height: 100%;
+      backface-visibility: hidden; border-radius: 5px; overflow: hidden;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.6);
+    }
+    .deck-card-back img, .deck-card-front img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .deck-card-front { transform: rotateY(180deg); }
+    .deck-card:hover:not(.selected-card) {
+      transform: translateY(-12px);
+      filter: brightness(1.35) drop-shadow(0 0 8px rgba(212,169,67,0.8));
+      z-index: 200 !important;
+    }
+    .deck-card.selected-card { pointer-events: none; }
+    @keyframes cardDeal {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes cardDeal {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* flip-card ở trạng thái nhỏ (preview) */
+    .multi-card-slot.preview {
+      --card-scale: 0.38;
+      transform: scale(var(--card-scale));
+      transform-origin: top center;
+      margin-bottom: calc((var(--card-scale) - 1) * 196px);
+      transition: transform 0.55s cubic-bezier(0.22,1,0.36,1),
+                  margin-bottom 0.55s cubic-bezier(0.22,1,0.36,1);
+      animation: previewPop 0.4s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes previewPop {
+      from { transform: scale(0.1); opacity: 0; }
+      to   { transform: scale(0.38); opacity: 1; }
+    }
+    /* khi zoom to */
+    .multi-card-slot.expanded {
+      --card-scale: 1;
+      transform: scale(1);
+      margin-bottom: 0;
+      animation: none;
+    }
+
+    /* ─── Step 6: Kết quả — lật bài ─── */
+    .result-question-banner {
+      text-align: center; font-style: italic;
+      color: #a0a0a0; font-size: 1rem; margin-bottom: 24px;
+      padding: 12px 20px; border-radius: 12px;
+      background: rgba(212,169,67,0.06);
+      border: 1px solid rgba(212,169,67,0.15);
+    }
+
+    .multi-reveal-row {
+      display: flex; justify-content: center; flex-wrap: wrap; gap: 20px;
+      margin-bottom: 16px;
+    }
+    .multi-card-slot {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      animation: fadeInUp 0.5s ease both;
+    }
+    .multi-card-label {
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.72rem;
+      color: var(--gold); letter-spacing: 2px; text-transform: uppercase;
+    }
+    .multi-flip-card {
+      width: 120px; height: 196px; perspective: 800px; cursor: pointer;
+    }
+    .multi-flip-inner {
+      width: 100%; height: 100%; position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.75s cubic-bezier(0.4,0,0.2,1);
+      border-radius: 10px;
+    }
+    .multi-flip-inner.flipped { transform: rotateY(180deg); }
+    .multi-flip-back, .multi-flip-front {
+      position: absolute; width: 100%; height: 100%;
+      backface-visibility: hidden; border-radius: 10px; overflow: hidden;
+      box-shadow: 0 6px 28px rgba(0,0,0,0.65), 0 0 0 1px rgba(212,169,67,0.18);
+    }
+    .multi-flip-back { border: 2px solid var(--gold-dark); background: var(--card-back); }
+
+    /* Bài thường: lật ngang (rotateY) */
+    .multi-flip-front {
+      transform: rotateY(180deg); border: 2px solid var(--gold);
+      box-shadow: 0 6px 28px rgba(0,0,0,0.65), 0 0 18px var(--glow);
+    }
+    .multi-flip-inner.flipped { transform: rotateY(180deg); }
+
+    /* Bài ngược: lật dọc từ dưới lên (rotateX) */
+    .multi-flip-inner.flip-reversed .multi-flip-front {
+      transform: rotateX(180deg);
+    }
+    .multi-flip-inner.flip-reversed.flipped { transform: rotateX(180deg); }
+
+    .multi-flip-back img, .multi-flip-front img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    @keyframes cardReveal {
+      0%   { box-shadow: 0 0 0px var(--glow); }
+      50%  { box-shadow: 0 0 40px var(--gold), 0 0 80px var(--glow); }
+      100% { box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 20px var(--glow); }
+    }
+    .multi-flip-inner.flipped .multi-flip-front { animation: cardReveal 1s ease-out forwards; }
+    .flip-hint-row {
+      text-align: center; font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 0.72rem; color: var(--gold); letter-spacing: 2px;
+      opacity: 0.75; margin-top: 4px;
+    }
+
+    /* ─── Synthesis ─── */
+    .synthesis-panel {
+      display: none;
+      padding: 8px 0; margin-top: 16px;
+      animation: fadeInUp 0.55s ease;
+    }
+    .synthesis-panel.visible { display: block; }
+    .synthesis-header {
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.95rem;
+      color: var(--gold-light); text-align: center; letter-spacing: 4px;
+      margin-bottom: 14px; text-shadow: 0 0 20px var(--glow);
+    }
+    .synthesis-intro {
+      font-style: italic; color: #a0a0a0; font-size: 1rem;
+      text-align: center; line-height: 1.7; margin-bottom: 16px;
+    }
+    .synthesis-chips {
+      display: flex; justify-content: center; flex-wrap: wrap;
+      gap: 8px; margin-bottom: 18px;
+    }
+    .synth-chip {
+      display: flex; flex-direction: column; align-items: center;
+      background: rgba(212,169,67,0.08); border: 1px solid rgba(212,169,67,0.3);
+      border-radius: 12px; padding: 7px 14px; min-width: 80px;
+    }
+    .synth-chip.reversed { border-color: rgba(180,60,60,0.4); background: rgba(180,60,60,0.08); }
+    .synth-chip-pos {
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.6rem;
+      color: var(--gold); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 3px;
+    }
+    .synth-chip.reversed .synth-chip-pos { color: #ff9a9a; }
+    .synth-chip-name { font-size: 0.9rem; color: var(--star-white); font-weight: 600; }
+    .synthesis-msg {
+      color: #c0c0c0; font-size: 1.03rem; line-height: 1.8;
+      margin-bottom: 22px; border-top: 1px solid rgba(212,169,67,0.15);
+      padding-top: 16px;
+    }
+    .synthesis-actions {
+      display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;
+    }
+
+    /* ─── Detail panel per card ─── */
+    .detail-section { display: none; margin-top: 20px; }
+    .detail-section.visible { display: block; animation: fadeInUp 0.45s ease; }
+    .detail-block {
+      background: linear-gradient(135deg, rgba(15,15,15,0.85), rgba(0,0,0,0.95));
+      border: 1px solid var(--gold-dark); border-radius: 16px;
+      padding: 22px 26px; margin-bottom: 14px;
+    }
+    .detail-header {
+      display: flex; align-items: baseline; flex-wrap: wrap;
+      gap: 10px; margin-bottom: 12px;
+    }
+    .detail-pos {
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.72rem;
+      color: var(--gold); letter-spacing: 2px; text-transform: uppercase;
+    }
+    .detail-name { font-size: 1.1rem; color: var(--gold-light); font-weight: 600; }
+    .reversed-badge {
+      font-size: 0.78rem; background: rgba(180,60,60,0.3);
+      border: 1px solid rgba(180,60,60,0.5); color: #ff9a9a;
+      padding: 3px 10px; border-radius: 20px; letter-spacing: 1px;
+    }
+    .detail-tabs {
+      display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0 8px;
+    }
+    .detail-tab {
+      background: transparent; border: 1px solid var(--gold-dark);
+      color: #a0a0a0; padding: 5px 16px; font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 1rem; cursor: pointer; border-radius: 20px;
+      transition: all 0.2s; letter-spacing: 0.5px;
+    }
+    .detail-tab:hover { border-color: var(--gold); color: var(--gold-light); }
+    .detail-tab.active { background: var(--gold-dark); border-color: var(--gold); color: #fff; }
+    .detail-content { color: #c0c0c0; font-size: 1.02rem; line-height: 1.75; min-height: 56px; }
+    .detail-pane { display: none; }
+    .detail-pane.active { display: block; }
+
+    /* ─── Particle ─── */
+    .particle { position: fixed; pointer-events: none; z-index: 999; border-radius: 50%; }
+
+    /* ─── Daily card (collapsible sidebar style) ─── */
+    .daily-bar {
+      max-width: 720px; margin: 0 auto 30px;
+      background: linear-gradient(135deg, rgba(12,12,12,0.7), rgba(0,0,0,0.88));
+      border: 1px solid var(--gold-dark); border-radius: 18px;
+      overflow: hidden;
+    }
+    .daily-bar-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 24px; cursor: pointer;
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.8rem;
+      color: var(--gold); letter-spacing: 3px;
+    }
+    .daily-bar-header:hover { background: rgba(212,169,67,0.05); }
+    .daily-bar-arrow { transition: transform 0.3s; }
+    .daily-bar-arrow.open { transform: rotate(180deg); }
+    .daily-bar-body { display: none; padding: 0 24px 22px; }
+    .daily-bar-body.open { display: block; animation: fadeInUp 0.35s ease; }
+    .daily-date-text {
+      text-align: center; font-style: italic; color: #a0a0a0;
+      font-size: 0.9rem; margin-bottom: 16px;
+    }
+    .daily-layout-mini {
+      display: flex; align-items: flex-start; gap: 24px; flex-wrap: wrap;
+      justify-content: center;
+    }
+    .daily-card-wrap { cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .daily-card {
+      width: 110px; height: 180px; position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.8s cubic-bezier(0.4,0,0.2,1); border-radius: 10px;
+    }
+    .daily-card.flipped { transform: rotateY(180deg); }
+    .daily-card-back, .daily-card-front {
+      position: absolute; width: 100%; height: 100%;
+      backface-visibility: hidden; border-radius: 10px; overflow: hidden;
+    }
+    .daily-card-back {
+      background: var(--card-back); border: 2px solid var(--gold-dark);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 6px 28px rgba(0,0,0,0.6);
+    }
+    .daily-card-back img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 8px; }
+    .daily-card-front {
+      transform: rotateY(180deg); border: 2px solid var(--gold);
+      display: flex; flex-direction: column; align-items: center;
+      box-shadow: 0 6px 28px rgba(0,0,0,0.6), 0 0 18px var(--glow);
+    }
+    .daily-card-front .card-img-wrap { flex: 1; width: 100%; overflow: hidden; }
+    .daily-card-front .card-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .daily-card-front .card-img-wrap img.reversed-img { transform: rotate(180deg); }
+    .daily-card-name {
+      width: 100%; background: rgba(0,0,0,0.6);
+      color: var(--gold-light); font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 0.65rem; text-align: center; padding: 6px 4px;
+      border-top: 1px solid var(--gold-dark); letter-spacing: 1px;
+    }
+    .daily-flip-hint {
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.68rem;
+      color: var(--gold); letter-spacing: 2px; opacity: 0.8;
+    }
+    .daily-info { flex: 1; min-width: 200px; max-width: 360px; }
+    .daily-card-title { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+    .daily-numeral { font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.72rem; color: var(--gold); letter-spacing: 2px; }
+    .daily-name { font-size: 1.08rem; color: var(--gold-light); font-weight: 600; }
+    .daily-meaning { color: #c0c0c0; font-size: 1rem; line-height: 1.7; margin-bottom: 14px; }
+    .daily-affirmation {
+      background: rgba(212,169,67,0.07); border: 1px solid rgba(212,169,67,0.22);
+      border-radius: 12px; padding: 14px 16px;
+    }
+    .affirmation-label {
+      display: block; font-family: 'Be Vietnam Pro', sans-serif; font-size: 1rem;
+      font-weight: 600; color: var(--gold-light); letter-spacing: 2px;
+      text-align: center; margin-bottom: 8px;
+    }
+    .affirmation-text {
+      color: var(--star-white); font-style: italic;
+      font-size: 0.98rem; line-height: 1.65; text-align: center;
+    }
+
+    /* ─── Footer ─── */
+    footer {
+      text-align: center; padding: 30px;
+      color: #a89bc2; font-size: 0.88rem; letter-spacing: 2px;
+      position: relative; z-index: 5;
+    }
+
+    @media (max-width: 600px) {
+      .method-grid, .spread-grid, .theme-img-grid { grid-template-columns: 1fr; }
+      .wizard-panel { padding: 24px 18px; }
+      .step-label { font-size: 0.6rem; }
+      .multi-flip-card { width: 90px; height: 148px; }
+      .step-connector { max-width: 30px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<img src="mattrang.png" class="moon-top" alt="">
+<canvas id="smokeCanvas"></canvas>
+<div class="candle-left">
+  <video autoplay muted loop playsinline><source src="video-nen.mp4" type="video/mp4"></video>
+</div>
+<div class="candle-right">
+  <video autoplay muted loop playsinline><source src="video-nen.mp4" type="video/mp4"></video>
+</div>
+
+<div class="container">
+  <header>
+    <h1>BÓI BÀI TAROT</h1>
+    <p class="subtitle">✦ Lắng nghe thông điệp từ vũ trụ ✦</p>
+  </header>
+
+  <div class="divider">
+    <div class="divider-line"></div>
+    <span class="divider-star">✧</span><span class="divider-star">✦</span><span class="divider-star">✧</span>
+    <div class="divider-line"></div>
+  </div>
+
+  <!-- Daily card collapsible -->
+  <div class="daily-bar">
+    <div class="daily-bar-header" id="dailyBarToggle">
+      <span>✦ LÁ BÀI TRONG NGÀY</span>
+      <span class="daily-bar-arrow" id="dailyArrow">▼</span>
+    </div>
+    <div class="daily-bar-body" id="dailyBarBody">
+      <div id="dailyCardSection"></div>
+    </div>
+  </div>
+
+  <div class="divider">
+    <div class="divider-line"></div>
+    <span class="divider-star">✧</span><span class="divider-star">✦</span><span class="divider-star">✧</span>
+    <div class="divider-line"></div>
+  </div>
+
+  <!-- Step indicator -->
+  <div class="step-indicator" id="stepIndicator">
+    <div class="step-item active" data-step="1">
+      <div class="step-circle active">1</div>
+      <div class="step-label">Phương thức</div>
+    </div>
+    <div class="step-connector" id="conn-1-2"></div>
+    <div class="step-item" data-step="2">
+      <div class="step-circle">2</div>
+      <div class="step-label">Kiểu trải</div>
+    </div>
+    <div class="step-connector" id="conn-2-3"></div>
+    <div class="step-item" data-step="3">
+      <div class="step-circle">3</div>
+      <div class="step-label">Câu hỏi</div>
+    </div>
+    <div class="step-connector" id="conn-3-4"></div>
+    <div class="step-item" data-step="4">
+      <div class="step-circle">4</div>
+      <div class="step-label">Xáo & Kết quả</div>
+    </div>
+  </div>
+
+  <!-- ════ WIZARD PANEL ════ -->
+  <div class="wizard-panel">
+
+    <!-- STEP 1: Phương thức bói -->
+    <div class="step-screen active" id="screen1">
+      <div class="screen-title">✦ CHỌN PHƯƠNG THỨC BÓI ✦</div>
+      <div class="method-grid">
+        <div class="method-card" data-method="question" onclick="selectMethod(this)">
+          <span class="method-icon">🔮</span>
+          <div class="method-name">CÂU HỎI CỤ THỂ</div>
+          <div class="method-desc">Nhập câu hỏi của bạn — bộ bài sẽ phản chiếu chính xác điều bạn đang tìm kiếm.</div>
+        </div>
+        <div class="method-card" data-method="theme" onclick="selectMethod(this)">
+          <span class="method-icon">🌙</span>
+          <div class="method-name">THEO CHỦ ĐỀ</div>
+          <div class="method-desc">Chọn chủ đề và câu hỏi gợi ý — vũ trụ sẽ dẫn lối theo từng lĩnh vực của cuộc sống.</div>
+        </div>
+      </div>
+      <div class="nav-row center">
+        <button class="btn-primary" id="step1Next" disabled onclick="goToStep(2)">TIẾP THEO ›</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Kiểu trải bài -->
+    <div class="step-screen" id="screen2">
+      <div class="screen-title">✦ CHỌN KIỂU TRẢI BÀI ✦</div>
+      <div class="spread-grid">
+        <div class="spread-option" data-spread="1" onclick="selectSpread(this)">
+          <div class="spread-cards-preview">
+            <div class="mini-card"></div>
+          </div>
+          <div class="spread-name">TRẢI 1 LÁ</div>
+          <div class="spread-desc">Nhanh · Trực tiếp · Chính xác<br>Thông điệp cốt lõi vũ trụ muốn bạn nghe hôm nay.</div>
+          <span class="spread-tag">Thông điệp</span>
+        </div>
+        <div class="spread-option" data-spread="3" onclick="selectSpread(this)">
+          <div class="spread-cards-preview">
+            <div class="mini-card"></div>
+            <div class="mini-card"></div>
+            <div class="mini-card"></div>
+          </div>
+          <div class="spread-name">TRẢI 3 LÁ</div>
+          <div class="spread-desc">Phân tích sâu hơn:<br>Quá Khứ · Hiện Tại · Tương Lai</div>
+          <span class="spread-tag">Phổ biến nhất</span>
+        </div>
+        <div class="spread-option" data-spread="5" onclick="selectSpread(this)">
+          <div class="spread-cards-preview">
+            <div class="mini-card"></div><div class="mini-card"></div><div class="mini-card"></div>
+            <div class="mini-card"></div><div class="mini-card"></div>
+          </div>
+          <div class="spread-name">TRẢI 5 LÁ</div>
+          <div class="spread-desc">Toàn cảnh tình huống:<br>Hoàn cảnh · Thách thức · Quá khứ · Tương lai · Kết quả</div>
+          <span class="spread-tag">Chi tiết</span>
+        </div>
+        <div class="spread-option" data-spread="7" onclick="selectSpread(this)">
+          <div class="spread-cards-preview">
+            <div class="mini-card"></div><div class="mini-card"></div><div class="mini-card"></div>
+            <div class="mini-card"></div><div class="mini-card"></div><div class="mini-card"></div>
+            <div class="mini-card"></div>
+          </div>
+          <div class="spread-name">TRẢI 7 LÁ</div>
+          <div class="spread-desc">Phân tích toàn diện:<br>Quá khứ · Hiện tại · Tương lai · Lời khuyên · Trở ngại · Tiềm năng · Kết quả</div>
+          <span class="spread-tag">Chuyên sâu</span>
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="btn-secondary" onclick="goToStep(1)">‹ QUAY LẠI</button>
+        <button class="btn-primary" id="step2Next" disabled onclick="goToStep(3)">TIẾP THEO ›</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Câu hỏi / Chủ đề -->
+    <div class="step-screen" id="screen3">
+      <div class="screen-title" id="screen3Title">✦ NHẬP CÂU HỎI CỦA BẠN ✦</div>
+
+      <!-- Tab: Câu hỏi -->
+      <div class="input-panel active" id="panelQuestion">
+        <label class="question-label">Hãy gõ câu hỏi bạn muốn vũ trụ lắng nghe...</label>
+        <textarea class="question-input" id="questionInput" rows="3" maxlength="500"
+          placeholder="Ví dụ: Tôi có nên thay đổi công việc hiện tại không?"
+          oninput="document.getElementById('charCount').textContent=this.value.length"></textarea>
+        <div class="char-count"><span id="charCount">0</span>/500</div>
+      </div>
+
+      <!-- Tab: Chủ đề -->
+      <div class="input-panel" id="panelTheme">
+        <label class="question-label" id="themeGridLabel">Chọn lĩnh vực bạn muốn khám phá:</label>
+        <button class="theme-back-btn" id="themeBackBtn" onclick="resetThemeSelection()">← Chọn chủ đề khác</button>
+        <div class="theme-img-grid" id="themeImgGrid">
+          <div class="theme-img-card" data-theme="love" onclick="selectThemeImg(this)">
+            <img src="chude-tinhyeu.png" alt="Tình Yêu">
+            <div class="theme-img-overlay">
+              <div class="theme-img-title">TÌNH YÊU</div>
+              <div class="theme-img-desc">Bói bài Tarot giúp bạn khám phá các khía cạnh sâu sắc trong tình yêu và mối quan hệ.</div>
+              <span class="theme-img-btn">✦ NHẬN THÔNG ĐIỆP</span>
+            </div>
+          </div>
+          <div class="theme-img-card" data-theme="spirit" onclick="selectThemeImg(this)">
+            <img src="chu-de-tinh-than.png" alt="Tinh Thần">
+            <div class="theme-img-overlay">
+              <div class="theme-img-title">TINH THẦN</div>
+              <div class="theme-img-desc">Khám phá nội tâm, hiểu rõ cảm xúc, và tìm kiếm sự cân bằng trong cuộc sống.</div>
+              <span class="theme-img-btn">✦ NHẬN THÔNG ĐIỆP</span>
+            </div>
+          </div>
+          <div class="theme-img-card" data-theme="health" onclick="selectThemeImg(this)">
+            <img src="chu-de-suc-khoe.png" alt="Sức Khỏe">
+            <div class="theme-img-overlay">
+              <div class="theme-img-title">SỨC KHỎE</div>
+              <div class="theme-img-desc">Cung cấp ưu ra lời khuyên giúp cải thiện sức khỏe toàn diện.</div>
+              <span class="theme-img-btn">✦ NHẬN THÔNG ĐIỆP</span>
+            </div>
+          </div>
+          <div class="theme-img-card" data-theme="career" onclick="selectThemeImg(this)">
+            <img src="chu-de-tai-chinh.png" alt="Tài Chính">
+            <div class="theme-img-overlay">
+              <div class="theme-img-title">TÀI CHÍNH</div>
+              <div class="theme-img-desc">Trải bài về chủ đề tài chính giúp bạn hiểu rõ tình hình kinh tế và đưa ra lời khuyên hữu ích.</div>
+              <span class="theme-img-btn">✦ NHẬN THÔNG ĐIỆP</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="theme-preset-area" id="themePresetArea">
+          <label class="question-label" style="margin-bottom:12px;">Chọn câu hỏi gợi ý:</label>
+          <div class="preset-chips" id="presetChips"></div>
+          <div id="themeQuestionPreview" style="display:none; margin-top:4px;">
+            <div class="result-question-banner" id="themeQuestionText"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn-secondary" onclick="goToStep(2)">‹ QUAY LẠI</button>
+        <button class="btn-primary" id="step3Next" onclick="goToStep(4)">BẮT ĐẦU BÓI ›</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Xáo bài + Chọn bài (gộp) -->
+    <div class="step-screen" id="screen4">
+      <!-- Phase xáo: hiện trước -->
+      <div id="shufflePhase">
+        <div class="screen-title">✦ ĐANG XÁO BÀI ✦</div>
+        <div class="shuffle-area">
+          <div class="shuffle-card-anim">
+            <div class="sc"><img src="cards/mat-sau.jpg" alt=""></div>
+            <div class="sc"><img src="cards/mat-sau.jpg" alt=""></div>
+            <div class="sc"><img src="cards/mat-sau.jpg" alt=""></div>
+          </div>
+          <div class="shuffle-label" id="shuffleLabel">Tập trung năng lượng vào bộ bài...</div>
+          <div class="shuffle-bar-wrap"><div id="shuffleBar"></div></div>
+          <div class="shuffle-steps-text"><span id="shuffleProgress">1/6</span> bước</div>
+        </div>
+      </div>
+      <!-- Phase fan: ẩn, tự hiện sau khi xáo xong -->
+      <div id="fanPhase" style="display:none">
+        <!-- Tiêu đề thay đổi theo phase -->
+        <div class="screen-title" id="screen4Title">✦ RÚT BÀI CỦA BẠN ✦</div>
+
+        <!-- Hàng lá bài (nhỏ → to): luôn visible trong screen4 -->
+        <div class="multi-reveal-row" id="multiRevealRow"></div>
+        <div class="flip-hint-row" id="flipHintRow" style="display:none">✦ Nhấn vào từng lá bài để lật ✦</div>
+
+        <!-- Phase chọn bài -->
+        <div id="deckFanSection">
+          <div class="select-counter" id="selectCounter">Đã chọn 0/1 lá bài</div>
+          <p class="fan-hint">Tập trung vào câu hỏi · Chọn lá bài bạn cảm nhận được</p>
+          <div id="deckGrid"></div>
+        </div>
+
+        <!-- Phase kết quả -->
+        <div id="resultPhase" style="display:none">
+          <div class="result-question-banner" id="resultQuestionBanner"></div>
+          <div class="synthesis-panel" id="synthPanel">
+            <div class="synthesis-header">✦ THÔNG ĐIỆP TỔNG HỢP ✦</div>
+            <p class="synthesis-intro" id="synthIntro"></p>
+            <div class="synthesis-chips" id="synthChips"></div>
+            <p class="synthesis-msg" id="synthMsg"></p>
+            <div class="synthesis-actions">
+              <button class="btn-primary" onclick="resetAll()">✦ BÓI LẠI ✦</button>
+              <button class="btn-secondary" onclick="toggleDetail()">✦ XEM CHI TIẾT TỪNG LÁ ✦</button>
+            </div>
+          </div>
+          <div class="detail-section" id="detailSection"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end wizard-panel -->
+
+  <footer>✦ &nbsp; Tarot chỉ là gương chiếu nội tâm — Sức mạnh thực sự nằm trong bạn &nbsp; ✦</footer>
+</div>
+
+<script src="cards.js"></script>
+<script src="smoke.js"></script>
+<script>
+// ══════════════════════════════════════════════════════
+//  Stars
+// ══════════════════════════════════════════════════════
+(function () {
+  const c = document.getElementById('stars');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const sz = Math.random() * 2.5 + 0.5;
+    s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${2+Math.random()*4}s;animation-delay:${Math.random()*5}s;`;
+    c.appendChild(s);
+  }
+})();
+
+// ══════════════════════════════════════════════════════
+//  Card image helpers
+// ══════════════════════════════════════════════════════
+const CARD_IMAGES = [
+  'cards/00_the-fool.jpg','cards/01_the-magician.jpg','cards/02_the-high-priestess.jpg',
+  'cards/03_the-empress.jpg','cards/04_the-emperor.jpg','cards/05_the-hierophant.jpg',
+  'cards/06_the-lovers.jpg','cards/07_the-chariot.jpg','cards/08_strength.jpg',
+  'cards/09_the-hermit.jpg','cards/10_wheel-of-fortune.jpg','cards/11_justice.jpg',
+  'cards/12_the-hanged-man.jpg','cards/13_death.jpg','cards/14_temperance.jpg',
+  'cards/15_the-devil.jpg','cards/16_the-tower.jpg','cards/17_the-star.jpg',
+  'cards/18_the-moon.jpg','cards/19_the-sun.jpg','cards/20_judgement.jpg',
+  'cards/21_the-world.jpg','cards/22_ace-of-wands.jpg','cards/23_two-of-wands.jpg',
+  'cards/24_three-of-wands.jpg','cards/25_four-of-wands.jpg','cards/26_five-of-wands.jpg',
+  'cards/27_six-of-wands.jpg','cards/28_seven-of-wands.jpg','cards/29_eight-of-wands.jpg',
+  'cards/30_nine-of-wands.jpg','cards/31_ten-of-wands.jpg','cards/32_page-of-wands.jpg',
+  'cards/33_knight-of-wands.jpg','cards/34_queen-of-wands.jpg','cards/35_king-of-wands.jpg',
+  'cards/36_ace-of-cups.jpg','cards/37_two-of-cups.jpg','cards/38_three-of-cups.jpg',
+  'cards/39_four-of-cups.jpg','cards/40_five-of-cups.jpg','cards/41_six-of-cups.jpg',
+  'cards/42_seven-of-cups.jpg','cards/43_eight-of-cups.jpg','cards/44_nine-of-cups.jpg',
+  'cards/45_ten-of-cups.jpg','cards/46_page-of-cups.jpg','cards/47_knight-of-cups.jpg',
+  'cards/48_queen-of-cups.jpg','cards/49_king-of-cups.jpg','cards/50_ace-of-swords.jpg',
+  'cards/51_two-of-swords.jpg','cards/52_three-of-swords.jpg','cards/53_four-of-swords.jpg',
+  'cards/54_five-of-swords.jpg','cards/55_six-of-swords.jpg','cards/56_seven-of-swords.jpg',
+  'cards/57_eight-of-swords.jpg','cards/58_nine-of-swords.jpg','cards/59_ten-of-swords.jpg',
+  'cards/60_page-of-swords.jpg','cards/61_knight-of-swords.jpg','cards/62_queen-of-swords.jpg',
+  'cards/63_king-of-swords.jpg','cards/64_ace-of-pentacles.jpg','cards/65_two-of-pentacles.jpg',
+  'cards/66_three-of-pentacles.jpg','cards/67_four-of-pentacles.jpg','cards/68_five-of-pentacles.jpg',
+  'cards/69_six-of-pentacles.jpg','cards/70_seven-of-pentacles.jpg','cards/71_eight-of-pentacles.jpg',
+  'cards/72_nine-of-pentacles.jpg','cards/73_ten-of-pentacles.jpg','cards/74_page-of-pentacles.jpg',
+  'cards/75_knight-of-pentacles.jpg','cards/76_queen-of-pentacles.jpg','cards/77_king-of-pentacles.jpg',
+];
+
+function makeCardBackHTML() {
+  return `<img src="cards/mat-sau.jpg" alt="mặt sau" style="width:100%;height:100%;object-fit:cover;display:block;">`;
+}
+function makeCardFrontSVG(card) {
+  const [c1,c2] = card.colors;
+  return `<svg viewBox="0 0 140 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="140" height="200" fill="${card.bg}"/>
+    <rect x="5" y="5" width="130" height="190" fill="none" stroke="${c1}" stroke-width="0.8" rx="4" opacity="0.5"/>
+    <text x="8" y="20" fill="${c1}" font-size="9" opacity="0.7">✦</text>
+    <text x="122" y="20" fill="${c1}" font-size="9" opacity="0.7">✦</text>
+    <text x="8" y="196" fill="${c1}" font-size="9" opacity="0.7">✦</text>
+    <text x="122" y="196" fill="${c1}" font-size="9" opacity="0.7">✦</text>
+    <text x="70" y="30" text-anchor="middle" fill="${c1}" font-size="11" font-family="serif" letter-spacing="3" opacity="0.9">${card.numeral}</text>
+    <circle cx="70" cy="105" r="45" fill="none" stroke="${c1}" stroke-width="0.6" opacity="0.3"/>
+    <circle cx="70" cy="105" r="32" fill="${c1}" fill-opacity="0.08"/>
+    <text x="70" y="120" text-anchor="middle" fill="${c1}" font-size="44">${card.symbol}</text>
+    <line x1="20" y1="158" x2="120" y2="158" stroke="${c1}" stroke-width="0.5" opacity="0.4"/>
+    <text x="70" y="178" text-anchor="middle" fill="${c2}" font-size="10" font-family="serif" opacity="0.7" letter-spacing="1">— ${card.nameVi} —</text>
+  </svg>`;
+}
+function makeCardImageHTML(card) {
+  const imgPath = CARD_IMAGES[card.id] || `cards/mat-sau.jpg`;
+  return `<img src="${imgPath}" alt="${card.name}"
+    onerror="this.style.display='none';this.nextElementSibling.style.display='block';"
+    style="width:100%;height:100%;object-fit:cover;display:block;">
+  <div style="display:none;width:100%;height:100%">${makeCardFrontSVG(card)}</div>`;
+}
+
+// ══════════════════════════════════════════════════════
+//  State
+// ══════════════════════════════════════════════════════
+let currentStep    = 1;
+let chosenMethod   = null;   // 'question' | 'theme'
+let chosenSpread   = null;   // 1 | 3 | 5
+let userQuestion   = '';
+let selectedCards  = [];     // [{card, reversed, imgSrc}]
+let fanCards       = [];
+
+const SPREAD_LABELS = {
+  1: ['Thông Điệp'],
+  3: ['Quá Khứ','Hiện Tại','Tương Lai'],
+  5: ['Hoàn Cảnh','Thách Thức','Quá Khứ','Tương Lai','Kết Quả'],
+  7: ['Quá Khứ','Hiện Tại','Tương Lai','Lời Khuyên','Trở Ngại','Tiềm Năng','Kết Quả'],
+};
+
+// ══════════════════════════════════════════════════════
+//  Step navigation
+// ══════════════════════════════════════════════════════
+function goToStep(n) {
+  if (n === 3) {
+    const isTheme = chosenMethod === 'theme';
+    document.getElementById('panelQuestion').classList.toggle('active', !isTheme);
+    document.getElementById('panelTheme').classList.toggle('active', isTheme);
+    document.getElementById('screen3Title').textContent = isTheme
+      ? '✦ CHỌN CHỦ ĐỀ BÓI ✦'
+      : '✦ NHẬP CÂU HỎI CỦA BẠN ✦';
+  }
+
+  if (n === 4) {
+    startShuffle();
+    document.querySelector('.candle-left').classList.add('visible');
+    document.querySelector('.candle-right').classList.add('visible');
+  }
+
+  document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(`screen${n}`).classList.add('active');
+  currentStep = n;
+  updateStepIndicator(n);
+
+  window.scrollTo({ top: document.querySelector('.step-indicator').offsetTop - 20, behavior: 'smooth' });
+}
+
+function updateStepIndicator(active) {
+  for (let i = 1; i <= 4; i++) {
+    const item = document.querySelector(`.step-item[data-step="${i}"]`);
+    if (!item) continue;
+    const circle = item.querySelector('.step-circle');
+    item.classList.remove('active','done');
+    circle.classList.remove('active','done');
+    if (i < active)  { item.classList.add('done');   circle.classList.add('done'); }
+    if (i === active){ item.classList.add('active');  circle.classList.add('active'); }
+  }
+  for (let i = 1; i <= 3; i++) {
+    const conn = document.getElementById(`conn-${i}-${i+1}`);
+    if (conn) conn.classList.toggle('done', i < active);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  Step 1 — Phương thức
+// ══════════════════════════════════════════════════════
+function selectMethod(el) {
+  document.querySelectorAll('.method-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  chosenMethod = el.dataset.method;
+  document.getElementById('step1Next').disabled = false;
+}
+
+// ══════════════════════════════════════════════════════
+//  Step 2 — Kiểu trải
+// ══════════════════════════════════════════════════════
+function selectSpread(el) {
+  document.querySelectorAll('.spread-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  chosenSpread = parseInt(el.dataset.spread);
+  document.getElementById('step2Next').disabled = false;
+}
+
+// Theme presets
+const THEME_QUESTIONS = {
+  love: [
+    'Mối quan hệ này đang đi về đâu?',
+    'Người ấy có thực sự yêu tôi không?',
+    'Tôi có nên tiếp tục hay buông bỏ mối quan hệ này?',
+    'Điều gì đang cản trở tình yêu của tôi?',
+    'Tình yêu mới có đến với tôi không?',
+    'Tôi cần làm gì để mối quan hệ tốt hơn?',
+    'Người phù hợp với tôi đang ở đâu?',
+    'Tại sao tôi liên tục thất bại trong tình yêu?',
+  ],
+  career: [
+    'Công việc hiện tại có phù hợp với tôi không?',
+    'Tôi có nên thay đổi nghề nghiệp không?',
+    'Sự nghiệp của tôi sẽ phát triển như thế nào?',
+    'Tôi có được thăng chức không?',
+    'Dự án này có thành công không?',
+    'Tôi nên làm gì để tài chính ổn định hơn?',
+    'Công việc kinh doanh của tôi có triển vọng không?',
+    'Tôi có nên khởi nghiệp không?',
+  ],
+  family: [
+    'Mối quan hệ với gia đình sẽ cải thiện không?',
+    'Làm thế nào để hòa giải mâu thuẫn gia đình?',
+    'Bạn bè xung quanh tôi có thật lòng không?',
+    'Tôi có nên tha thứ cho người đó không?',
+    'Tình bạn này có nên tiếp tục?',
+  ],
+  health: [
+    'Sức khỏe của tôi cần chú ý điều gì?',
+    'Tôi nên thay đổi lối sống như thế nào?',
+    'Năng lượng của tôi đang ở trạng thái nào?',
+    'Điều gì đang ảnh hưởng đến sức khỏe tinh thần của tôi?',
+    'Tôi cần nghỉ ngơi và chăm sóc bản thân như thế nào?',
+  ],
+  spirit: [
+    'Thông điệp vũ trụ muốn gửi đến tôi hôm nay là gì?',
+    'Tôi đang ở giai đoạn nào trong hành trình tâm linh?',
+    'Bài học tâm hồn tôi cần học trong lúc này là gì?',
+    'Năng lượng của tôi cần được cân bằng như thế nào?',
+    'Mục đích sống thực sự của tôi là gì?',
+  ],
+  general: [
+    'Tổng quan cuộc sống của tôi hiện tại như thế nào?',
+    'Điều gì đang ngăn tôi phát triển?',
+    'Tôi cần tập trung vào điều gì trong thời gian tới?',
+    'Cơ hội nào đang chờ tôi phía trước?',
+    'Tôi có đang đi đúng hướng trong cuộc sống không?',
+    'Lời khuyên vũ trụ dành riêng cho tôi lúc này?',
+  ],
+};
+
+function selectThemeImg(el) {
+  document.querySelectorAll('.theme-img-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  const theme = el.dataset.theme;
+  userQuestion = '';
+  document.getElementById('themeQuestionPreview').style.display = 'none';
+
+  // Fade out rồi ẩn hẳn các thẻ khác
+  const others = document.querySelectorAll('.theme-img-card:not(.selected)');
+  others.forEach(c => {
+    c.classList.add('hiding');
+    setTimeout(() => { c.style.display = 'none'; }, 260);
+  });
+
+  setTimeout(() => {
+    document.getElementById('themeImgGrid').classList.add('has-selection');
+    document.getElementById('themeBackBtn').classList.add('visible');
+    document.getElementById('themeGridLabel').style.display = 'none';
+  }, 260);
+
+  const area = document.getElementById('themePresetArea');
+  const chips = document.getElementById('presetChips');
+  chips.innerHTML = '';
+  setTimeout(() => area.classList.add('visible'), 300);
+
+  (THEME_QUESTIONS[theme] || []).forEach(q => {
+    const chip = document.createElement('div');
+    chip.className = 'preset-chip';
+    chip.textContent = q;
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      userQuestion = q;
+      document.getElementById('themeQuestionText').textContent = `"${q}"`;
+      document.getElementById('themeQuestionPreview').style.display = 'block';
+    });
+    chips.appendChild(chip);
+  });
+}
+
+function resetThemeSelection() {
+  const grid = document.getElementById('themeImgGrid');
+  grid.classList.remove('has-selection');
+  document.getElementById('themeBackBtn').classList.remove('visible');
+  document.getElementById('themeGridLabel').style.display = '';
+  document.getElementById('themePresetArea').classList.remove('visible');
+  document.getElementById('themeQuestionPreview').style.display = 'none';
+  userQuestion = '';
+
+  // Hiện lại tất cả thẻ với animation
+  document.querySelectorAll('.theme-img-card').forEach(c => {
+    c.classList.remove('selected', 'hiding');
+    c.style.display = '';
+    c.classList.add('showing');
+    setTimeout(() => c.classList.remove('showing'), 400);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  Step 4 — Xáo bài
+// ══════════════════════════════════════════════════════
+const SHUFFLE_STEPS = [
+  'Tập trung năng lượng vào bộ bài...',
+  'Xáo bài lần một...',
+  'Đảo ngược năng lượng...',
+  'Xáo bài lần hai...',
+  'Cân bằng lại các lá bài...',
+  'Bộ bài đã sẵn sàng!',
+];
+
+function startShuffle() {
+  const label = document.getElementById('shuffleLabel');
+  const bar   = document.getElementById('shuffleBar');
+  const prog  = document.getElementById('shuffleProgress');
+
+  // Reset về phase xáo
+  document.getElementById('shufflePhase').style.display = 'block';
+  document.getElementById('fanPhase').style.display = 'none';
+
+  bar.style.width   = '0%';
+  label.textContent = SHUFFLE_STEPS[0];
+  prog.textContent  = '1/' + SHUFFLE_STEPS.length;
+
+  if (chosenMethod === 'question') {
+    userQuestion = document.getElementById('questionInput').value.trim();
+  }
+
+  let step = 0;
+  const iv = setInterval(() => {
+    step++;
+    if (step < SHUFFLE_STEPS.length) {
+      label.textContent = SHUFFLE_STEPS[step];
+      prog.textContent  = (step+1) + '/' + SHUFFLE_STEPS.length;
+      bar.style.width   = ((step+1) / SHUFFLE_STEPS.length * 100) + '%';
+    } else {
+      clearInterval(iv);
+      label.textContent = '✦ Bộ bài đã sẵn sàng ✦';
+      bar.style.width   = '100%';
+      // Tự động chuyển sang fan sau 600ms
+      setTimeout(showFanPhase, 600);
+    }
+  }, 700);
+}
+
+function showFanPhase() {
+  document.getElementById('shufflePhase').style.display = 'none';
+  document.getElementById('fanPhase').style.display = 'block';
+  buildFan();
+  document.getElementById('fanPhase').style.animation = 'fadeInUp 0.5s ease';
+}
+
+// ══════════════════════════════════════════════════════
+//  Step 5 — Fan 78 lá
+// ══════════════════════════════════════════════════════
+function buildFan() {
+  const grid = document.getElementById('deckGrid');
+  grid.innerHTML = '';
+  selectedCards = [];
+  fanCards = [];
+  updateCounter();
+
+  const deck = [...CARDS].sort(() => Math.random() - 0.5);
+  const N = deck.length;
+  const ROWS = 4;
+  const perRow = Math.ceil(N / ROWS);
+  const cardW = 54;
+  const containerW = grid.parentElement.offsetWidth || 640;
+  const pitch = Math.floor(containerW / perRow);
+  const overlapPx = Math.max(0, Math.floor((cardW - pitch) / 2));
+  grid.style.setProperty('--card-overlap', `-${overlapPx}px`);
+  grid.style.gridTemplateColumns = `repeat(${perRow}, ${pitch}px)`;
+  grid.style.display = 'grid';
+  grid.style.maxWidth = '';
+
+  const lastRowCount = N % perRow || perRow;
+  const lastRowStart = lastRowCount < perRow ? Math.floor((perRow - lastRowCount) / 2) + 1 : 1;
+
+  deck.forEach((card, i) => {
+    const reversed = Math.random() < 0.3;
+    const imgSrc   = CARD_IMAGES[card.id] || 'cards/mat-sau.jpg';
+    const isFirstOfLastRow = i === (ROWS - 1) * perRow;
+
+    const slot = document.createElement('div');
+    slot.className = 'deck-card';
+    slot.style.cssText = `z-index:${i};animation:cardDeal 0.3s ease both;animation-delay:${i*8}ms;${isFirstOfLastRow && lastRowCount < perRow ? `grid-column-start:${lastRowStart};` : ''}`;
+    slot.innerHTML = `
+      <div class="deck-card-inner">
+        <div class="deck-card-back"><img src="cards/mat-sau.jpg" alt="mặt sau"></div>
+        <div class="deck-card-front"><img src="${imgSrc}" alt="${card.nameVi}" style="${reversed?'transform:rotate(180deg);':''}"></div>
+      </div>`;
+    slot.addEventListener('click', () => onCardPick(slot, card, reversed, imgSrc));
+    grid.appendChild(slot);
+    fanCards.push({ slot, card, reversed, imgSrc });
+  });
+}
+
+function makeFlipSlot(card, reversed, imgSrc, label, small) {
+  const wrap = document.createElement('div');
+  wrap.className = 'multi-card-slot' + (small ? ' preview' : '');
+
+  const lbl = document.createElement('div');
+  lbl.className = 'multi-card-label';
+  lbl.textContent = label;
+
+  const flipper = document.createElement('div');
+  flipper.className = 'multi-flip-card';
+
+  const inner = document.createElement('div');
+  // Bài ngược dùng flip-reversed (rotateX từ dưới lên), bài thường dùng rotateY
+  inner.className = 'multi-flip-inner' + (reversed ? ' flip-reversed' : '');
+
+  const back = document.createElement('div');
+  back.className = 'multi-flip-back';
+  back.innerHTML = `<img src="cards/mat-sau.jpg" alt="mặt sau">`;
+
+  const front = document.createElement('div');
+  front.className = 'multi-flip-front';
+  // Ảnh bài ngược xoay 180deg để hiển thị đúng chiều ngược
+  front.innerHTML = `<img src="${imgSrc}" alt="${card.nameVi}" style="${reversed?'transform:rotate(180deg);':''}" onerror="this.src='cards/mat-sau.jpg'">`;
+
+  inner.appendChild(back);
+  inner.appendChild(front);
+  flipper.appendChild(inner);
+  wrap.appendChild(lbl);
+  wrap.appendChild(flipper);
+  return { wrap, inner, flipper };
+}
+
+function onCardPick(slot, card, reversed, imgSrc) {
+  if (slot.classList.contains('selected-card')) return;
+  if (selectedCards.length >= chosenSpread) return;
+  slot.classList.add('selected-card');
+
+  const labels = SPREAD_LABELS[chosenSpread] || Array.from({length: chosenSpread}, (_,i) => `Lá ${i+1}`);
+  const idx = selectedCards.length;
+  selectedCards.push({ card, reversed, imgSrc });
+  updateCounter();
+
+  // Flash rồi ẩn lá vừa chọn
+  slot.style.transition = 'filter 0.15s, opacity 0.35s 0.15s';
+  slot.style.filter = 'brightness(2) drop-shadow(0 0 14px #d4a943)';
+  slot.style.pointerEvents = 'none';
+  setTimeout(() => { slot.style.opacity = '0'; }, 150);
+
+  // Tạo flip-card nhỏ vào multiRevealRow
+  const { wrap } = makeFlipSlot(card, reversed, imgSrc, labels[idx], true);
+  document.getElementById('multiRevealRow').appendChild(wrap);
+
+  if (selectedCards.length === chosenSpread) {
+    setTimeout(() => showResultPhase(), 600);
+  }
+}
+
+function showResultPhase() {
+  const fanSection = document.getElementById('deckFanSection');
+  fanSection.style.transition = 'opacity 0.35s';
+  fanSection.style.opacity = '0';
+
+  setTimeout(() => {
+    fanSection.style.display = 'none';
+    document.querySelector('.wizard-panel').classList.add('result-mode');
+    document.getElementById('screen4Title').textContent = '✦ THÔNG ĐIỆP VŨ TRỤ ✦';
+    document.getElementById('resultQuestionBanner').textContent = `"${userQuestion || 'Thông điệp tổng quan'}"`;
+    document.getElementById('resultPhase').style.display = 'block';
+    document.getElementById('flipHintRow').style.display = 'none';
+
+    const slots = document.getElementById('multiRevealRow').querySelectorAll('.multi-card-slot');
+    const total = slots.length;
+
+    // Zoom to từng slot trước
+    slots.forEach((wrap, i) => {
+      setTimeout(() => {
+        wrap.classList.remove('preview');
+        wrap.classList.add('expanded');
+      }, i * 120);
+    });
+
+    // Sau khi zoom xong, tự lật từng lá cách nhau 1.2s
+    const zoomDone = total * 120 + 400;
+    slots.forEach((wrap, i) => {
+      setTimeout(() => {
+        const inner = wrap.querySelector('.multi-flip-inner');
+        const flipper = wrap.querySelector('.multi-flip-card');
+        if (!inner.classList.contains('flipped')) {
+          inner.classList.add('flipped');
+          spawnParticles(flipper);
+        }
+        // Sau lá cuối cùng, hiện synthesis
+        if (i === total - 1) {
+          setTimeout(showSynthesis, 1000);
+        }
+      }, zoomDone + i * 1200);
+    });
+
+    window.scrollTo({ top: document.querySelector('.step-indicator').offsetTop - 20, behavior: 'smooth' });
+  }, 380);
+}
+
+function updateCounter() {
+  document.getElementById('selectCounter').textContent =
+    `Đã chọn ${selectedCards.length}/${chosenSpread || 1} lá bài`;
+}
+
+
+// ── Synthesis ──
+
+// Mô tả vị trí dùng để luận giải
+const POS_CONTEXT = {
+  'Quá Khứ':    { intro: 'Nhìn lại', role: 'phản ánh những gì đã xảy ra, những năng lượng hoặc sự kiện từ quá khứ vẫn còn đang định hình hiện tại của bạn' },
+  'Hiện Tại':   { intro: 'Ở thời điểm này', role: 'phản chiếu chính xác tình huống và năng lượng bạn đang sống trong lúc này' },
+  'Tương Lai':  { intro: 'Nhìn về phía trước', role: 'hé lộ hướng năng lượng đang chảy tới — không phải số phận cố định, mà là tiềm năng nếu bạn tiếp tục con đường hiện tại' },
+  'Hoàn Cảnh': { intro: 'Về bức tranh tổng thể', role: 'đặt ra bối cảnh chung cho toàn bộ trải bài, cho thấy môi trường và năng lượng bao quanh bạn' },
+  'Thách Thức': { intro: 'Về điều cần vượt qua', role: 'chỉ ra thách thức hoặc rào cản chính đang đứng giữa bạn và điều bạn muốn đạt được' },
+  'Quá Khứ Gần':{ intro: 'Từ không lâu trước đây', role: 'phản ánh những gì gần đây đã qua, những ảnh hưởng vẫn còn tươi mới trong cuộc sống bạn' },
+  'Tương Lai Gần':{ intro: 'Trong thời gian tới', role: 'cho thấy những gì đang hình thành ngay trước mắt, năng lượng sắp đến trong cuộc sống bạn' },
+  'Lời Khuyên': { intro: 'Điều cần ghi nhớ', role: 'mang đến chỉ dẫn quan trọng nhất từ vũ trụ — hành động hoặc thái độ cần có lúc này' },
+  'Trở Ngại':   { intro: 'Điều đang cản bước', role: 'tiết lộ yếu tố hoặc nỗi sợ ẩn đang kìm hãm sự tiến triển của bạn' },
+  'Tiềm Năng':  { intro: 'Điều có thể khai mở', role: 'chỉ ra sức mạnh hoặc cơ hội chưa được tận dụng đang chờ bạn nhận ra' },
+  'Kết Quả':    { intro: 'Điểm đến', role: 'tổng hòa năng lượng của toàn bộ trải bài — kết quả có thể xảy ra nếu bạn đi theo dòng chảy hiện tại' },
+};
+
+function cardReading(card, reversed, posLabel) {
+  const meaning = reversed ? card.reversed : card.upright;
+  const ctx = POS_CONTEXT[posLabel] || { intro: 'Tại vị trí này', role: 'mang thông điệp quan trọng cho tình huống của bạn' };
+  const suitNote = card.suit === 'major'
+    ? 'Là lá Đại Bí Ẩn, nó mang tầm ảnh hưởng sâu rộng đến hành trình tâm linh và cuộc sống tổng thể của bạn.'
+    : card.suit === 'wands' ? 'Thuộc bộ Gậy — lửa hành động và đam mê đang hiện diện mạnh mẽ ở đây.'
+    : card.suit === 'cups'  ? 'Thuộc bộ Chén — cảm xúc và thế giới nội tâm đang là trung tâm của vị trí này.'
+    : card.suit === 'swords'? 'Thuộc bộ Kiếm — tư duy, quyết định và sự rõ ràng là chủ đề cốt lõi.'
+    :                         'Thuộc bộ Tiền — những vấn đề thực tế, vật chất và sự nghiệp đang được chiếu sáng.';
+  const reversedNote = reversed
+    ? ' <em>Lá bài ở chiều ngược cho thấy năng lượng này đang bị chặn hoặc cần được nhìn nhận lại từ bên trong — đây là lời nhắc để điều chỉnh, không phải điềm xấu.</em>'
+    : '';
+  return `${ctx.intro}, <strong>${card.nameVi}</strong> ${ctx.role}. ${meaning}${reversedNote} ${suitNote}`;
+}
+
+function buildSynthMsg(cards) {
+  const labels = SPREAD_LABELS[cards.length] || cards.map((_,i)=>`Lá ${i+1}`);
+
+  if (cards.length === 1) {
+    const { card, reversed } = cards[0];
+    const meaning = reversed ? card.reversed : card.upright;
+    const rev = reversed ? ' (chiều ngược)' : '';
+    return `<strong>${card.nameVi}${rev}</strong> là thông điệp vũ trụ gửi đến bạn lúc này.<br><br>${meaning}${reversed ? ' <em>Lá ngược nhắc bạn nhìn lại nội tâm — năng lượng này đang cần được điều chỉnh hoặc giải phóng.</em>' : ''}<br><br>${
+      card.suit === 'major' ? 'Đây là lá Đại Bí Ẩn — mang thông điệp quan trọng về hành trình lớn trong cuộc đời bạn, không chỉ là tình huống nhất thời.' : 'Hãy để ý đến những biểu hiện của chủ đề này trong cuộc sống hàng ngày của bạn.'
+    }`;
+  }
+
+  const parts = cards.map(({ card, reversed }, i) => {
+    const lbl = labels[i];
+    return `<strong>${lbl} — ${card.nameVi}${reversed?' ↓':''}</strong><br>${cardReading(card, reversed, lbl)}`;
+  });
+
+  let connector = '';
+  if (cards.length === 3) {
+    const hasReversed = cards.some(c => c.reversed);
+    connector = hasReversed
+      ? '<br><br>Tổng thể, trải bài cho thấy một hành trình đang trải qua giai đoạn chuyển hóa — một số năng lượng đang bị kìm hãm nhưng chính đó là cơ hội để bạn nhận ra điều cần thay đổi.'
+      : '<br><br>Tổng thể, dòng chảy năng lượng đang hướng về phía tích cực — những gì đã qua đang hỗ trợ cho hiện tại, và hiện tại đang mở đường cho một tương lai đầy tiềm năng.';
+  } else if (cards.length >= 5) {
+    connector = '<br><br>Đọc toàn bộ trải bài như một câu chuyện liên kết — không có lá nào đứng độc lập. Mỗi vị trí góp phần tạo nên bức tranh tổng thể về hành trình bạn đang đi và lựa chọn bạn có thể đưa ra.';
+  }
+
+  return parts.join('<br><br>') + connector;
+}
+
+function showSynthesis() {
+  const panel  = document.getElementById('synthPanel');
+  const labels = SPREAD_LABELS[selectedCards.length] || selectedCards.map((_,i)=>`Lá ${i+1}`);
+
+  const intros = [
+    'Những lá bài bạn chọn không phải ngẫu nhiên — trực giác đã dẫn bạn đến đúng những thông điệp bạn cần nghe.',
+    'Vũ trụ phản hồi qua hình ảnh và biểu tượng. Dưới đây là những gì bộ bài muốn nói với bạn hôm nay.',
+    'Mỗi lá bài phản chiếu một khía cạnh của năng lượng bạn đang mang. Hãy đọc với tâm thế cởi mở.',
+    'Không có kết quả "tốt" hay "xấu" trong Tarot — chỉ có thông điệp để bạn suy ngẫm và lựa chọn.',
+  ];
+  document.getElementById('synthIntro').textContent = intros[Math.floor(Math.random()*intros.length)];
+  document.getElementById('synthMsg').innerHTML = buildSynthMsg(selectedCards);
+  document.getElementById('synthChips').innerHTML = selectedCards.map((c,i) =>
+    `<div class="synth-chip ${c.reversed?'reversed':''}">
+      <span class="synth-chip-pos">${labels[i]}</span>
+      <span class="synth-chip-name">${c.card.nameVi}${c.reversed?' ↓':''}</span>
+    </div>`).join('');
+
+  panel.classList.add('visible');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Detail toggle ──
+function toggleDetail() {
+  const sec = document.getElementById('detailSection');
+  const isVisible = sec.classList.contains('visible');
+  if (isVisible) { sec.classList.remove('visible'); return; }
+
+  const labels = SPREAD_LABELS[selectedCards.length] || selectedCards.map((_,i)=>`Lá ${i+1}`);
+  sec.innerHTML = '';
+
+  selectedCards.forEach(({ card, reversed }, idx) => {
+    const meaning = reversed ? card.reversed : card.upright;
+    const uid = `dd-${idx}`;
+
+    // Tạo nội dung Tổng Quan đầy đủ
+    const posCtx = POS_CONTEXT[labels[idx]] || { intro: 'Tại vị trí này', role: 'mang thông điệp cho tình huống của bạn' };
+    const suitLine = card.suit === 'major'
+      ? '✦ Lá Đại Bí Ẩn — ảnh hưởng sâu và bền, liên quan đến hành trình lớn của cuộc đời.'
+      : card.suit === 'wands'  ? '🔥 Bộ Gậy — chủ đề hành động, đam mê, sự nghiệp và sáng tạo.'
+      : card.suit === 'cups'   ? '💧 Bộ Chén — chủ đề cảm xúc, tình yêu, mối quan hệ và trực giác.'
+      : card.suit === 'swords' ? '💨 Bộ Kiếm — chủ đề tư duy, quyết định, xung đột và sự thật.'
+      :                          '🌿 Bộ Tiền — chủ đề tài chính, sức khỏe, sự nghiệp và ổn định thực tế.';
+    const reversedLine = reversed
+      ? `<br><br><em>↓ Lá ngược: Năng lượng của ${card.nameVi} đang gặp trở ngại hoặc hướng vào nội tâm. Đây là dấu hiệu cần nhìn lại — ${card.reversed}</em>`
+      : '';
+    const overview = `${posCtx.intro}, lá <strong>${card.nameVi}</strong> ${posCtx.role}.<br><br>${meaning}${reversedLine}<br><br>${suitLine}`;
+
+    const tabs = [
+      { key:'ov', label:'Tổng Quan',   text: overview },
+      { key:'lv', label:'Tình Yêu',    text: card.details?.love   || '' },
+      { key:'ca', label:'Sự Nghiệp',   text: card.details?.career || '' },
+      { key:'hl', label:'Sức Khỏe',    text: card.details?.health || '' },
+      { key:'sp', label:'Tâm Linh',    text: card.details?.spirit || '' },
+      { key:'ad', label:'Lời Khuyên',  text: card.details?.advice || (reversed
+          ? `Hãy dừng lại và nhìn vào bên trong. ${card.nameVi} ngược nhắc bạn rằng câu trả lời bạn cần không nằm ở bên ngoài — mà đang chờ bạn khám phá trong chính mình.`
+          : `Hãy đón nhận năng lượng của ${card.nameVi} một cách chủ động. Lá bài này là lời mời để bạn hành động hoặc điều chỉnh theo hướng nó chỉ ra.`) },
+    ].filter(t => t.text);
+
+    const block = document.createElement('div');
+    block.className = 'detail-block';
+    block.innerHTML = `
+      <div class="detail-header">
+        <span class="detail-pos">${labels[idx]}</span>
+        <span class="detail-name">${card.numeral ? card.numeral + '. ' : ''}${card.name} · ${card.nameVi}</span>
+        ${reversed ? '<span class="reversed-badge">↓ Ngược</span>' : ''}
+      </div>
+      <div class="detail-tabs">
+        ${tabs.map((t,i)=>`<button class="detail-tab${i===0?' active':''}" onclick="switchDetailTab('${uid}','${t.key}',this)">${t.label}</button>`).join('')}
+      </div>
+      <div class="detail-content">
+        ${tabs.map((t,i)=>`<div class="detail-pane${i===0?' active':''}" id="${uid}-${t.key}">${t.text}</div>`).join('')}
+      </div>`;
+    sec.appendChild(block);
+  });
+
+  sec.classList.add('visible');
+  sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function switchDetailTab(uid, key, btn) {
+  const block = btn.closest('.detail-block');
+  block.querySelectorAll('.detail-pane').forEach(p => p.classList.remove('active'));
+  block.querySelector(`#${uid}-${key}`).classList.add('active');
+  block.querySelectorAll('.detail-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── Reset ──
+function resetAll() {
+  chosenMethod = null; chosenSpread = null; userQuestion = '';
+  selectedCards = []; fanCards = [];
+  document.querySelectorAll('.method-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.spread-option').forEach(o => o.classList.remove('selected'));
+  document.getElementById('step1Next').disabled = true;
+  document.getElementById('step2Next').disabled = true;
+  document.getElementById('questionInput').value = '';
+  document.getElementById('charCount').textContent = '0';
+  document.querySelectorAll('.theme-img-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('themePresetArea').classList.remove('visible');
+  document.getElementById('presetChips').innerHTML = '';
+  document.getElementById('themeQuestionPreview').style.display = 'none';
+  document.getElementById('shufflePhase').style.display = 'block';
+  document.getElementById('fanPhase').style.display = 'none';
+  document.querySelector('.candle-left').classList.remove('visible');
+  document.querySelector('.candle-right').classList.remove('visible');
+  document.getElementById('deckGrid').innerHTML = '';
+  document.getElementById('multiRevealRow').innerHTML = '';
+  document.getElementById('flipHintRow').style.display = 'none';
+  document.getElementById('deckFanSection').style.display = '';
+  document.getElementById('deckFanSection').style.opacity = '';
+  document.getElementById('resultPhase').style.display = 'none';
+  document.getElementById('screen4Title').textContent = '✦ RÚT BÀI CỦA BẠN ✦';
+  document.getElementById('synthPanel').classList.remove('visible');
+  document.getElementById('detailSection').innerHTML = '';
+  document.querySelector('.wizard-panel').classList.remove('result-mode');
+  goToStep(1);
+}
+
+// ── Particles ──
+function spawnParticles(el) {
+  const rect = el.getBoundingClientRect();
+  const cx = rect.left + rect.width/2, cy = rect.top + rect.height/2;
+  const colors = ['#d4a943','#f0d080','#ffffff','#a86ccc','#7ec8ff'];
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const sz = 3 + Math.random()*5;
+    p.style.cssText = `width:${sz}px;height:${sz}px;background:${colors[Math.floor(Math.random()*colors.length)]};left:${cx}px;top:${cy}px;`;
+    document.body.appendChild(p);
+    const angle = Math.random()*Math.PI*2;
+    const dist  = 60 + Math.random()*100;
+    p.animate([
+      { transform:'translate(-50%,-50%) scale(1)', opacity:1 },
+      { transform:`translate(calc(-50% + ${Math.cos(angle)*dist}px),calc(-50% + ${Math.sin(angle)*dist}px)) scale(0)`, opacity:0 }
+    ], { duration: 700+Math.random()*400, easing:'ease-out' }).onfinish = () => p.remove();
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  Daily Card
+// ══════════════════════════════════════════════════════
+// Toggle collapsible
+document.getElementById('dailyBarToggle').addEventListener('click', () => {
+  const body  = document.getElementById('dailyBarBody');
+  const arrow = document.getElementById('dailyArrow');
+  const open  = body.classList.toggle('open');
+  arrow.classList.toggle('open', open);
+});
+
+const DAILY_AFFIRMATIONS = [
+  "Hôm nay tôi không cần phải hoàn hảo — tôi chỉ cần thành thật.",
+  "Tôi cho phép mình cảm thấy những gì mình đang thực sự cảm thấy.",
+  "Tôi đủ mạnh để nhìn thẳng vào những điều khó chịu thay vì tránh né.",
+  "Tôi không phải kiếm quyền được nghỉ ngơi — tôi cần nghỉ ngơi vì tôi là con người.",
+  "Tôi có thể vừa chưa chắc chắn vừa vẫn tiếp tục bước.",
+  "Tôi không cần sự chấp thuận của người khác để biết mình đang đi đúng hướng.",
+  "Những gì tôi cảm thấy hôm nay là thật — kể cả khi nó mâu thuẫn.",
+  "Tôi học cách phân biệt giọng nói của nỗi sợ và giọng nói của trực giác.",
+  "Tôi không cần giải thích lý do mình cần ranh giới — ranh giới là hợp lệ.",
+  "Thay đổi chậm vẫn là thay đổi — tôi không cần phải biến đổi qua đêm.",
+  "Tôi cho phép bản thân không biết câu trả lời hôm nay.",
+  "Tôi không cần phải xử lý mọi thứ một mình.",
+  "Những lần tôi thất bại không định nghĩa tôi là ai.",
+  "Tôi đang học — và học không bao giờ trông gọn gàng.",
+  "Tôi có thể yêu thương ai đó và vẫn đặt ra giới hạn với họ.",
+  "Cơ thể tôi đang làm hết sức nó có thể — tôi tôn trọng điều đó.",
+  "Tôi không phải chứng minh giá trị của mình qua năng suất.",
+  "Tôi được phép thay đổi suy nghĩ khi có thêm thông tin mới.",
+  "Tôi tin vào khả năng xử lý của mình — kể cả khi chưa biết cách.",
+  "Hôm nay tôi chú ý đến một điều nhỏ làm mình dễ chịu hơn.",
+  "Tôi không cần kiểm soát kết quả — tôi chỉ cần kiểm soát hành động của mình.",
+  "Những gì đang khó hôm nay không có nghĩa là sẽ khó mãi.",
+];
+
+function getDailyCard() {
+  const now = new Date();
+  const key = `daily_${now.getFullYear()}_${now.getMonth()+1}_${now.getDate()}`;
+  const stored = JSON.parse(localStorage.getItem('tarot_daily') || 'null');
+  let cardIndex, reversed, affIdx;
+  if (stored && stored.date === key) {
+    cardIndex = stored.cardIndex; reversed = stored.reversed; affIdx = stored.affirmationIndex;
+  } else {
+    cardIndex = Math.floor(Math.random() * CARDS.length);
+    reversed  = Math.random() < 0.3;
+    affIdx    = Math.floor(Math.random() * DAILY_AFFIRMATIONS.length);
+    localStorage.setItem('tarot_daily', JSON.stringify({ date: key, cardIndex, reversed, affirmationIndex: affIdx }));
+  }
+  return {
+    card: CARDS[cardIndex], reversed,
+    affirmation: DAILY_AFFIRMATIONS[affIdx],
+    dateStr: now.toLocaleDateString('vi-VN', { weekday:'long', year:'numeric', month:'long', day:'numeric' })
+  };
+}
+
+function renderDailyCard() {
+  const { card, reversed, affirmation, dateStr } = getDailyCard();
+  const sec = document.getElementById('dailyCardSection');
+  if (!sec) return;
+  const imgSrc = CARD_IMAGES[card.id] || 'cards/mat-sau.jpg';
+  const meaning = reversed ? card.reversed : card.upright;
+
+  sec.innerHTML = `
+    <div class="daily-date-text">${dateStr}</div>
+    <div class="daily-layout-mini">
+      <div class="daily-card-wrap" id="dailyWrap">
+        <div class="daily-card" id="dailyCardEl">
+          <div class="daily-card-back"><img src="cards/mat-sau.jpg" alt="mặt sau"></div>
+          <div class="daily-card-front">
+            <div class="card-img-wrap">
+              <img src="${imgSrc}" alt="${card.nameVi}" class="${reversed?'reversed-img':''}"
+                onerror="this.src='cards/mat-sau.jpg'">
+            </div>
+            <div class="daily-card-name">${card.nameVi}${reversed?' ↓':''}</div>
+          </div>
+        </div>
+        <div class="daily-flip-hint" id="dailyHint">✦ Nhấn để lật ✦</div>
+      </div>
+      <div class="daily-info" id="dailyInfo" style="display:none">
+        <div class="daily-card-title">
+          <span class="daily-numeral">${card.numeral}</span>
+          <span class="daily-name">${card.name} · ${card.nameVi}</span>
+          ${reversed ? '<span class="reversed-badge">↓ Ngược</span>' : ''}
+        </div>
+        <p class="daily-meaning">${meaning}</p>
+        <div class="daily-affirmation">
+          <span class="affirmation-label">✦ Lời Khẳng Định Hôm Nay ✦</span>
+          <p class="affirmation-text">"${affirmation}"</p>
+        </div>
+      </div>
+    </div>`;
+
+  let flipped = false;
+  document.getElementById('dailyWrap').addEventListener('click', () => {
+    if (flipped) return;
+    flipped = true;
+    document.getElementById('dailyCardEl').classList.add('flipped');
+    document.getElementById('dailyHint').style.opacity = '0';
+    spawnParticles(document.getElementById('dailyWrap'));
+    setTimeout(() => {
+      const info = document.getElementById('dailyInfo');
+      info.style.display = 'block';
+      info.style.animation = 'fadeInUp 0.6s ease';
+    }, 600);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', renderDailyCard);
+</script>
+</body>
+</html>

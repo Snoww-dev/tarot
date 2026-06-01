@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command \"Get-Content 'c:/Users/pottr/Downloads/Tarot/index.html' | Select-Object -Skip 513 -First 1102 | Out-File -Encoding utf8 'c:/Users/pottr/Downloads/Tarot/_cards_raw.txt'\")",
+      "Bash(powershell -Command \"Get-Content 'c:/Users/pottr/Downloads/Tarot/index.html' | Select-Object -Skip 1615 -First 18 | Out-File -Encoding utf8 'c:/Users/pottr/Downloads/Tarot/_spread_raw.txt'\")",
+      "Bash(python -c ' *)",
+      "Bash(Remove-Item \"c:/Users/pottr/Downloads/Tarot/_cards_raw.txt\", \"c:/Users/pottr/Downloads/Tarot/_spread_raw.txt\", \"c:/Users/pottr/Downloads/Tarot/_cards_block.txt\", \"c:/Users/pottr/Downloads/Tarot/_app_block.txt\" -ErrorAction SilentlyContinue)",
+      "Bash(Write-Output \"Cleaned\")",
+      "PowerShell(New-Item -ItemType Directory -Force \"c:\\\\Users\\\\pottr\\\\Downloads\\\\Tarot\\\\cards\")",
+      "WebSearch",
+      "WebFetch(domain:commons.wikimedia.org)",
+      "PowerShell(python --version 2>&1)",
+      "PowerShell(python3 --version 2>&1)",
+      "PowerShell(Start-Process \"http://localhost:8765\")",
+      "Bash(Start-Process \"c:\\\\Users\\\\pottr\\\\Downloads\\\\Tarot\\\\index.html\")",
+      "PowerShell(Start-Process \"c:\\\\Users\\\\pottr\\\\Downloads\\\\Tarot\\\\index.html\")",
+      "Bash(node -e ' *)",
+      "Bash(curl -s -o \"c:/Users/pottr/Downloads/Tarot/cards/test.jpg\" \"https://upload.wikimedia.org/wikipedia/commons/9/90/RWS_Tarot_00_Fool.jpg\")",
+      "Bash(start index.html)",
+      "Bash(dir \"c:\\\\Users\\\\pottr\\\\Downloads\\\\Tarot\\\\video-nen.mp4\")",
+      "Bash(ffprobe -v quiet -print_format json -show_streams \"c:\\\\Users\\\\pottr\\\\Downloads\\\\Tarot\\\\video-nen.mp4\")",
+      "Bash(findstr \"width\\\\|height\\\\|codec_name\")",
+      "Bash(dir \"c:\\\\Users\\\\pottr\\\\Downloads\\\\Tarot\\\\mattrang.png\")",
+      "WebFetch(domain:boitarot.org)",
+      "WebFetch(domain:www.bachhoaxanh.com)",
+      "WebFetch(domain:www.ticketgo.vn)",
+      "WebFetch(domain:jobsgo.vn)",
+      "WebFetch(domain:mystichouse.vn)",
+      "WebFetch(domain:thienmenh.net)",
+      "WebFetch(domain:tarotmienphi.com)",
+      "WebFetch(domain:tarotreader.me)",
+      "WebFetch(domain:www.studocu.vn)",
+      "Bash(start \"\" \"c:\\\\Users\\\\pottr\\\\Downloads\\\\Tarot\\\\index.html\")",
+      "Bash(python rewrite_minor.py)",
+      "Bash(del \"c:/Users/pottr/Downloads/Tarot/rewrite_minor.py\")",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
+    ]
+  }
+}
