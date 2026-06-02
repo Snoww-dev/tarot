@@ -67,11 +67,11 @@
   });
 
   const SHUFFLE_STEPS = [
-    'Tập trung năng lượng vào bộ bài...',
+    'Xáo bài...',
     'Xáo bài lần một...',
-    'Đảo ngược năng lượng...',
+    'Tiếp tục xáo...',
     'Xáo bài lần hai...',
-    'Cân bằng lại các lá bài...',
+    'Sắp xong...',
     'Bộ bài đã sẵn sàng!',
   ];
 
@@ -272,10 +272,10 @@
 
   // ── Bước 4: Thông điệp tổng hợp ─────────────────────────────────────────
   const SYNTHESIS_INTRO = [
-    'Những lá bài bạn chọn hôm nay không phải ngẫu nhiên — chúng phản chiếu chính xác năng lượng bạn đang mang.',
-    'Vũ trụ đã lắng nghe và phản hồi qua từng lá bài bạn cảm nhận.',
-    'Hành trình bên trong bạn đang được phản chiếu rõ ràng qua bộ bài hôm nay.',
-    'Mỗi lá bài là một mảnh ghép của bức tranh toàn cảnh về con đường bạn đang đi.',
+    'Đây là những lá bài bạn vừa rút. Đọc chậm — đôi khi điều có ý nghĩa nhất là thứ bạn ngay lập tức phản ứng với.',
+    'Tarot không tiên tri — nó phản ánh. Xem những lá này như một góc nhìn khác về tình huống của bạn.',
+    'Mỗi lá bài nhìn vào một khía cạnh khác nhau. Hãy đọc tổng thể hơn là từng lá riêng lẻ.',
+    'Không có lá bài nào là "xấu" hoàn toàn — mọi lá đều cho bạn thứ gì đó để suy nghĩ.',
   ];
 
   function buildSynthesisMessage(cards) {
@@ -283,24 +283,23 @@
 
     if (cards.length === 1) {
       const { card, reversed } = cards[0];
-      return `Lá <strong>${card.nameVi}</strong>${reversed ? ' (Ngược)' : ''} xuất hiện như một gương chiếu — ` +
-        `${reversed ? card.reversed : card.upright} Đây là thông điệp cốt lõi vũ trụ muốn bạn lắng nghe hôm nay.`;
+      return `<strong>${card.nameVi}${reversed ? ' (Ngược)' : ''}</strong><br><br>` +
+        `${reversed ? card.reversed : card.upright}`;
     }
 
     if (cards.length === 3) {
       const [past, present, future] = cards;
-      return `<strong>${labels[0]} — ${past.card.nameVi}${past.reversed ? ' ↓' : ''}</strong> cho thấy nền tảng bạn đang đứng trên. ` +
-        `<strong>${labels[1]} — ${present.card.nameVi}${present.reversed ? ' ↓' : ''}</strong> là trung tâm của hành trình hiện tại, ` +
-        `kêu gọi bạn chú ý vào điều đang xảy ra ngay lúc này. ` +
-        `<strong>${labels[2]} — ${future.card.nameVi}${future.reversed ? ' ↓' : ''}</strong> hé lộ hướng năng lượng đang chảy về — ` +
-        `không phải số phận cố định, mà là tiềm năng đang chờ bạn khai mở.`;
+      return `<strong>${labels[0]} — ${past.card.nameVi}${past.reversed ? ' ↓' : ''}</strong> cho thấy điều gì đó từ trước vẫn đang ảnh hưởng. ` +
+        `<strong>${labels[1]} — ${present.card.nameVi}${present.reversed ? ' ↓' : ''}</strong> là tình huống bạn đang thực sự ở trong lúc này. ` +
+        `<strong>${labels[2]} — ${future.card.nameVi}${future.reversed ? ' ↓' : ''}</strong> cho thấy hướng mọi thứ đang đi nếu bạn tiếp tục như hiện tại — ` +
+        `không phải số phận cố định, vẫn có thể thay đổi.`;
     }
 
     if (cards.length === 5) {
       const names = cards.map((c, i) => `<strong>${labels[i]} — ${c.card.nameVi}${c.reversed ? ' ↓' : ''}</strong>`);
-      return `${names[0]} đặt ra bối cảnh tổng thể, trong khi ${names[1]} chỉ ra thử thách cần đối mặt. ` +
-        `${names[2]} tiết lộ những gì từ quá khứ vẫn còn ảnh hưởng, còn ${names[3]} mở ra con đường phía trước. ` +
-        `${names[4]} là năng lượng kết quả — tổng hòa của tất cả những gì bạn đang mang và đang hướng đến.`;
+      return `${names[0]} đặt ra bối cảnh chung, trong khi ${names[1]} chỉ ra điều đang cản bạn. ` +
+        `${names[2]} cho thấy điều gì từ quá khứ vẫn còn liên quan, còn ${names[3]} gợi ý hướng có thể đi tiếp. ` +
+        `${names[4]} là kết quả khả năng cao nhất dựa trên những gì đang xảy ra — nhưng lựa chọn vẫn là của bạn.`;
     }
 
     return cards.map((c, i) =>

@@ -153,6 +153,7 @@
       max-width: 720px; margin: 0 auto 40px;
       box-shadow: 0 8px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(212,169,67,0.1);
       transition: border-color 0.5s, background 0.5s, box-shadow 0.5s, padding 0.5s;
+      overflow: hidden;
     }
     .wizard-panel.result-mode {
       background: transparent;
@@ -443,6 +444,22 @@
     .btn-secondary:hover { background: rgba(212,169,67,0.1); border-color: var(--gold); }
 
     /* ─── Step 4: Xáo bài ─── */
+    #screen4 {
+      position: relative;
+    }
+    #screen4::before {
+      content: '';
+      position: absolute;
+      inset: -36px -40px;
+      background: url('anh-ban.png') center center / cover no-repeat;
+      opacity: 0.32;
+      z-index: 0;
+      pointer-events: none;
+    }
+    #screen4 > * {
+      position: relative;
+      z-index: 1;
+    }
     .shuffle-area {
       display: flex; flex-direction: column; align-items: center; gap: 24px;
     }
@@ -904,7 +921,7 @@
             <div class="mini-card"></div>
           </div>
           <div class="spread-name">TRẢI 1 LÁ</div>
-          <div class="spread-desc">Nhanh · Trực tiếp · Chính xác<br>Thông điệp cốt lõi vũ trụ muốn bạn nghe hôm nay.</div>
+          <div class="spread-desc">Nhanh · Trực tiếp · Chính xác<br>Một câu trả lời rõ ràng cho câu hỏi của bạn.</div>
           <span class="spread-tag">Thông điệp</span>
         </div>
         <div class="spread-option" data-spread="3" onclick="selectSpread(this)">
@@ -949,7 +966,7 @@
 
       <!-- Tab: Câu hỏi -->
       <div class="input-panel active" id="panelQuestion">
-        <label class="question-label">Hãy gõ câu hỏi bạn muốn vũ trụ lắng nghe...</label>
+        <label class="question-label">Gõ câu hỏi bạn muốn hỏi...</label>
         <textarea class="question-input" id="questionInput" rows="3" maxlength="500"
           placeholder="Ví dụ: Tôi có nên thay đổi công việc hiện tại không?"
           oninput="document.getElementById('charCount').textContent=this.value.length"></textarea>
@@ -1046,7 +1063,7 @@
         <div id="resultPhase" style="display:none">
           <div class="result-question-banner" id="resultQuestionBanner"></div>
           <div class="synthesis-panel" id="synthPanel">
-            <div class="synthesis-header">✦ THÔNG ĐIỆP TỔNG HỢP ✦</div>
+            <div class="synthesis-header">✦ ĐỌC KẾT QUẢ ✦</div>
             <p class="synthesis-intro" id="synthIntro"></p>
             <div class="synthesis-chips" id="synthChips"></div>
             <p class="synthesis-msg" id="synthMsg"></p>
@@ -1259,8 +1276,8 @@ const THEME_QUESTIONS = {
     'Tôi cần nghỉ ngơi và chăm sóc bản thân như thế nào?',
   ],
   spirit: [
-    'Thông điệp vũ trụ muốn gửi đến tôi hôm nay là gì?',
-    'Tôi đang ở giai đoạn nào trong hành trình tâm linh?',
+    'Điều tôi cần chú ý nhất trong thời gian này là gì?',
+    'Tôi đang ở giai đoạn nào trong cuộc sống hiện tại?',
     'Bài học tâm hồn tôi cần học trong lúc này là gì?',
     'Năng lượng của tôi cần được cân bằng như thế nào?',
     'Mục đích sống thực sự của tôi là gì?',
@@ -1271,7 +1288,7 @@ const THEME_QUESTIONS = {
     'Tôi cần tập trung vào điều gì trong thời gian tới?',
     'Cơ hội nào đang chờ tôi phía trước?',
     'Tôi có đang đi đúng hướng trong cuộc sống không?',
-    'Lời khuyên vũ trụ dành riêng cho tôi lúc này?',
+    'Điều gì quan trọng nhất tôi cần nhớ lúc này?',
   ],
 };
 
@@ -1496,8 +1513,8 @@ function showResultPhase() {
   setTimeout(() => {
     fanSection.style.display = 'none';
     document.querySelector('.wizard-panel').classList.add('result-mode');
-    document.getElementById('screen4Title').textContent = '✦ THÔNG ĐIỆP VŨ TRỤ ✦';
-    document.getElementById('resultQuestionBanner').textContent = `"${userQuestion || 'Thông điệp tổng quan'}"`;
+    document.getElementById('screen4Title').textContent = '✦ KẾT QUẢ TRẢI BÀI ✦';
+    document.getElementById('resultQuestionBanner').textContent = `"${userQuestion || 'Trải bài tổng quan'}"`;
     document.getElementById('resultPhase').style.display = 'block';
     document.getElementById('flipHintRow').style.display = 'none';
 
@@ -1543,32 +1560,26 @@ function updateCounter() {
 
 // Mô tả vị trí dùng để luận giải
 const POS_CONTEXT = {
-  'Quá Khứ':    { intro: 'Nhìn lại', role: 'phản ánh những gì đã xảy ra, những năng lượng hoặc sự kiện từ quá khứ vẫn còn đang định hình hiện tại của bạn' },
-  'Hiện Tại':   { intro: 'Ở thời điểm này', role: 'phản chiếu chính xác tình huống và năng lượng bạn đang sống trong lúc này' },
-  'Tương Lai':  { intro: 'Nhìn về phía trước', role: 'hé lộ hướng năng lượng đang chảy tới — không phải số phận cố định, mà là tiềm năng nếu bạn tiếp tục con đường hiện tại' },
-  'Hoàn Cảnh': { intro: 'Về bức tranh tổng thể', role: 'đặt ra bối cảnh chung cho toàn bộ trải bài, cho thấy môi trường và năng lượng bao quanh bạn' },
-  'Thách Thức': { intro: 'Về điều cần vượt qua', role: 'chỉ ra thách thức hoặc rào cản chính đang đứng giữa bạn và điều bạn muốn đạt được' },
-  'Quá Khứ Gần':{ intro: 'Từ không lâu trước đây', role: 'phản ánh những gì gần đây đã qua, những ảnh hưởng vẫn còn tươi mới trong cuộc sống bạn' },
-  'Tương Lai Gần':{ intro: 'Trong thời gian tới', role: 'cho thấy những gì đang hình thành ngay trước mắt, năng lượng sắp đến trong cuộc sống bạn' },
-  'Lời Khuyên': { intro: 'Điều cần ghi nhớ', role: 'mang đến chỉ dẫn quan trọng nhất từ vũ trụ — hành động hoặc thái độ cần có lúc này' },
-  'Trở Ngại':   { intro: 'Điều đang cản bước', role: 'tiết lộ yếu tố hoặc nỗi sợ ẩn đang kìm hãm sự tiến triển của bạn' },
-  'Tiềm Năng':  { intro: 'Điều có thể khai mở', role: 'chỉ ra sức mạnh hoặc cơ hội chưa được tận dụng đang chờ bạn nhận ra' },
-  'Kết Quả':    { intro: 'Điểm đến', role: 'tổng hòa năng lượng của toàn bộ trải bài — kết quả có thể xảy ra nếu bạn đi theo dòng chảy hiện tại' },
+  'Quá Khứ':    { intro: 'Nhìn lại', role: 'cho thấy điều gì đó từ quá khứ vẫn còn ảnh hưởng đến bạn lúc này — có thể là tình huống cũ, thói quen, hoặc cảm xúc chưa được xử lý xong' },
+  'Hiện Tại':   { intro: 'Lúc này', role: 'phản ánh đúng tình trạng bạn đang ở — không nhìn xa, chỉ nhìn vào những gì đang thực sự xảy ra' },
+  'Tương Lai':  { intro: 'Sắp tới', role: 'cho thấy hướng mọi thứ đang đi nếu bạn tiếp tục như hiện tại — không phải số phận, mà là xu hướng có thể thay đổi được' },
+  'Hoàn Cảnh': { intro: 'Nhìn vào bối cảnh', role: 'mô tả tình huống chung xung quanh bạn — những yếu tố đang tác động mà bạn có thể chưa nhận ra hết' },
+  'Thách Thức': { intro: 'Cái đang cản bạn', role: 'chỉ ra điều gì đó đang khiến bạn khó tiến — có thể là hoàn cảnh bên ngoài, hoặc cũng có thể là chính bạn' },
+  'Quá Khứ Gần':{ intro: 'Gần đây', role: 'phản ánh điều mới xảy ra không lâu — vẫn còn tươi và đang để lại dấu ấn trong cách bạn nhìn nhận mọi thứ' },
+  'Tương Lai Gần':{ intro: 'Trong thời gian tới', role: 'cho thấy điều gì đó đang bắt đầu hình thành — không xa, có thể bạn đã cảm nhận được một phần rồi' },
+  'Lời Khuyên': { intro: 'Điều đáng chú ý', role: 'gợi ý thái độ hoặc hành động thực tế phù hợp với tình huống hiện tại của bạn' },
+  'Trở Ngại':   { intro: 'Điều đang cản bước', role: 'chỉ ra thứ đang làm chậm hoặc chặn bạn lại — có thể là tình huống cụ thể, hoặc cũng có thể là nỗi sợ bạn chưa dám nhìn thẳng' },
+  'Tiềm Năng':  { intro: 'Cái chưa được dùng đến', role: 'chỉ ra điểm mạnh hoặc cơ hội bạn chưa khai thác — không phải vì không có, mà vì chưa chú ý đến' },
+  'Kết Quả':    { intro: 'Kết quả có thể xảy ra', role: 'cho thấy khả năng cao nhất nếu mọi thứ tiếp tục theo chiều hiện tại — nhưng kết quả vẫn phụ thuộc vào lựa chọn của bạn' },
 };
 
 function cardReading(card, reversed, posLabel) {
   const meaning = reversed ? card.reversed : card.upright;
-  const ctx = POS_CONTEXT[posLabel] || { intro: 'Tại vị trí này', role: 'mang thông điệp quan trọng cho tình huống của bạn' };
-  const suitNote = card.suit === 'major'
-    ? 'Là lá Đại Bí Ẩn, nó mang tầm ảnh hưởng sâu rộng đến hành trình tâm linh và cuộc sống tổng thể của bạn.'
-    : card.suit === 'wands' ? 'Thuộc bộ Gậy — lửa hành động và đam mê đang hiện diện mạnh mẽ ở đây.'
-    : card.suit === 'cups'  ? 'Thuộc bộ Chén — cảm xúc và thế giới nội tâm đang là trung tâm của vị trí này.'
-    : card.suit === 'swords'? 'Thuộc bộ Kiếm — tư duy, quyết định và sự rõ ràng là chủ đề cốt lõi.'
-    :                         'Thuộc bộ Tiền — những vấn đề thực tế, vật chất và sự nghiệp đang được chiếu sáng.';
+  const ctx = POS_CONTEXT[posLabel] || { intro: 'Ở vị trí này', role: 'nói về tình huống của bạn' };
   const reversedNote = reversed
-    ? ' <em>Lá bài ở chiều ngược cho thấy năng lượng này đang bị chặn hoặc cần được nhìn nhận lại từ bên trong — đây là lời nhắc để điều chỉnh, không phải điềm xấu.</em>'
+    ? ' <em>(Lá ngược: ý nghĩa vẫn vậy, nhưng thường biểu hiện yếu hơn, bị chặn lại, hoặc đang quay vào bên trong — chú ý thêm một chút.)</em>'
     : '';
-  return `${ctx.intro}, <strong>${card.nameVi}</strong> ${ctx.role}. ${meaning}${reversedNote} ${suitNote}`;
+  return `${ctx.intro}, <strong>${card.nameVi}</strong> ${ctx.role}. ${meaning}${reversedNote}`;
 }
 
 function buildSynthMsg(cards) {
@@ -1577,10 +1588,8 @@ function buildSynthMsg(cards) {
   if (cards.length === 1) {
     const { card, reversed } = cards[0];
     const meaning = reversed ? card.reversed : card.upright;
-    const rev = reversed ? ' (chiều ngược)' : '';
-    return `<strong>${card.nameVi}${rev}</strong> là thông điệp vũ trụ gửi đến bạn lúc này.<br><br>${meaning}${reversed ? ' <em>Lá ngược nhắc bạn nhìn lại nội tâm — năng lượng này đang cần được điều chỉnh hoặc giải phóng.</em>' : ''}<br><br>${
-      card.suit === 'major' ? 'Đây là lá Đại Bí Ẩn — mang thông điệp quan trọng về hành trình lớn trong cuộc đời bạn, không chỉ là tình huống nhất thời.' : 'Hãy để ý đến những biểu hiện của chủ đề này trong cuộc sống hàng ngày của bạn.'
-    }`;
+    const rev = reversed ? ' (ngược)' : '';
+    return `<strong>${card.nameVi}${rev}</strong><br><br>${meaning}${reversed ? ' <em>(Lá ngược: cùng chủ đề nhưng thường ở dạng khó nhận ra hơn — bị chặn, bị phủ nhận, hoặc đang quay vào bên trong bạn.)</em>' : ''}`;
   }
 
   const parts = cards.map(({ card, reversed }, i) => {
@@ -1592,10 +1601,10 @@ function buildSynthMsg(cards) {
   if (cards.length === 3) {
     const hasReversed = cards.some(c => c.reversed);
     connector = hasReversed
-      ? '<br><br>Tổng thể, trải bài cho thấy một hành trình đang trải qua giai đoạn chuyển hóa — một số năng lượng đang bị kìm hãm nhưng chính đó là cơ hội để bạn nhận ra điều cần thay đổi.'
-      : '<br><br>Tổng thể, dòng chảy năng lượng đang hướng về phía tích cực — những gì đã qua đang hỗ trợ cho hiện tại, và hiện tại đang mở đường cho một tương lai đầy tiềm năng.';
+      ? '<br><br>Nhìn chung, ba lá này cho thấy có điều gì đó chưa được xử lý gọn — một số thứ đang bị kéo ngược lại. Không nhất thiết là xấu, nhưng đáng để dừng lại suy nghĩ thêm một chút.'
+      : '<br><br>Nhìn chung, ba lá này cho thấy tình hình đang chuyển động theo hướng ổn — quá khứ đã tạo nền cho hiện tại, và hiện tại đang dẫn đến điều gì đó khá rõ ràng phía trước.';
   } else if (cards.length >= 5) {
-    connector = '<br><br>Đọc toàn bộ trải bài như một câu chuyện liên kết — không có lá nào đứng độc lập. Mỗi vị trí góp phần tạo nên bức tranh tổng thể về hành trình bạn đang đi và lựa chọn bạn có thể đưa ra.';
+    connector = '<br><br>Đọc toàn bộ trải bài như một câu chuyện — mỗi lá liên quan đến nhau, không đứng riêng lẻ. Bức tranh tổng thể thường nói nhiều hơn từng lá đơn lẻ.';
   }
 
   return parts.join('<br><br>') + connector;
@@ -1606,10 +1615,10 @@ function showSynthesis() {
   const labels = SPREAD_LABELS[selectedCards.length] || selectedCards.map((_,i)=>`Lá ${i+1}`);
 
   const intros = [
-    'Những lá bài bạn chọn không phải ngẫu nhiên — trực giác đã dẫn bạn đến đúng những thông điệp bạn cần nghe.',
-    'Vũ trụ phản hồi qua hình ảnh và biểu tượng. Dưới đây là những gì bộ bài muốn nói với bạn hôm nay.',
-    'Mỗi lá bài phản chiếu một khía cạnh của năng lượng bạn đang mang. Hãy đọc với tâm thế cởi mở.',
-    'Không có kết quả "tốt" hay "xấu" trong Tarot — chỉ có thông điệp để bạn suy ngẫm và lựa chọn.',
+    'Đây là những lá bài bạn vừa rút. Đọc chậm — đôi khi điều có ý nghĩa nhất là thứ bạn ngay lập tức phản ứng với.',
+    'Tarot không tiên tri — nó phản ánh. Xem những lá này như một góc nhìn khác về tình huống của bạn.',
+    'Mỗi lá bài nhìn vào một khía cạnh khác nhau. Hãy đọc tổng thể hơn là từng lá riêng lẻ.',
+    'Không có lá bài nào là "xấu" hoàn toàn — mọi lá đều cho bạn thứ gì đó để suy nghĩ.',
   ];
   document.getElementById('synthIntro').textContent = intros[Math.floor(Math.random()*intros.length)];
   document.getElementById('synthMsg').innerHTML = buildSynthMsg(selectedCards);
@@ -1637,17 +1646,11 @@ function toggleDetail() {
     const uid = `dd-${idx}`;
 
     // Tạo nội dung Tổng Quan đầy đủ
-    const posCtx = POS_CONTEXT[labels[idx]] || { intro: 'Tại vị trí này', role: 'mang thông điệp cho tình huống của bạn' };
-    const suitLine = card.suit === 'major'
-      ? '✦ Lá Đại Bí Ẩn — ảnh hưởng sâu và bền, liên quan đến hành trình lớn của cuộc đời.'
-      : card.suit === 'wands'  ? '🔥 Bộ Gậy — chủ đề hành động, đam mê, sự nghiệp và sáng tạo.'
-      : card.suit === 'cups'   ? '💧 Bộ Chén — chủ đề cảm xúc, tình yêu, mối quan hệ và trực giác.'
-      : card.suit === 'swords' ? '💨 Bộ Kiếm — chủ đề tư duy, quyết định, xung đột và sự thật.'
-      :                          '🌿 Bộ Tiền — chủ đề tài chính, sức khỏe, sự nghiệp và ổn định thực tế.';
+    const posCtx = POS_CONTEXT[labels[idx]] || { intro: 'Ở vị trí này', role: 'nói về tình huống của bạn' };
     const reversedLine = reversed
-      ? `<br><br><em>↓ Lá ngược: Năng lượng của ${card.nameVi} đang gặp trở ngại hoặc hướng vào nội tâm. Đây là dấu hiệu cần nhìn lại — ${card.reversed}</em>`
+      ? `<br><br><em>↓ Lá ngược: ${card.reversed}</em>`
       : '';
-    const overview = `${posCtx.intro}, lá <strong>${card.nameVi}</strong> ${posCtx.role}.<br><br>${meaning}${reversedLine}<br><br>${suitLine}`;
+    const overview = `${posCtx.intro}, <strong>${card.nameVi}</strong> ${posCtx.role}.<br><br>${meaning}${reversedLine}`;
 
     const tabs = [
       { key:'ov', label:'Tổng Quan',   text: overview },
@@ -1656,8 +1659,8 @@ function toggleDetail() {
       { key:'hl', label:'Sức Khỏe',    text: card.details?.health || '' },
       { key:'sp', label:'Tâm Linh',    text: card.details?.spirit || '' },
       { key:'ad', label:'Lời Khuyên',  text: card.details?.advice || (reversed
-          ? `Hãy dừng lại và nhìn vào bên trong. ${card.nameVi} ngược nhắc bạn rằng câu trả lời bạn cần không nằm ở bên ngoài — mà đang chờ bạn khám phá trong chính mình.`
-          : `Hãy đón nhận năng lượng của ${card.nameVi} một cách chủ động. Lá bài này là lời mời để bạn hành động hoặc điều chỉnh theo hướng nó chỉ ra.`) },
+          ? `${card.nameVi} ngược thường là dấu hiệu nên dừng lại một chút — không phải vì sai, mà vì có thứ gì đó chưa rõ cần được nhìn lại trước khi tiếp tục.`
+          : `Điều ${card.nameVi} gợi ý: đừng chờ thêm, hãy bắt đầu từ điều nhỏ nhất bạn có thể làm ngay bây giờ liên quan đến chủ đề này.`) },
     ].filter(t => t.text);
 
     const block = document.createElement('div');

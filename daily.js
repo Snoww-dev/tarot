@@ -3,7 +3,7 @@
 // A different browser/device gets a different card. Resets at midnight local time.
 
 const DAILY_AFFIRMATIONS = [
-  "Hôm nay tôi mở lòng đón nhận những điều tốt đẹp từ vũ trụ.",
+  "Hôm nay tôi mở lòng đón nhận những điều tốt đẹp đang đến.",
   "Tôi tin tưởng vào hành trình của chính mình.",
   "Tôi đủ mạnh để đối mặt với bất cứ điều gì hôm nay mang đến.",
   "Mỗi khoảnh khắc hiện tại là một cơ hội để bắt đầu lại.",
@@ -12,7 +12,7 @@ const DAILY_AFFIRMATIONS = [
   "Năng lượng của tôi là quà tặng — tôi trao nó cho những điều quan trọng.",
   "Tôi lắng nghe trực giác của mình và tin tưởng nó dẫn đường.",
   "Tôi đang phát triển, dù đôi khi tôi không nhận ra.",
-  "Vũ trụ đang âm thầm sắp xếp mọi thứ vì lợi ích của tôi.",
+  "Mọi thứ không phải lúc nào cũng theo kế hoạch — và đó không phải lúc nào cũng là điều xấu.",
   "Tôi chọn bình yên hơn là đúng.",
   "Hôm nay tôi là phiên bản tốt nhất của chính mình.",
   "Tôi cảm ơn những thử thách — chúng đang tôi luyện tôi.",
@@ -24,7 +24,7 @@ const DAILY_AFFIRMATIONS = [
   "Tôi đang đúng nơi tôi cần ở vào lúc này.",
   "Mỗi hơi thở là lời nhắc nhở tôi còn sống và còn cơ hội.",
   "Tôi tha thứ cho bản thân về những điều chưa hoàn hảo.",
-  "Tôi kết nối với nguồn năng lượng vô tận của vũ trụ."
+  "Tôi có đủ thứ cần thiết để xử lý những gì đang đến hôm nay."
 ];
 
 function getTodayKey() {
