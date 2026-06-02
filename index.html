@@ -460,6 +460,9 @@
       position: relative;
       z-index: 1;
     }
+    .wizard-panel.result-mode #screen4::before {
+      display: none;
+    }
     .shuffle-area {
       display: flex; flex-direction: column; align-items: center; gap: 24px;
     }
@@ -797,7 +800,11 @@
     .daily-card-title { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
     .daily-numeral { font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.72rem; color: var(--gold); letter-spacing: 2px; }
     .daily-name { font-size: 1.08rem; color: var(--gold-light); font-weight: 600; }
-    .daily-meaning { color: #c0c0c0; font-size: 1rem; line-height: 1.7; margin-bottom: 14px; }
+    .daily-meaning { color: #c0c0c0; font-size: 1rem; line-height: 1.7; margin-bottom: 16px; }
+    .daily-details { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+    .daily-detail-row { display: flex; gap: 10px; align-items: flex-start; font-size: 0.93rem; color: #b0b0b0; line-height: 1.6; }
+    .daily-detail-icon { font-size: 1rem; flex-shrink: 0; margin-top: 2px; }
+    .daily-detail-label { color: var(--gold); font-weight: 600; }
     .daily-affirmation {
       background: rgba(212,169,67,0.07); border: 1px solid rgba(212,169,67,0.22);
       border-radius: 12px; padding: 14px 16px;
@@ -966,11 +973,10 @@
 
       <!-- Tab: Câu hỏi -->
       <div class="input-panel active" id="panelQuestion">
-        <label class="question-label">Gõ câu hỏi bạn muốn hỏi...</label>
         <textarea class="question-input" id="questionInput" rows="3" maxlength="500"
-          placeholder="Ví dụ: Tôi có nên thay đổi công việc hiện tại không?"
-          oninput="document.getElementById('charCount').textContent=this.value.length"></textarea>
-        <div class="char-count"><span id="charCount">0</span>/500</div>
+          placeholder="Ví dụ: Bạn muốn hỏi về điều gì?"
+          oninput="onQuestionInput(this)"></textarea>
+        <div class="char-count"><span id="charCount">0</span>/500 <span id="charHint" style="color:#c0392b;font-size:0.82em;margin-left:8px;"></span></div>
       </div>
 
       <!-- Tab: Chủ đề -->
@@ -1064,7 +1070,6 @@
           <div class="result-question-banner" id="resultQuestionBanner"></div>
           <div class="synthesis-panel" id="synthPanel">
             <div class="synthesis-header">✦ ĐỌC KẾT QUẢ ✦</div>
-            <p class="synthesis-intro" id="synthIntro"></p>
             <div class="synthesis-chips" id="synthChips"></div>
             <p class="synthesis-msg" id="synthMsg"></p>
             <div class="synthesis-actions">
@@ -1179,6 +1184,20 @@ const SPREAD_LABELS = {
 // ══════════════════════════════════════════════════════
 //  Step navigation
 // ══════════════════════════════════════════════════════
+function onQuestionInput(el) {
+  const len = el.value.length;
+  document.getElementById('charCount').textContent = len;
+  const hint = document.getElementById('charHint');
+  const btn  = document.getElementById('step3Next');
+  if (len < 10) {
+    hint.textContent = `(cần thêm ${10 - len} ký tự nữa)`;
+    btn.disabled = true;
+  } else {
+    hint.textContent = '';
+    btn.disabled = false;
+  }
+}
+
 function goToStep(n) {
   if (n === 3) {
     const isTheme = chosenMethod === 'theme';
@@ -1187,6 +1206,13 @@ function goToStep(n) {
     document.getElementById('screen3Title').textContent = isTheme
       ? '✦ CHỌN CHỦ ĐỀ BÓI ✦'
       : '✦ NHẬP CÂU HỎI CỦA BẠN ✦';
+    // Disable nút nếu đang ở tab câu hỏi và chưa đủ ký tự
+    if (!isTheme) {
+      const len = document.getElementById('questionInput').value.length;
+      document.getElementById('step3Next').disabled = len < 10;
+      const hint = document.getElementById('charHint');
+      hint.textContent = len < 10 ? `(cần thêm ${10 - len} ký tự nữa)` : '';
+    }
   }
 
   if (n === 4) {
@@ -1620,7 +1646,6 @@ function showSynthesis() {
     'Mỗi lá bài nhìn vào một khía cạnh khác nhau. Hãy đọc tổng thể hơn là từng lá riêng lẻ.',
     'Không có lá bài nào là "xấu" hoàn toàn — mọi lá đều cho bạn thứ gì đó để suy nghĩ.',
   ];
-  document.getElementById('synthIntro').textContent = intros[Math.floor(Math.random()*intros.length)];
   document.getElementById('synthMsg').innerHTML = buildSynthMsg(selectedCards);
   document.getElementById('synthChips').innerHTML = selectedCards.map((c,i) =>
     `<div class="synth-chip ${c.reversed?'reversed':''}">
@@ -1702,6 +1727,8 @@ function resetAll() {
   document.getElementById('step2Next').disabled = true;
   document.getElementById('questionInput').value = '';
   document.getElementById('charCount').textContent = '0';
+  document.getElementById('charHint').textContent = '';
+  document.getElementById('step3Next').disabled = false;
   document.querySelectorAll('.theme-img-card').forEach(c => c.classList.remove('selected'));
   document.getElementById('themePresetArea').classList.remove('visible');
   document.getElementById('presetChips').innerHTML = '';

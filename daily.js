@@ -60,12 +60,39 @@ function getDailyCard() {
   };
 }
 
+function extractDetailSide(text, reversed) {
+  if (!text) return '';
+  // Tách phần "Xuôi:" hoặc "Ngược:" tương ứng
+  const side = reversed ? 'Ngược' : 'Xuôi';
+  const other = reversed ? 'Xuôi' : 'Ngược';
+  const regex = new RegExp(side + ':\\s*(.+?)(?=' + other + ':|$)', 'i');
+  const match = text.match(regex);
+  return match ? match[1].trim() : text;
+}
+
 function renderDailyCard() {
   const { card, reversed, affirmation, dateStr } = getDailyCard();
   const section = document.getElementById('dailyCardSection');
   if (!section) return;
 
   const meaning = reversed ? card.reversed : card.upright;
+
+  const detailItems = [
+    { icon: '❤', label: 'Tình yêu',   text: extractDetailSide(card.details?.love,   reversed) },
+    { icon: '💼', label: 'Sự nghiệp', text: extractDetailSide(card.details?.career, reversed) },
+    { icon: '🌿', label: 'Sức khỏe',  text: extractDetailSide(card.details?.health, reversed) },
+    { icon: '💡', label: 'Lời khuyên',text: card.details?.advice || '' },
+  ].filter(d => d.text);
+
+  const detailsHTML = detailItems.length ? `
+    <div class="daily-details">
+      ${detailItems.map(d => `
+        <div class="daily-detail-row">
+          <span class="daily-detail-icon">${d.icon}</span>
+          <div><span class="daily-detail-label">${d.label}:</span> ${d.text}</div>
+        </div>
+      `).join('')}
+    </div>` : '';
 
   section.innerHTML = `
     <div class="daily-date">${dateStr}</div>
@@ -87,6 +114,7 @@ function renderDailyCard() {
           ${reversed ? '<span class="reversed-badge">↓ Ngược</span>' : ''}
         </div>
         <p class="daily-meaning">${meaning}</p>
+        ${detailsHTML}
         <div class="daily-affirmation">
           <span class="affirmation-label">✦ Lời Khẳng Định Hôm Nay ✦</span>
           <p class="affirmation-text">"${affirmation}"</p>
