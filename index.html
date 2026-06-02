@@ -680,51 +680,64 @@
     }
     .synth-chip.reversed .synth-chip-pos { color: #ff9a9a; }
     .synth-chip-name { font-size: 0.9rem; color: var(--star-white); font-weight: 600; }
-    .synthesis-msg {
-      color: #c0c0c0; font-size: 1.03rem; line-height: 1.8;
-      margin-bottom: 22px; border-top: 1px solid rgba(212,169,67,0.15);
-      padding-top: 16px;
+    .synthesis-overall {
+      color: #c8c0d8; font-size: 1.06rem; line-height: 1.85;
+      margin-bottom: 24px; border-top: 1px solid rgba(212,169,67,0.2);
+      padding-top: 20px;
+    }
+    .synthesis-divider {
+      border: none; border-top: 1px solid rgba(212,169,67,0.15);
+      margin: 8px 0;
     }
     .synthesis-actions {
       display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;
+      margin-top: 32px;
     }
 
-    /* ─── Detail panel per card ─── */
-    .detail-section { display: none; margin-top: 20px; }
-    .detail-section.visible { display: block; animation: fadeInUp 0.45s ease; }
-    .detail-block {
-      background: linear-gradient(135deg, rgba(15,15,15,0.85), rgba(0,0,0,0.95));
+    /* ─── Result card blocks (chi tiết từng lá) ─── */
+    .detail-section { margin-top: 18px; }
+    .result-card-block {
+      background: linear-gradient(135deg, rgba(15,8,30,0.9), rgba(0,0,0,0.95));
       border: 1px solid var(--gold-dark); border-radius: 16px;
-      padding: 22px 26px; margin-bottom: 14px;
+      padding: 22px 24px; margin-bottom: 22px;
     }
-    .detail-header {
+    .result-card-header {
       display: flex; align-items: baseline; flex-wrap: wrap;
-      gap: 10px; margin-bottom: 12px;
+      gap: 10px; margin-bottom: 18px;
+      padding-bottom: 12px; border-bottom: 1px solid rgba(212,169,67,0.18);
     }
-    .detail-pos {
+    .result-card-pos {
       font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.72rem;
       color: var(--gold); letter-spacing: 2px; text-transform: uppercase;
     }
-    .detail-name { font-size: 1.1rem; color: var(--gold-light); font-weight: 600; }
+    .result-card-name { font-size: 1.1rem; color: var(--gold-light); font-weight: 600; }
     .reversed-badge {
       font-size: 0.78rem; background: rgba(180,60,60,0.3);
       border: 1px solid rgba(180,60,60,0.5); color: #ff9a9a;
       padding: 3px 10px; border-radius: 20px; letter-spacing: 1px;
     }
-    .detail-tabs {
-      display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0 8px;
+    .result-card-body {
+      display: flex; gap: 22px; align-items: flex-start;
     }
-    .detail-tab {
-      background: transparent; border: 1px solid var(--gold-dark);
-      color: #a0a0a0; padding: 5px 16px; font-family: 'Be Vietnam Pro', sans-serif;
-      font-size: 1rem; cursor: pointer; border-radius: 20px;
-      transition: all 0.2s; letter-spacing: 0.5px;
+    .result-card-img {
+      flex: 0 0 140px; width: 140px;
+      border-radius: 10px; overflow: hidden;
+      box-shadow: 0 0 18px rgba(212,169,67,0.25);
+      aspect-ratio: 140/200;
     }
-    .detail-tab:hover { border-color: var(--gold); color: var(--gold-light); }
-    .detail-tab.active { background: var(--gold-dark); border-color: var(--gold); color: #fff; }
-    .detail-content { color: #c0c0c0; font-size: 1.02rem; line-height: 1.75; min-height: 56px; }
-    .detail-pane { display: none; }
-    .detail-pane.active { display: block; }
+    .result-card-img img, .result-card-img svg {
+      width: 100%; height: auto; display: block;
+    }
+    .result-card-text {
+      flex: 1; color: #c0c0c0; font-size: 1.03rem; line-height: 1.82;
+    }
+    .result-card-text p { margin: 0 0 14px; }
+    .result-card-extras { margin-top: 14px; border-top: 1px solid rgba(212,169,67,0.1); padding-top: 14px; }
+    .result-card-extras p { margin: 0 0 12px; }
+    @media (max-width: 560px) {
+      .result-card-body { flex-direction: column; }
+      .result-card-img { width: 120px; flex: none; }
+    }
 
     /* ─── Particle ─── */
     .particle { position: fixed; pointer-events: none; z-index: 999; border-radius: 50%; }
@@ -1069,15 +1082,16 @@
         <div id="resultPhase" style="display:none">
           <div class="result-question-banner" id="resultQuestionBanner"></div>
           <div class="synthesis-panel" id="synthPanel">
-            <div class="synthesis-header">✦ ĐỌC KẾT QUẢ ✦</div>
+            <div class="synthesis-header">✦ THÔNG ĐIỆP TỔNG THỂ ✦</div>
             <div class="synthesis-chips" id="synthChips"></div>
-            <p class="synthesis-msg" id="synthMsg"></p>
+            <div class="synthesis-overall" id="synthOverall"></div>
+            <div class="synthesis-divider"></div>
+            <div class="synthesis-header" style="margin-top:24px">✦ CHI TIẾT TỪNG LÁ ✦</div>
+            <div class="detail-section" id="detailSection"></div>
             <div class="synthesis-actions">
               <button class="btn-primary" onclick="resetAll()">✦ BÓI LẠI ✦</button>
-              <button class="btn-secondary" onclick="toggleDetail()">✦ XEM CHI TIẾT TỪNG LÁ ✦</button>
             </div>
           </div>
-          <div class="detail-section" id="detailSection"></div>
         </div>
       </div>
     </div>
@@ -1608,114 +1622,121 @@ function cardReading(card, reversed, posLabel) {
   return `${ctx.intro}, <strong>${card.nameVi}</strong> ${ctx.role}. ${meaning}${reversedNote}`;
 }
 
-function buildSynthMsg(cards) {
+function buildOverallMsg(cards) {
   const labels = SPREAD_LABELS[cards.length] || cards.map((_,i)=>`Lá ${i+1}`);
+  const reversedCount = cards.filter(c => c.reversed).length;
 
   if (cards.length === 1) {
     const { card, reversed } = cards[0];
     const meaning = reversed ? card.reversed : card.upright;
-    const rev = reversed ? ' (ngược)' : '';
-    return `<strong>${card.nameVi}${rev}</strong><br><br>${meaning}${reversed ? ' <em>(Lá ngược: cùng chủ đề nhưng thường ở dạng khó nhận ra hơn — bị chặn, bị phủ nhận, hoặc đang quay vào bên trong bạn.)</em>' : ''}`;
+    const tone = reversed
+      ? `Lá bài xuất hiện ở chiều ngược, cho thấy năng lượng của <strong>${card.nameVi}</strong> đang bị chặn lại hoặc chưa được biểu hiện đúng hướng. Đây không phải điều xấu — mà là một tín hiệu để bạn chú ý và điều chỉnh.`
+      : `<strong>${card.nameVi}</strong> là thông điệp vũ trụ gửi đến bạn lúc này.`;
+    const adviceText = card.details?.advice
+      ? `<br><br><strong>Lời khuyên:</strong> ${card.details.advice}`
+      : `<br><br><strong>Lời khuyên:</strong> Hãy để thông điệp này ngấm dần — đôi khi câu trả lời không đến ngay lập tức, mà hiện ra khi bạn sẵn sàng nhìn nhận nó.`;
+    return `${tone}<br><br>${meaning}${reversed ? '<br><br><em>Lá ngược thường phản ánh điều đang diễn ra bên trong — nỗi sợ chưa được thừa nhận, năng lượng bị kìm nén, hoặc bài học chưa được tiêu hóa hết. Không xấu, chỉ là chưa đến lúc bùng phát.</em>' : ''}${adviceText}`;
   }
 
-  const parts = cards.map(({ card, reversed }, i) => {
-    const lbl = labels[i];
-    return `<strong>${lbl} — ${card.nameVi}${reversed?' ↓':''}</strong><br>${cardReading(card, reversed, lbl)}`;
-  });
+  const cardNames = cards.map((c, i) => `<strong>${labels[i]}: ${c.card.nameVi}${c.reversed?' (ngược)':''}</strong>`).join(', ');
 
-  let connector = '';
+  let opening = '';
   if (cards.length === 3) {
-    const hasReversed = cards.some(c => c.reversed);
-    connector = hasReversed
-      ? '<br><br>Nhìn chung, ba lá này cho thấy có điều gì đó chưa được xử lý gọn — một số thứ đang bị kéo ngược lại. Không nhất thiết là xấu, nhưng đáng để dừng lại suy nghĩ thêm một chút.'
-      : '<br><br>Nhìn chung, ba lá này cho thấy tình hình đang chuyển động theo hướng ổn — quá khứ đã tạo nền cho hiện tại, và hiện tại đang dẫn đến điều gì đó khá rõ ràng phía trước.';
+    const [past, present, future] = cards;
+    const pastTone = past.reversed ? 'một điều gì đó từ quá khứ chưa được giải quyết xong' : 'nền tảng từ quá khứ vẫn đang ảnh hưởng đến hiện tại';
+    const presentTone = present.reversed ? 'hiện tại đang có chút bất ổn hoặc chưa rõ hướng đi' : 'hiện tại mang một năng lượng khá rõ ràng';
+    const futureTone = future.reversed ? 'tương lai phụ thuộc vào việc bạn nhìn lại và xử lý những gì đang bị bỏ qua' : 'tương lai đang mở ra theo hướng tích cực nếu bạn tiếp tục như hiện tại';
+    opening = `Trải bài hôm nay gồm ${cardNames}. Nhìn tổng thể, ${pastTone}, ${presentTone}, và ${futureTone}.`;
   } else if (cards.length >= 5) {
-    connector = '<br><br>Đọc toàn bộ trải bài như một câu chuyện — mỗi lá liên quan đến nhau, không đứng riêng lẻ. Bức tranh tổng thể thường nói nhiều hơn từng lá đơn lẻ.';
+    const dominant = reversedCount > cards.length / 2 ? 'Phần lớn các lá xuất hiện ngược, cho thấy đây là giai đoạn bạn cần nhìn vào bên trong nhiều hơn là hành động ra bên ngoài.' : 'Phần lớn các lá xuất hiện thuận, cho thấy năng lượng đang chuyển động và bạn đang đi đúng hướng.';
+    opening = `Trải bài 5 lá hôm nay bao gồm ${cardNames}. ${dominant}`;
   }
 
-  return parts.join('<br><br>') + connector;
+  const threads = cards.map(({ card, reversed }, i) => {
+    const lbl = labels[i];
+    const meaning = reversed ? card.reversed : card.upright;
+    const ctx = POS_CONTEXT[lbl] || { intro: 'Ở vị trí này', role: 'nói về tình huống của bạn' };
+    return `${ctx.intro}, <strong>${card.nameVi}</strong> ${ctx.role}. ${meaning}${reversed ? ' <em>(Lá ngược: năng lượng này có thể đang bị kìm nén hoặc chưa được nhận ra.)</em>' : ''}`;
+  }).join('<br><br>');
+
+  let closing = '';
+  if (cards.length === 3) {
+    closing = reversedCount === 0
+      ? '<br><br>Nhìn chung, ba lá này vẽ ra một câu chuyện đang chuyển động theo hướng tốt. Hãy tin vào quá trình và tiếp tục đi.'
+      : reversedCount === 3
+      ? '<br><br>Cả ba lá đều ngược — đây là thời điểm đặc biệt để dừng lại, nhìn lại, và không vội vã đưa ra quyết định lớn. Năng lượng đang cần được tái cân bằng trước khi tiến lên.'
+      : '<br><br>Sự kết hợp giữa lá thuận và lá ngược cho thấy tình huống không đơn giản chỉ tốt hay xấu — có những phần đang phát triển tốt, có những phần cần thêm chú ý. Đọc từng lá để hiểu rõ hơn phần nào cần ưu tiên.';
+  } else if (cards.length >= 5) {
+    closing = '<br><br>Đọc toàn bộ trải bài như một câu chuyện liên kết — không lá nào đứng một mình. Bức tranh tổng thể thường tiết lộ điều mà từng lá đơn lẻ không thể nói hết.';
+  }
+
+  return `${opening}<br><br>${threads}${closing}`;
 }
 
 function showSynthesis() {
   const panel  = document.getElementById('synthPanel');
   const labels = SPREAD_LABELS[selectedCards.length] || selectedCards.map((_,i)=>`Lá ${i+1}`);
 
-  const intros = [
-    'Đây là những lá bài bạn vừa rút. Đọc chậm — đôi khi điều có ý nghĩa nhất là thứ bạn ngay lập tức phản ứng với.',
-    'Tarot không tiên tri — nó phản ánh. Xem những lá này như một góc nhìn khác về tình huống của bạn.',
-    'Mỗi lá bài nhìn vào một khía cạnh khác nhau. Hãy đọc tổng thể hơn là từng lá riêng lẻ.',
-    'Không có lá bài nào là "xấu" hoàn toàn — mọi lá đều cho bạn thứ gì đó để suy nghĩ.',
-  ];
-  document.getElementById('synthMsg').innerHTML = buildSynthMsg(selectedCards);
+  // Chips tóm tắt lá
   document.getElementById('synthChips').innerHTML = selectedCards.map((c,i) =>
     `<div class="synth-chip ${c.reversed?'reversed':''}">
       <span class="synth-chip-pos">${labels[i]}</span>
       <span class="synth-chip-name">${c.card.nameVi}${c.reversed?' ↓':''}</span>
     </div>`).join('');
 
-  panel.classList.add('visible');
-  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
+  // Thông điệp tổng thể
+  document.getElementById('synthOverall').innerHTML = buildOverallMsg(selectedCards);
 
-// ── Detail toggle ──
-function toggleDetail() {
+  // Chi tiết từng lá (luôn hiển thị, layout ảnh + text)
   const sec = document.getElementById('detailSection');
-  const isVisible = sec.classList.contains('visible');
-  if (isVisible) { sec.classList.remove('visible'); return; }
-
-  const labels = SPREAD_LABELS[selectedCards.length] || selectedCards.map((_,i)=>`Lá ${i+1}`);
   sec.innerHTML = '';
-
   selectedCards.forEach(({ card, reversed }, idx) => {
+    const lbl = labels[idx];
     const meaning = reversed ? card.reversed : card.upright;
-    const uid = `dd-${idx}`;
+    const posCtx = POS_CONTEXT[lbl] || { intro: 'Ở vị trí này', role: 'nói về tình huống của bạn' };
 
-    // Tạo nội dung Tổng Quan đầy đủ
-    const posCtx = POS_CONTEXT[labels[idx]] || { intro: 'Ở vị trí này', role: 'nói về tình huống của bạn' };
-    const reversedLine = reversed
-      ? `<br><br><em>↓ Lá ngược: ${card.reversed}</em>`
-      : '';
-    const overview = `${posCtx.intro}, <strong>${card.nameVi}</strong> ${posCtx.role}.<br><br>${meaning}${reversedLine}`;
+    const mainText = `${posCtx.intro}, <strong>${card.nameVi}</strong> ${posCtx.role}.<br><br>${meaning}${reversed ? `<br><br><em>↓ Lá ngược: ${card.reversed}</em>` : ''}`;
 
-    const tabs = [
-      { key:'ov', label:'Tổng Quan',   text: overview },
-      { key:'lv', label:'Tình Yêu',    text: card.details?.love   || '' },
-      { key:'ca', label:'Sự Nghiệp',   text: card.details?.career || '' },
-      { key:'hl', label:'Sức Khỏe',    text: card.details?.health || '' },
-      { key:'sp', label:'Tâm Linh',    text: card.details?.spirit || '' },
-      { key:'ad', label:'Lời Khuyên',  text: card.details?.advice || (reversed
-          ? `${card.nameVi} ngược thường là dấu hiệu nên dừng lại một chút — không phải vì sai, mà vì có thứ gì đó chưa rõ cần được nhìn lại trước khi tiếp tục.`
-          : `Điều ${card.nameVi} gợi ý: đừng chờ thêm, hãy bắt đầu từ điều nhỏ nhất bạn có thể làm ngay bây giờ liên quan đến chủ đề này.`) },
-    ].filter(t => t.text);
+    const extras = [];
+    if (card.details?.love)   extras.push(`<strong>Tình yêu:</strong> ${card.details.love}`);
+    if (card.details?.career) extras.push(`<strong>Sự nghiệp:</strong> ${card.details.career}`);
+    if (card.details?.health) extras.push(`<strong>Sức khỏe:</strong> ${card.details.health}`);
+    if (card.details?.spirit) extras.push(`<strong>Tâm linh:</strong> ${card.details.spirit}`);
+    const adviceText = card.details?.advice
+      || (reversed
+        ? `${card.nameVi} ngược thường là dấu hiệu nên dừng lại — không phải vì sai, mà vì có thứ gì đó chưa rõ cần được nhìn lại trước khi tiếp tục.`
+        : `Điều ${card.nameVi} gợi ý: đừng chờ thêm, hãy bắt đầu từ điều nhỏ nhất bạn có thể làm ngay bây giờ liên quan đến chủ đề này.`);
+    extras.push(`<strong>Lời khuyên:</strong> ${adviceText}`);
+
+    const imgPath = CARD_IMAGES[card.id] || 'cards/mat-sau.jpg';
+    const reversedStyle = reversed ? 'transform:rotate(180deg);' : '';
 
     const block = document.createElement('div');
-    block.className = 'detail-block';
+    block.className = 'result-card-block';
     block.innerHTML = `
-      <div class="detail-header">
-        <span class="detail-pos">${labels[idx]}</span>
-        <span class="detail-name">${card.numeral ? card.numeral + '. ' : ''}${card.name} · ${card.nameVi}</span>
+      <div class="result-card-header">
+        <span class="result-card-pos">${lbl}</span>
+        <span class="result-card-name">${card.numeral ? card.numeral + '. ' : ''}${card.name} · ${card.nameVi}</span>
         ${reversed ? '<span class="reversed-badge">↓ Ngược</span>' : ''}
       </div>
-      <div class="detail-tabs">
-        ${tabs.map((t,i)=>`<button class="detail-tab${i===0?' active':''}" onclick="switchDetailTab('${uid}','${t.key}',this)">${t.label}</button>`).join('')}
-      </div>
-      <div class="detail-content">
-        ${tabs.map((t,i)=>`<div class="detail-pane${i===0?' active':''}" id="${uid}-${t.key}">${t.text}</div>`).join('')}
+      <div class="result-card-body">
+        <div class="result-card-img">
+          <img src="${imgPath}" alt="${card.name}" style="width:100%;height:auto;display:block;${reversedStyle}"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+          <div style="display:none;${reversedStyle}">${makeCardFrontSVG(card)}</div>
+        </div>
+        <div class="result-card-text">
+          <p>${mainText}</p>
+          ${extras.length ? '<div class="result-card-extras">' + extras.map(e=>`<p>${e}</p>`).join('') + '</div>' : ''}
+        </div>
       </div>`;
     sec.appendChild(block);
   });
 
-  sec.classList.add('visible');
-  sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  panel.classList.add('visible');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function switchDetailTab(uid, key, btn) {
-  const block = btn.closest('.detail-block');
-  block.querySelectorAll('.detail-pane').forEach(p => p.classList.remove('active'));
-  block.querySelector(`#${uid}-${key}`).classList.add('active');
-  block.querySelectorAll('.detail-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-}
 
 // ── Reset ──
 function resetAll() {
