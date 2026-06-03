@@ -584,6 +584,48 @@
       animation: none;
     }
 
+    /* ─── Yes/No Verdict ─── */
+    .yn-verdict-wrap {
+      text-align: center; padding: 4px 0 8px;
+    }
+    .yn-question {
+      font-family: 'Crimson Text', serif; font-size: 1.05rem;
+      color: #a89bc2; font-style: italic; margin-bottom: 18px;
+    }
+    .yn-verdict {
+      font-family: 'Cinzel Decorative', serif; font-size: 2rem;
+      letter-spacing: 6px; margin: 0 auto 18px;
+      padding: 14px 32px; border-radius: 14px; display: inline-block;
+      animation: verdictPop 0.6s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes verdictPop {
+      0%   { transform: scale(0.6); opacity: 0; }
+      70%  { transform: scale(1.08); }
+      100% { transform: scale(1);   opacity: 1; }
+    }
+    .verdict-yes   { color: #f0d080; background: rgba(212,169,67,0.12); border: 1px solid rgba(212,169,67,0.4); text-shadow: 0 0 18px rgba(212,169,67,0.6); }
+    .verdict-no    { color: #e08080; background: rgba(180,50,50,0.12);  border: 1px solid rgba(180,50,50,0.4);  text-shadow: 0 0 18px rgba(200,80,80,0.5); }
+    .verdict-maybe { color: #a0c0e8; background: rgba(80,120,200,0.1);  border: 1px solid rgba(80,120,200,0.3); text-shadow: 0 0 14px rgba(100,140,220,0.4); }
+    .yn-reason {
+      font-family: 'Crimson Text', serif; font-size: 1.05rem;
+      color: #c0b0d8; line-height: 1.75; margin: 0 auto 14px; max-width: 540px;
+    }
+    .yn-card-list {
+      list-style: none; padding: 0; margin: 0 auto 12px;
+      max-width: 560px; text-align: left;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .yn-card-list li {
+      font-family: 'Crimson Text', serif; font-size: 0.98rem;
+      color: #b0a0cc; line-height: 1.6; padding: 8px 14px;
+      background: rgba(255,255,255,0.03); border-radius: 8px;
+      border-left: 2px solid rgba(212,169,67,0.3);
+    }
+    .yn-note {
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.78rem;
+      color: #c09060; margin-top: 6px;
+    }
+
     /* ─── Step 6: Kết quả — lật bài ─── */
     .result-question-banner {
       text-align: center; font-style: italic;
@@ -1865,7 +1907,68 @@ function cardReading(card, reversed, posLabel) {
   return `${ctx.intro}, <strong>${card.nameVi}</strong> ${ctx.role}. ${meaning}${reversedNote}`;
 }
 
+// ── Phân tích Yes/No từ câu hỏi + lá bài ──
+
+function detectYesNoQuestion(q) {
+  if (!q) return false;
+  const s = q.toLowerCase();
+  return /(có nên|nên không|có thể không|được không|có được không|nên hay không|có nên không|có thể|có nên đi|có nên làm|có nên mua|có nên nói|có nên bắt đầu|có nên tiếp tục|có nên dừng|có nên từ bỏ|có nên thử|có nên chấp nhận|có nên từ chối|hôm nay.*có|mình.*có nên|tôi.*có nên|\bcó\b.*\bkhông\b)/.test(s);
+}
+
+// Mỗi lá có "energy score": upright = +1, reversed = -1
+// Một số lá cụ thể có trọng số mạnh hơn
+const STRONG_YES  = new Set([0,1,3,6,7,10,17,18,19,20]); // Fool, Magician, Empress, Chariot, Wheel, Star, Sun, Moon, Judgement
+const STRONG_NO   = new Set([15,16,13,12]);               // Devil, Tower, Death, Hanged Man
+
+function cardVoteScore(card, reversed) {
+  const base  = reversed ? -1 : 1;
+  const boost = STRONG_YES.has(card.id) ? 1 : STRONG_NO.has(card.id) ? -1 : 0;
+  return base + boost;
+}
+
+function buildYesNoVerdict(cards, question) {
+  const score = cards.reduce((s, {card, reversed}) => s + cardVoteScore(card, reversed), 0);
+  const total = cards.length;
+  const reversedCount = cards.filter(c => c.reversed).length;
+
+  let verdict, verdictClass, verdictIcon;
+  if (score >= total * 0.5)        { verdict = 'CÓ';       verdictClass = 'verdict-yes';     verdictIcon = '✦'; }
+  else if (score <= -total * 0.5)  { verdict = 'KHÔNG';    verdictClass = 'verdict-no';      verdictIcon = '✦'; }
+  else                              { verdict = 'TÙY BẠN';  verdictClass = 'verdict-maybe';   verdictIcon = '✦'; }
+
+  // Giải thích gắn với câu hỏi + từng lá
+  const cardLines = cards.map(({card, reversed}, i) => {
+    const lbl = (SPREAD_LABELS[cards.length] || cards.map((_,j)=>`Lá ${j+1}`))[i];
+    const tone = reversed
+      ? `<strong>${card.nameVi}</strong> (${lbl}, ngược) — ${card.reversed}`
+      : `<strong>${card.nameVi}</strong> (${lbl}) — ${card.upright}`;
+    return `<li>${tone}</li>`;
+  }).join('');
+
+  const reasonIntro = verdict === 'CÓ'
+    ? `Năng lượng của các lá bài nghiêng về phía <em>thuận lợi</em> cho câu hỏi của bạn.`
+    : verdict === 'KHÔNG'
+    ? `Các lá bài cho thấy có những <em>cản trở hoặc cảnh báo</em> cần chú ý trước khi hành động.`
+    : `Các lá bài không nghiêng hẳn về bên nào — <em>kết quả phụ thuộc vào lựa chọn của bạn.</em>`;
+
+  return `
+    <div class="yn-verdict-wrap">
+      <div class="yn-question">"${question}"</div>
+      <div class="yn-verdict ${verdictClass}">${verdictIcon} ${verdict} ${verdictIcon}</div>
+      <p class="yn-reason">${reasonIntro}</p>
+      <ul class="yn-card-list">${cardLines}</ul>
+      ${reversedCount > 0 && verdict !== 'KHÔNG'
+        ? `<p class="yn-note">⚠ ${reversedCount} lá ngược — dù câu trả lời là ${verdict}, hãy chú ý đến những điểm cần cẩn thận trong giải thích từng lá.</p>`
+        : ''}
+    </div>`;
+}
+
 function buildOverallMsg(cards) {
+  // Nếu có câu hỏi Yes/No → ưu tiên hiển thị verdict
+  if (userQuestion && detectYesNoQuestion(userQuestion)) {
+    return buildYesNoVerdict(cards, userQuestion);
+  }
+
   const labels = SPREAD_LABELS[cards.length] || cards.map((_,i)=>`Lá ${i+1}`);
   const reversedCount = cards.filter(c => c.reversed).length;
 
