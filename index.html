@@ -807,7 +807,13 @@
     }
     .daily-flip-hint {
       font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.68rem;
-      color: var(--gold); letter-spacing: 2px; opacity: 0.8;
+      color: var(--gold); letter-spacing: 2px;
+      animation: hintPulse 2s ease-in-out infinite;
+      cursor: pointer;
+    }
+    @keyframes hintPulse {
+      0%, 100% { opacity: 0.5; text-shadow: none; letter-spacing: 2px; }
+      50%       { opacity: 1;   text-shadow: 0 0 10px var(--gold), 0 0 22px rgba(212,169,67,0.5); letter-spacing: 3.5px; }
     }
     .daily-info { flex: 1; min-width: 200px; max-width: 360px; }
     .daily-card-title { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
@@ -829,14 +835,229 @@
     }
     .affirmation-text {
       color: var(--star-white); font-style: italic;
-      font-size: 0.98rem; line-height: 1.65; text-align: center;
+      font-size: 1.13rem; line-height: 1.65; text-align: center;
+      display: inline-block; position: relative;
+    }
+    .affirmation-text.burst {
+      animation: affirmBurst 1.1s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    @keyframes affirmBurst {
+      0%   { transform: scale(1);    text-shadow: none; }
+      30%  { transform: scale(1.22); text-shadow: 0 0 18px #fff8, 0 0 36px rgba(212,169,67,0.7); }
+      60%  { transform: scale(1.14); text-shadow: 0 0 10px #fff4, 0 0 22px rgba(212,169,67,0.4); }
+      100% { transform: scale(1);    text-shadow: none; }
+    }
+    .smoke-puff {
+      position: absolute; border-radius: 50%; pointer-events: none;
+      background: radial-gradient(circle, rgba(15,8,30,0.85) 0%, rgba(40,20,60,0.4) 45%, rgba(10,5,20,0.0) 70%);
+      animation: smokeRise var(--sd,1.4s) ease-out forwards;
+      z-index: 10;
+    }
+    @keyframes smokeRise {
+      0%   { opacity: 0; transform: translate(var(--sx,0px), 0px) scale(0.2); }
+      15%  { opacity: 0.85; }
+      60%  { opacity: 0.5; }
+      100% { opacity: 0;  transform: translate(calc(var(--sx,0px)*2), -80px) scale(2.2); }
     }
 
     /* ─── Footer ─── */
     footer {
-      text-align: center; padding: 12px 30px;
+      text-align: center; padding: 12px 30px 18px;
       color: #a89bc2; font-size: 0.88rem; letter-spacing: 2px;
       position: relative; z-index: 5;
+    }
+    .all-cards-btn {
+      margin-top: 10px; padding: 7px 22px;
+      background: transparent; border: 1px solid rgba(212,169,67,0.35);
+      border-radius: 20px; color: var(--gold); font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 0.72rem; letter-spacing: 2px; cursor: pointer;
+      transition: border-color 0.3s, color 0.3s, box-shadow 0.3s;
+    }
+    .all-cards-btn:hover {
+      border-color: var(--gold); color: var(--gold-light);
+      box-shadow: 0 0 12px rgba(212,169,67,0.3);
+    }
+
+    /* ─── Modal tất cả thẻ ─── */
+    .all-cards-modal {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(10,5,20,0.88); backdrop-filter: blur(6px);
+      overflow-y: auto; padding: 24px 16px;
+    }
+    .all-cards-modal.open { display: block; }
+    .all-cards-panel {
+      max-width: 960px; margin: 0 auto; position: relative;
+      background: linear-gradient(160deg, #1a0a2e 0%, #0d0520 100%);
+      border: 1px solid rgba(212,169,67,0.25); border-radius: 18px;
+      padding: 32px 24px 40px;
+    }
+    .all-cards-title {
+      text-align: center; font-family: 'Cinzel Decorative', serif;
+      font-size: 1.1rem; color: var(--gold-light); letter-spacing: 3px;
+      margin: 0 0 14px;
+    }
+    .all-cards-desc {
+      text-align: center; font-family: 'Crimson Text', serif;
+      font-size: 1.05rem; color: #b0a0cc; line-height: 1.75;
+      max-width: 620px; margin: 0 auto 28px;
+      border-bottom: 1px solid rgba(212,169,67,0.15); padding-bottom: 22px;
+    }
+    .all-cards-close {
+      position: absolute; top: 16px; right: 20px;
+      background: transparent; border: none; color: var(--gold);
+      font-size: 1.2rem; cursor: pointer; opacity: 0.7; transition: opacity 0.2s;
+    }
+    .all-cards-close:hover { opacity: 1; }
+    .all-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 24px;
+    }
+    .card-thumb {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      cursor: default;
+    }
+    .card-thumb img {
+      width: 170px; height: 278px; object-fit: cover; border-radius: 10px;
+      border: 1px solid rgba(212,169,67,0.2);
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .card-thumb:hover img {
+      transform: translateY(-5px) scale(1.04);
+      box-shadow: 0 10px 28px rgba(212,169,67,0.4);
+    }
+    .card-thumb-name {
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.72rem;
+      color: var(--gold); text-align: center; letter-spacing: 0.5px;
+      line-height: 1.3;
+    }
+    .card-thumb-nameEn {
+      font-family: 'Crimson Text', serif; font-size: 0.65rem;
+      color: #7a6a9a; text-align: center;
+    }
+
+    /* ─── Flip 3D trong card detail ─── */
+    .cd-flip-wrap {
+      width: 110px; height: 180px; perspective: 700px; flex-shrink: 0;
+    }
+    .cd-flipper {
+      width: 100%; height: 100%; position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.85s cubic-bezier(0.4,0,0.2,1);
+      border-radius: 10px;
+    }
+    .cd-flipper.flipped { transform: rotateY(180deg); }
+    .cd-flip-back, .cd-flip-front {
+      position: absolute; inset: 0; border-radius: 10px;
+      backface-visibility: hidden; overflow: hidden;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.6);
+    }
+    .cd-flip-back {
+      border: 2px solid var(--gold-dark);
+      background: var(--purple-deep);
+    }
+    .cd-flip-back img { width: 100%; height: 100%; object-fit: cover; }
+    .cd-flip-front {
+      transform: rotateY(180deg);
+      border: 2px solid var(--gold);
+    }
+    .cd-flip-front img { width: 100%; height: 100%; object-fit: cover; }
+    @keyframes cdRevealGlow {
+      0%   { box-shadow: 0 0 0 var(--glow); }
+      40%  { box-shadow: 0 0 50px var(--gold), 0 0 100px var(--glow), 0 0 6px #fff6; }
+      100% { box-shadow: 0 6px 24px rgba(0,0,0,0.6), 0 0 20px var(--glow); }
+    }
+    .cd-flipper.flipped .cd-flip-front {
+      animation: cdRevealGlow 1.1s ease-out forwards;
+    }
+    .cd-meta-hidden { opacity: 0; transform: translateY(10px); transition: opacity 0.5s ease, transform 0.5s ease; }
+    .cd-meta-hidden.visible { opacity: 1; transform: translateY(0); }
+    .cd-content-hidden { opacity: 0; transition: opacity 0.5s ease 0.15s; }
+    .cd-content-hidden.visible { opacity: 1; }
+
+    /* ─── Modal chi tiết thẻ ─── */
+    .card-detail-modal {
+      display: none; position: fixed; inset: 0; z-index: 1100;
+      background: rgba(5,2,15,0.92); backdrop-filter: blur(8px);
+      overflow-y: auto; padding: 24px 16px;
+    }
+    .card-detail-modal.open { display: block; }
+    .card-detail-panel {
+      max-width: 680px; margin: 0 auto; position: relative;
+      background: linear-gradient(160deg, #1e0f38 0%, #0d0520 100%);
+      border: 1px solid rgba(212,169,67,0.3); border-radius: 18px;
+      padding: 36px 28px 40px; animation: fadeInUp 0.35s ease;
+    }
+    .card-detail-body { display: flex; flex-direction: column; gap: 0; }
+    .cd-header {
+      display: flex; gap: 22px; align-items: flex-start; margin-bottom: 24px;
+    }
+    .cd-img {
+      width: 110px; height: 180px; object-fit: cover; border-radius: 10px;
+      border: 1px solid rgba(212,169,67,0.35); flex-shrink: 0;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.6);
+    }
+    .cd-meta { flex: 1; }
+    .cd-numeral {
+      font-family: 'Cinzel Decorative', serif; font-size: 0.75rem;
+      color: var(--gold); letter-spacing: 3px; margin-bottom: 4px;
+    }
+    .cd-name {
+      font-family: 'Cinzel Decorative', serif; font-size: 1.25rem;
+      color: var(--gold-light); line-height: 1.3; margin-bottom: 2px;
+    }
+    .cd-name-en {
+      font-family: 'Crimson Text', serif; font-size: 0.9rem;
+      color: #7a6a9a; margin-bottom: 14px;
+    }
+    .cd-meaning {
+      font-family: 'Crimson Text', serif; font-size: 1.02rem;
+      color: #c8b8e8; line-height: 1.7;
+    }
+    .cd-divider {
+      border: none; border-top: 1px solid rgba(212,169,67,0.15);
+      margin: 20px 0;
+    }
+    .cd-section-title {
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.7rem;
+      color: var(--gold); letter-spacing: 2.5px; text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .cd-details-grid {
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .cd-detail-row {
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .cd-detail-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+    .cd-detail-label {
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.72rem;
+      color: var(--gold); font-weight: 600; white-space: nowrap; min-width: 60px;
+    }
+    .cd-detail-text {
+      font-family: 'Crimson Text', serif; font-size: 0.97rem;
+      color: #b0a0cc; line-height: 1.6;
+    }
+    .cd-advice {
+      margin-top: 18px; padding: 14px 18px;
+      background: rgba(212,169,67,0.07); border: 1px solid rgba(212,169,67,0.2);
+      border-radius: 10px;
+      font-family: 'Crimson Text', serif; font-size: 1rem;
+      color: var(--star-white); font-style: italic; line-height: 1.65;
+      text-align: center;
+    }
+    .cd-reversed-block {
+      margin-top: 14px; padding: 12px 16px;
+      background: rgba(180,30,30,0.08); border: 1px solid rgba(180,30,30,0.2);
+      border-radius: 10px;
+    }
+    .cd-reversed-label {
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.68rem;
+      color: #e06060; letter-spacing: 2px; margin-bottom: 5px;
+    }
+    .cd-reversed-text {
+      font-family: 'Crimson Text', serif; font-size: 0.97rem;
+      color: #c09090; line-height: 1.6;
     }
 
     @media (max-width: 600px) {
@@ -1098,7 +1319,29 @@
 
   </div><!-- end wizard-panel -->
 
-  <footer>✦ &nbsp; Tarot chỉ là gương chiếu nội tâm — Sức mạnh thực sự nằm trong bạn &nbsp; ✦</footer>
+  <footer>
+    ✦ &nbsp; Tarot chỉ là gương chiếu nội tâm — Sức mạnh thực sự nằm trong bạn &nbsp; ✦
+    <br>
+    <button class="all-cards-btn" onclick="openAllCards()">✦ Xem tất cả thẻ bài ✦</button>
+  </footer>
+</div>
+
+<!-- Modal xem tất cả thẻ bài -->
+<div id="allCardsModal" class="all-cards-modal" onclick="if(event.target===this)closeAllCards()">
+  <div class="all-cards-panel">
+    <button class="all-cards-close" onclick="closeAllCards()">✕</button>
+    <h2 class="all-cards-title">✦ Tất Cả Thẻ Bài Tarot ✦</h2>
+    <p class="all-cards-desc">Tarot là bộ 78 lá bài biểu tượng — không phải để đoán tương lai, mà để soi chiếu nội tâm. Mỗi lá mang một nguyên mẫu của con người: nỗi sợ, khao khát, bài học, và tiềm năng. Khi rút một lá, bạn không hỏi vũ trụ — bạn đang hỏi chính mình.</p>
+    <div class="all-cards-grid" id="allCardsGrid"></div>
+  </div>
+</div>
+
+<!-- Modal chi tiết 1 thẻ -->
+<div id="cardDetailModal" class="card-detail-modal" onclick="if(event.target===this)closeCardDetail()">
+  <div class="card-detail-panel">
+    <button class="all-cards-close" onclick="closeCardDetail()">✕</button>
+    <div class="card-detail-body" id="cardDetailBody"></div>
+  </div>
 </div>
 
 <script src="cards.js"></script>
@@ -1890,8 +2133,144 @@ function renderDailyCard() {
       const info = document.getElementById('dailyInfo');
       info.style.display = 'block';
       info.style.animation = 'fadeInUp 0.6s ease';
+      triggerAffirmationBurst();
     }, 600);
   });
+}
+
+function triggerAffirmationBurst() {
+  const el = document.querySelector('.affirmation-text');
+  if (!el) return;
+  el.classList.remove('burst');
+  void el.offsetWidth; // reflow để reset animation
+  el.classList.add('burst');
+  spawnAffirmationSmoke(el);
+}
+
+function spawnAffirmationSmoke(el) {
+  // Dùng khung .daily-affirmation làm container để khói bao phủ toàn bộ khung
+  const box = el.closest('.daily-affirmation') || el.parentElement;
+  box.style.position = 'relative';
+  box.style.overflow = 'visible';
+  const w = box.offsetWidth;
+  const h = box.offsetHeight;
+  const count = 28;
+  for (let i = 0; i < count; i++) {
+    const puff = document.createElement('div');
+    puff.className = 'smoke-puff';
+    const size = 40 + Math.random() * 70;
+    // Xuất phát rải khắp khung, không chỉ tâm chữ
+    const ox = Math.random() * w;
+    const oy = Math.random() * h;
+    const sx = (Math.random() - 0.5) * 120;
+    const delay = Math.random() * 0.5;
+    const dur = 1.2 + Math.random() * 0.9;
+    puff.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${ox - size/2}px;
+      top:${oy - size/2}px;
+      --sx:${sx}px; --sd:${dur}s;
+      animation-delay:${delay}s;
+    `;
+    box.appendChild(puff);
+    setTimeout(() => puff.remove(), (dur + delay + 0.15) * 1000);
+  }
+}
+
+function openAllCards() {
+  const modal = document.getElementById('allCardsModal');
+  const grid  = document.getElementById('allCardsGrid');
+  if (!grid.hasChildNodes()) {
+    CARDS.forEach(card => {
+      const imgSrc = CARD_IMAGES[card.id] || 'cards/mat-sau.jpg';
+      const thumb = document.createElement('div');
+      thumb.className = 'card-thumb';
+      thumb.style.cursor = 'pointer';
+      thumb.innerHTML = `
+        <img src="${imgSrc}" alt="${card.nameVi}" loading="lazy">
+        <span class="card-thumb-name">${card.numeral} · ${card.nameVi}</span>
+        <span class="card-thumb-nameEn">${card.name}</span>
+      `;
+      thumb.addEventListener('click', () => openCardDetail(card));
+      grid.appendChild(thumb);
+    });
+  }
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeAllCards() {
+  document.getElementById('allCardsModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function openCardDetail(card) {
+  const imgSrc = CARD_IMAGES[card.id] || 'cards/mat-sau.jpg';
+  const backSrc = 'cards/mat-sau.jpg';
+  const d = card.details || {};
+  const rows = [
+    { icon: '💛', label: 'Tình yêu',   text: d.love },
+    { icon: '💼', label: 'Sự nghiệp',  text: d.career },
+    { icon: '🌿', label: 'Sức khỏe',   text: d.health },
+    { icon: '✨', label: 'Tâm linh',   text: d.spirit },
+  ].filter(r => r.text);
+
+  document.getElementById('cardDetailBody').innerHTML = `
+    <div class="cd-header">
+      <div class="cd-flip-wrap">
+        <div class="cd-flipper" id="cdFlipper">
+          <div class="cd-flip-back"><img src="${backSrc}" alt="back"></div>
+          <div class="cd-flip-front"><img src="${imgSrc}" alt="${card.nameVi}"></div>
+        </div>
+      </div>
+      <div class="cd-meta cd-meta-hidden" id="cdMeta">
+        <div class="cd-numeral">${card.numeral}</div>
+        <div class="cd-name">${card.nameVi}</div>
+        <div class="cd-name-en">${card.name}</div>
+        <p class="cd-meaning">${card.upright}</p>
+      </div>
+    </div>
+    <div class="cd-content-hidden" id="cdContent">
+      ${rows.length ? `
+        <hr class="cd-divider">
+        <div class="cd-section-title">✦ Chi tiết theo chủ đề</div>
+        <div class="cd-details-grid">
+          ${rows.map(r => `
+            <div class="cd-detail-row">
+              <span class="cd-detail-icon">${r.icon}</span>
+              <span class="cd-detail-label">${r.label}</span>
+              <span class="cd-detail-text">${r.text}</span>
+            </div>`).join('')}
+        </div>` : ''}
+      ${d.advice ? `<div class="cd-advice">"${d.advice}"</div>` : ''}
+      <hr class="cd-divider">
+      <div class="cd-reversed-block">
+        <div class="cd-reversed-label">↓ KHI LÁ NGƯỢC</div>
+        <div class="cd-reversed-text">${card.reversed}</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('cardDetailModal').classList.add('open');
+
+  // Lật sau 0.55s (đủ để modal hiện + mắt kịp nhìn vào lưng bài)
+  setTimeout(() => {
+    const flipper = document.getElementById('cdFlipper');
+    flipper.classList.add('flipped');
+    spawnParticles(flipper);
+
+    // Tên + thông điệp hiện ra sau khi lật xong (~0.85s)
+    setTimeout(() => {
+      document.getElementById('cdMeta').classList.add('visible');
+      setTimeout(() => {
+        document.getElementById('cdContent').classList.add('visible');
+      }, 200);
+    }, 700);
+  }, 550);
+}
+
+function closeCardDetail() {
+  document.getElementById('cardDetailModal').classList.remove('open');
 }
 
 document.addEventListener('DOMContentLoaded', renderDailyCard);
