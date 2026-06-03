@@ -1482,10 +1482,13 @@ function goToStep(n) {
     document.getElementById('screen3Title').textContent = isTheme
       ? '✦ CHỌN CHỦ ĐỀ BÓI ✦'
       : '✦ NHẬP CÂU HỎI CỦA BẠN ✦';
-    // Disable nút nếu đang ở tab câu hỏi và chưa đủ ký tự
-    if (!isTheme) {
+    const btn3 = document.getElementById('step3Next');
+    if (isTheme) {
+      // Tab chủ đề: chỉ enable khi đã chọn câu hỏi (userQuestion có giá trị)
+      btn3.disabled = !userQuestion;
+    } else {
       const len = document.getElementById('questionInput').value.length;
-      document.getElementById('step3Next').disabled = len < 10;
+      btn3.disabled = len < 10;
       const hint = document.getElementById('charHint');
       hint.textContent = len < 10 ? `(cần thêm ${10 - len} ký tự nữa)` : '';
     }
@@ -1629,6 +1632,7 @@ function selectThemeImg(el) {
       userQuestion = q;
       document.getElementById('themeQuestionText').textContent = `"${q}"`;
       document.getElementById('themeQuestionPreview').style.display = 'block';
+      document.getElementById('step3Next').disabled = false;
     });
     chips.appendChild(chip);
   });
