@@ -765,6 +765,65 @@
     /* ─── Particle ─── */
     .particle { position: fixed; pointer-events: none; z-index: 999; border-radius: 50%; }
 
+    /* ─── Rare Card Effects ─── */
+    @keyframes rareGlow {
+      0%   { box-shadow: 0 0 0px transparent; }
+      25%  { box-shadow: 0 0 40px #f0d080, 0 0 80px rgba(240,208,128,0.6), 0 0 120px rgba(212,169,67,0.3); }
+      50%  { box-shadow: 0 0 60px #fff8a0, 0 0 100px rgba(240,208,128,0.8), 0 0 160px rgba(212,169,67,0.5); }
+      75%  { box-shadow: 0 0 40px #f0d080, 0 0 80px rgba(240,208,128,0.6), 0 0 120px rgba(212,169,67,0.3); }
+      100% { box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 28px rgba(212,169,67,0.5); }
+    }
+    @keyframes rarePulse {
+      0%,100% { border-color: var(--gold); }
+      50%     { border-color: #fff8a0; }
+    }
+    .multi-flip-inner.rare-glow .multi-flip-front {
+      animation: rareGlow 1.8s ease-out forwards, rarePulse 0.6s ease-in-out 3;
+    }
+    @keyframes rareShake {
+      0%,100% { transform: rotateY(180deg) translateX(0); }
+      20%  { transform: rotateY(180deg) translateX(-4px) rotate(-1deg); }
+      40%  { transform: rotateY(180deg) translateX(4px) rotate(1deg); }
+      60%  { transform: rotateY(180deg) translateX(-3px); }
+      80%  { transform: rotateY(180deg) translateX(3px); }
+    }
+    .multi-flip-inner.rare-glow.flipped .multi-flip-front {
+      animation: rareGlow 1.8s ease-out forwards, rarePulse 0.6s ease-in-out 3, rareShake 0.5s ease 0.1s;
+    }
+
+    /* Toast thông điệp lá hiếm */
+    .rare-toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(30px);
+      z-index: 9999; pointer-events: none;
+      background: linear-gradient(135deg, rgba(10,6,25,0.97), rgba(20,10,40,0.97));
+      border: 1px solid rgba(240,208,128,0.7);
+      border-radius: 18px; padding: 18px 28px; max-width: 420px; width: 90%;
+      box-shadow: 0 0 40px rgba(212,169,67,0.5), 0 8px 40px rgba(0,0,0,0.8);
+      text-align: center; opacity: 0;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .rare-toast.visible {
+      opacity: 1; transform: translateX(-50%) translateY(0);
+    }
+    .rare-toast-icon { font-size: 1.6rem; margin-bottom: 6px; display: block; }
+    .rare-toast-msg {
+      font-family: 'Cinzel Decorative', serif; font-size: 0.72rem;
+      color: #f0d080; letter-spacing: 2px; line-height: 1.6;
+      text-shadow: 0 0 12px rgba(240,208,128,0.5);
+    }
+    .rare-toast-name {
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.82rem;
+      color: var(--star-white); margin-top: 6px; font-style: italic; opacity: 0.85;
+    }
+
+    /* Overlay sáng toàn màn hình khi rút lá hiếm */
+    .rare-flash-overlay {
+      position: fixed; inset: 0; z-index: 8000; pointer-events: none;
+      background: radial-gradient(ellipse at center, rgba(240,208,128,0.22) 0%, rgba(212,169,67,0.08) 50%, transparent 70%);
+      opacity: 0; transition: opacity 0.3s ease;
+    }
+    .rare-flash-overlay.flash { opacity: 1; }
+
     /* ─── Daily card (collapsible sidebar style) ─── */
     .daily-bar {
       max-width: 720px; margin: 0 auto 12px;
@@ -1353,6 +1412,16 @@
     <p class="all-cards-desc">Tarot là bộ 78 lá bài biểu tượng — không phải để đoán tương lai, mà để soi chiếu nội tâm. Mỗi lá mang một nguyên mẫu của con người: nỗi sợ, khao khát, bài học, và tiềm năng. Khi rút một lá, bạn không hỏi vũ trụ — bạn đang hỏi chính mình.</p>
     <div class="all-cards-grid" id="allCardsGrid"></div>
   </div>
+</div>
+
+<!-- Rare card flash overlay -->
+<div id="rareFlashOverlay" class="rare-flash-overlay"></div>
+
+<!-- Rare card toast -->
+<div id="rareToast" class="rare-toast">
+  <span class="rare-toast-icon" id="rareToastIcon">✨</span>
+  <div class="rare-toast-msg" id="rareToastMsg"></div>
+  <div class="rare-toast-name" id="rareToastName"></div>
 </div>
 
 <!-- Modal chi tiết 1 thẻ -->
@@ -1985,7 +2054,13 @@ function showResultPhase() {
         const flipper = wrap.querySelector('.multi-flip-card');
         if (!inner.classList.contains('flipped')) {
           inner.classList.add('flipped');
-          spawnParticles(flipper);
+          const cardData = selectedCards[i];
+          // Lá hiếm xuôi → hiệu ứng đặc biệt (delay nhỏ để flip animation bắt đầu trước)
+          if (cardData && isRareCard(cardData.card) && !cardData.reversed) {
+            setTimeout(() => triggerRareCardEffect(cardData.card, flipper), 400);
+          } else {
+            spawnParticles(flipper);
+          }
         }
         // Sau lá cuối cùng, hiện synthesis
         if (i === total - 1) {
@@ -2391,6 +2466,126 @@ function spawnParticles(el) {
       { transform:`translate(calc(-50% + ${Math.cos(angle)*dist}px),calc(-50% + ${Math.sin(angle)*dist}px)) scale(0)`, opacity:0 }
     ], { duration: 700+Math.random()*400, easing:'ease-out' }).onfinish = () => p.remove();
   }
+}
+
+// ══════════════════════════════════════════════════════
+//  Rare Card System
+// ══════════════════════════════════════════════════════
+
+// Lá hiếm: id → { icon, msg } (chỉ khi xuôi)
+const RARE_CARDS = {
+  19: { icon: '☀️', msg: 'Hôm nay vũ trụ mỉm cười với bạn — The Sun chiếu sáng con đường của bạn!' },
+  17: { icon: '⭐', msg: 'Hy vọng đang chờ bạn phía trước — The Star vừa xuất hiện!' },
+  21: { icon: '🌍', msg: 'Vòng tròn hoàn chỉnh — The World mang đến sự viên mãn và thành tựu!' },
+  10: { icon: '🎡', msg: 'Vận may đang xoay chiều có lợi cho bạn — Wheel of Fortune đã chọn bạn!' },
+   0: { icon: '🃏', msg: 'Một khởi đầu mới đầy tiềm năng — The Fool mời bạn bước vào cuộc phiêu lưu!' },
+   1: { icon: '🪄', msg: 'Sức mạnh trong tay bạn — The Magician nhắc bạn rằng bạn có đủ mọi thứ cần thiết!' },
+   3: { icon: '🌸', msg: 'Sự sung túc đang nảy nở — The Empress mang đến tình yêu và phồn thịnh!' },
+  20: { icon: '🎺', msg: 'Giây phút thức tỉnh — Judgement gọi bạn đến với phiên bản tốt nhất của mình!' },
+};
+
+function spawnFireworks(x, y, count = 40) {
+  const colors = ['#f0d080','#ffffff','#ffd700','#ffe066','#fff8a0','#a86ccc','#7ec8ff','#ff9a9a'];
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const sz = 2 + Math.random() * 7;
+    const shape = Math.random() < 0.3 ? '0%' : '50%';
+    p.style.cssText = `width:${sz}px;height:${sz}px;background:${colors[Math.floor(Math.random()*colors.length)]};left:${x}px;top:${y}px;border-radius:${shape};`;
+    document.body.appendChild(p);
+    const angle = Math.random() * Math.PI * 2;
+    const dist  = 80 + Math.random() * 180;
+    const delay = Math.random() * 200;
+    p.animate([
+      { transform:'translate(-50%,-50%) scale(1)', opacity:1, offset:0 },
+      { transform:`translate(calc(-50% + ${Math.cos(angle)*dist*0.6}px),calc(-50% + ${Math.sin(angle)*dist*0.5}px)) scale(1.2)`, opacity:1, offset:0.3 },
+      { transform:`translate(calc(-50% + ${Math.cos(angle)*dist}px),calc(-50% + ${Math.sin(angle)*dist}px)) scale(0)`, opacity:0, offset:1 }
+    ], { duration: 900 + Math.random()*500, delay, easing:'ease-out' }).onfinish = () => p.remove();
+  }
+  // Thêm một vài tia lớn toả ra
+  for (let i = 0; i < 8; i++) {
+    const streak = document.createElement('div');
+    streak.style.cssText = `position:fixed;pointer-events:none;z-index:999;border-radius:2px;width:3px;height:${12+Math.random()*18}px;background:linear-gradient(180deg,#fff8a0,transparent);left:${x}px;top:${y}px;transform-origin:top center;`;
+    document.body.appendChild(streak);
+    const angle = (i / 8) * Math.PI * 2;
+    const dist  = 60 + Math.random() * 120;
+    streak.animate([
+      { transform:`translate(-50%,-50%) rotate(${angle}rad) scaleY(1)`, opacity:1 },
+      { transform:`translate(calc(-50% + ${Math.cos(angle)*dist}px),calc(-50% + ${Math.sin(angle)*dist}px)) rotate(${angle}rad) scaleY(0)`, opacity:0 }
+    ], { duration: 600 + Math.random()*300, easing:'ease-out' }).onfinish = () => streak.remove();
+  }
+}
+
+function triggerRareCardEffect(card, flipperEl) {
+  const info = RARE_CARDS[card.id];
+  if (!info) return;
+
+  // Flash overlay
+  const overlay = document.getElementById('rareFlashOverlay');
+  overlay.classList.add('flash');
+  setTimeout(() => overlay.classList.remove('flash'), 600);
+
+  // Pháo hoa từ vị trí lá bài — 2 đợt
+  const rect = flipperEl.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  spawnFireworks(cx, cy, 45);
+  setTimeout(() => spawnFireworks(cx + (Math.random()-0.5)*80, cy - 40, 30), 300);
+  setTimeout(() => spawnFireworks(cx + (Math.random()-0.5)*60, cy + 20, 25), 550);
+
+  // Viền lá sáng lên
+  const inner = flipperEl.querySelector('.multi-flip-inner');
+  if (inner) inner.classList.add('rare-glow');
+
+  // Hiệu ứng âm thanh (Web Audio API — tạo âm "leng keng")
+  playRareSound();
+
+  // Toast thông điệp
+  const toast    = document.getElementById('rareToast');
+  const toastMsg = document.getElementById('rareToastMsg');
+  const toastIcon= document.getElementById('rareToastIcon');
+  const toastName= document.getElementById('rareToastName');
+  toastIcon.textContent = info.icon;
+  toastMsg.textContent  = info.msg;
+  toastName.textContent = `✦ ${card.numeral ? card.numeral + ' · ' : ''}${card.name} · ${card.nameVi} ✦`;
+  toast.classList.add('visible');
+  setTimeout(() => toast.classList.remove('visible'), 5500);
+}
+
+function playRareSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5]; // C5 E5 G5 C6 E6
+    notes.forEach((freq, i) => {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const t = ctx.currentTime + i * 0.12;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.18, t + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+      osc.start(t);
+      osc.stop(t + 0.6);
+    });
+    // Thêm 1 glitter shimmer ở cuối
+    setTimeout(() => {
+      const osc2  = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.connect(gain2); gain2.connect(ctx.destination);
+      osc2.type = 'triangle';
+      osc2.frequency.value = 2093; // C7
+      gain2.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+      osc2.start(ctx.currentTime); osc2.stop(ctx.currentTime + 0.45);
+    }, notes.length * 120);
+  } catch(e) { /* silent — AudioContext not available */ }
+}
+
+function isRareCard(card) {
+  return !!(RARE_CARDS[card.id]);
 }
 
 // ══════════════════════════════════════════════════════
