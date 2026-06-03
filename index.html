@@ -463,50 +463,31 @@
     .wizard-panel.result-mode #screen4::before {
       display: none;
     }
+    /* ─── Shuffle interactive ─── */
     .shuffle-area {
-      display: flex; flex-direction: column; align-items: center; gap: 24px;
+      display: flex; flex-direction: column; align-items: center; gap: 18px;
     }
-    .shuffle-card-anim {
-      position: relative; width: 110px; height: 170px;
-    }
-    .shuffle-card-anim .sc {
-      position: absolute; width: 88px; height: 140px;
-      border-radius: 10px; overflow: hidden;
-      box-shadow: 0 6px 24px rgba(0,0,0,0.6);
-      border: 1px solid var(--gold-dark);
-      top: 50%; left: 50%; transform: translate(-50%,-50%);
-    }
-    .shuffle-card-anim .sc img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .shuffle-card-anim .sc:nth-child(1) { animation: sh1 1.4s ease-in-out infinite; }
-    .shuffle-card-anim .sc:nth-child(2) { animation: sh2 1.4s ease-in-out infinite 0.2s; }
-    .shuffle-card-anim .sc:nth-child(3) { animation: sh3 1.4s ease-in-out infinite 0.4s; }
-    @keyframes sh1 {
-      0%,100% { transform: translate(-50%,-50%) rotate(-14deg) translateX(-22px); }
-      50%      { transform: translate(-50%,-50%) rotate(4deg) translateX(16px); }
-    }
-    @keyframes sh2 {
-      0%,100% { transform: translate(-50%,-50%) rotate(0deg); }
-      50%      { transform: translate(-50%,-50%) rotate(-6deg) translateX(-8px); }
-    }
-    @keyframes sh3 {
-      0%,100% { transform: translate(-50%,-50%) rotate(14deg) translateX(22px); }
-      50%      { transform: translate(-50%,-50%) rotate(-3deg) translateX(-12px); }
+    #shuffleCanvas {
+      border-radius: 16px; cursor: none; touch-action: none;
+      display: block;
     }
     .shuffle-label {
       font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.88rem;
       color: var(--gold-light); letter-spacing: 2px; text-align: center;
+      min-height: 1.4em;
     }
     .shuffle-bar-wrap {
-      width: 240px; height: 5px;
-      background: rgba(255,255,255,0.08); border-radius: 5px; overflow: hidden;
+      width: 260px; height: 6px;
+      background: rgba(255,255,255,0.08); border-radius: 6px; overflow: hidden;
     }
     #shuffleBar {
       height: 100%; width: 0%;
       background: linear-gradient(90deg, var(--gold-dark), var(--gold));
-      border-radius: 5px; transition: width 0.55s ease;
+      border-radius: 6px; transition: width 0.35s ease;
     }
-    .shuffle-steps-text {
-      font-size: 0.88rem; color: #a0a0a0; letter-spacing: 1px;
+    .shuffle-hint {
+      font-size: 0.78rem; color: #7a6a9a; letter-spacing: 1px; text-align: center;
+      animation: hintPulse 2.2s ease-in-out infinite;
     }
 
     /* ─── Step 5: Fan chọn bài ─── */
@@ -1313,16 +1294,12 @@
     <div class="step-screen" id="screen4">
       <!-- Phase xáo: hiện trước -->
       <div id="shufflePhase">
-        <div class="screen-title">✦ ĐANG XÁO BÀI ✦</div>
+        <div class="screen-title">✦ XÁO BÀI ✦</div>
         <div class="shuffle-area">
-          <div class="shuffle-card-anim">
-            <div class="sc"><img src="cards/mat-sau.jpg" alt=""></div>
-            <div class="sc"><img src="cards/mat-sau.jpg" alt=""></div>
-            <div class="sc"><img src="cards/mat-sau.jpg" alt=""></div>
-          </div>
-          <div class="shuffle-label" id="shuffleLabel">Tập trung năng lượng vào bộ bài...</div>
+          <canvas id="shuffleCanvas" width="320" height="240"></canvas>
+          <div class="shuffle-label" id="shuffleLabel">Di chuyển chuột qua bộ bài để xáo</div>
           <div class="shuffle-bar-wrap"><div id="shuffleBar"></div></div>
-          <div class="shuffle-steps-text"><span id="shuffleProgress">1/6</span> bước</div>
+          <div class="shuffle-hint">← di chuyển qua lại →</div>
         </div>
       </div>
       <!-- Phase fan: ẩn, tự hiện sau khi xáo xong -->
@@ -1346,10 +1323,10 @@
           <div class="result-question-banner" id="resultQuestionBanner"></div>
           <div class="synthesis-panel" id="synthPanel">
             <div class="synthesis-header">✦ THÔNG ĐIỆP TỔNG THỂ ✦</div>
-            <div class="synthesis-chips" id="synthChips"></div>
             <div class="synthesis-overall" id="synthOverall"></div>
             <div class="synthesis-divider"></div>
             <div class="synthesis-header" style="margin-top:24px">✦ CHI TIẾT TỪNG LÁ ✦</div>
+            <div class="synthesis-chips" id="synthChips"></div>
             <div class="detail-section" id="detailSection"></div>
             <div class="synthesis-actions">
               <button class="btn-primary" onclick="resetAll()">✦ BÓI LẠI ✦</button>
@@ -1678,47 +1655,189 @@ function resetThemeSelection() {
 // ══════════════════════════════════════════════════════
 //  Step 4 — Xáo bài
 // ══════════════════════════════════════════════════════
-const SHUFFLE_STEPS = [
-  'Tập trung năng lượng vào bộ bài...',
-  'Xáo bài lần một...',
-  'Đảo ngược năng lượng...',
-  'Xáo bài lần hai...',
-  'Cân bằng lại các lá bài...',
-  'Bộ bài đã sẵn sàng!',
-];
+
+// ── Interactive Shuffle Canvas ──
+let shuffleRAF = null;
+const SWIPE_NEEDED = 4; // số lần vuốt để hoàn thành
 
 function startShuffle() {
-  const label = document.getElementById('shuffleLabel');
-  const bar   = document.getElementById('shuffleBar');
-  const prog  = document.getElementById('shuffleProgress');
-
-  // Reset về phase xáo
   document.getElementById('shufflePhase').style.display = 'block';
   document.getElementById('fanPhase').style.display = 'none';
-
-  bar.style.width   = '0%';
-  label.textContent = SHUFFLE_STEPS[0];
-  prog.textContent  = '1/' + SHUFFLE_STEPS.length;
+  document.getElementById('shuffleBar').style.width = '0%';
+  document.getElementById('shuffleLabel').textContent = 'Di chuyển tay qua bộ bài để xáo';
 
   if (chosenMethod === 'question') {
     userQuestion = document.getElementById('questionInput').value.trim();
   }
 
-  let step = 0;
-  const iv = setInterval(() => {
-    step++;
-    if (step < SHUFFLE_STEPS.length) {
-      label.textContent = SHUFFLE_STEPS[step];
-      prog.textContent  = (step+1) + '/' + SHUFFLE_STEPS.length;
-      bar.style.width   = ((step+1) / SHUFFLE_STEPS.length * 100) + '%';
-    } else {
-      clearInterval(iv);
-      label.textContent = '✦ Bộ bài đã sẵn sàng ✦';
-      bar.style.width   = '100%';
-      // Tự động chuyển sang fan sau 600ms
-      setTimeout(showFanPhase, 600);
+  if (shuffleRAF) { cancelAnimationFrame(shuffleRAF); shuffleRAF = null; }
+  initShuffleCanvas();
+}
+
+function initShuffleCanvas() {
+  const canvas = document.getElementById('shuffleCanvas');
+  const ctx    = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H / 2 + 10;
+  const CW = 52, CH = 84;
+  const TOTAL = 14;
+  const SWIPE_NEEDED = 4;
+
+  const LABELS = [
+    'Di chuyển tay qua bộ bài để xáo',
+    'Tốt lắm! Tiếp tục...',
+    'Năng lượng đang hoà quyện...',
+    'Gần xong rồi...',
+    '✦ Bộ bài đã sẵn sàng ✦',
+  ];
+
+  // Load ảnh mặt sau
+  const backImg = new Image();
+  backImg.src = 'cards/mat-sau.jpg';
+
+  // Stack chồng lên nhau: lá dưới hơi lệch nhẹ, lá trên thẳng hơn
+  function makeStack() {
+    return Array.from({length: TOTAL}, (_, i) => {
+      const frac = i / (TOTAL - 1); // 0..1, lá i=0 là đáy
+      return {
+        x: cx + (Math.random() - 0.5) * 2,
+        y: cy + (TOTAL - 1 - i) * 0.8, // lá trên nhích lên nhẹ
+        angle: (Math.random() - 0.5) * 0.06,
+        tx: cx, ty: cy, ta: 0,
+        vx: 0, vy: 0, va: 0,
+        z: i,
+      };
+    });
+  }
+
+  let cards = makeStack();
+
+  let swipeCount = 0;
+  let lastX = 0, dirChanges = 0, prevDir = 0;
+  let trail = [];
+
+  function getPos(e) {
+    const r = canvas.getBoundingClientRect();
+    if (e.touches) return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top };
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+
+  function onMove(e) {
+    if (swipeCount >= SWIPE_NEEDED) return;
+    e.preventDefault();
+    const p = getPos(e);
+    const dx = p.x - lastX;
+    lastX = p.x;
+    if (Math.abs(dx) < 1) return;
+
+    trail.push({ x: p.x, y: p.y, age: 0 });
+
+    // Khuấy: lá trên cùng bị đẩy mạnh hơn, lá dưới ít hơn
+    cards.forEach((c, i) => {
+      const depth = i / TOTAL; // 0=đáy, 1=trên cùng
+      const force = dx * 0.018 * (0.3 + depth * 0.7);
+      c.va += force + (Math.random() - 0.5) * 0.01;
+      c.vx += dx * 0.06 * depth;
+      c.vy += (Math.random() - 0.5) * 1.2 * depth;
+    });
+
+    // Đếm đổi chiều
+    const dir = dx > 2 ? 1 : dx < -2 ? -1 : 0;
+    if (dir !== 0 && dir !== prevDir) {
+      dirChanges++;
+      prevDir = dir;
+      if (dirChanges % 2 === 0 && swipeCount < SWIPE_NEEDED) {
+        swipeCount++;
+        const pct = (swipeCount / SWIPE_NEEDED) * 100;
+        document.getElementById('shuffleBar').style.width = pct + '%';
+        document.getElementById('shuffleLabel').textContent = LABELS[Math.min(swipeCount, LABELS.length - 1)];
+
+        // Tung bài lên rồi rơi xuống xen kẽ (riffle effect)
+        cards.forEach((c, i) => {
+          const side = i % 2 === 0 ? -1 : 1;
+          c.vx += side * (4 + Math.random() * 8);
+          c.vy -= (2 + Math.random() * 6);
+          c.va += side * (0.05 + Math.random() * 0.15);
+        });
+
+        if (swipeCount >= SWIPE_NEEDED) {
+          setTimeout(() => {
+            if (shuffleRAF) { cancelAnimationFrame(shuffleRAF); shuffleRAF = null; }
+            canvas.removeEventListener('mousemove', onMove);
+            canvas.removeEventListener('touchmove', onMove);
+            showFanPhase();
+          }, 800);
+        }
+      }
     }
-  }, 700);
+  }
+
+  canvas.addEventListener('mousemove', onMove, { passive: false });
+  canvas.addEventListener('touchmove',  onMove, { passive: false });
+
+  function drawCard(c) {
+    ctx.save();
+    ctx.translate(c.x, c.y);
+    ctx.rotate(c.angle);
+    ctx.shadowColor = 'rgba(212,169,67,0.35)';
+    ctx.shadowBlur  = 10;
+    if (backImg.complete && backImg.naturalWidth) {
+      // Bo góc
+      const r = 5;
+      ctx.beginPath();
+      ctx.moveTo(-CW/2 + r, -CH/2);
+      ctx.lineTo( CW/2 - r, -CH/2); ctx.arcTo( CW/2, -CH/2,  CW/2, -CH/2 + r, r);
+      ctx.lineTo( CW/2,  CH/2 - r); ctx.arcTo( CW/2,  CH/2,  CW/2 - r,  CH/2, r);
+      ctx.lineTo(-CW/2 + r,  CH/2); ctx.arcTo(-CW/2,  CH/2, -CW/2,  CH/2 - r, r);
+      ctx.lineTo(-CW/2, -CH/2 + r); ctx.arcTo(-CW/2, -CH/2, -CW/2 + r, -CH/2, r);
+      ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(backImg, -CW/2, -CH/2, CW, CH);
+    } else {
+      ctx.fillStyle = '#1a0a2e';
+      ctx.fillRect(-CW/2, -CH/2, CW, CH);
+    }
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(212,169,67,0.5)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(-CW/2, -CH/2, CW, CH);
+    ctx.restore();
+  }
+
+  function tick() {
+    ctx.clearRect(0, 0, W, H);
+
+    trail = trail.filter(t => { t.age++; return t.age < 18; });
+    trail.forEach(t => {
+      const a = Math.max(0, 1 - t.age / 18);
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, 5 * a, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(212,169,67,${a * 0.5})`;
+      ctx.fill();
+    });
+
+    cards.forEach(c => {
+      // Spring về stack gốc
+      c.va += (c.ta - c.angle) * 0.04;
+      c.vx += (c.tx - c.x)    * 0.03;
+      c.vy += (c.ty - c.y)    * 0.03;
+      c.va *= 0.84; c.vx *= 0.80; c.vy *= 0.80;
+      c.x += c.vx; c.y += c.vy; c.angle += c.va;
+    });
+
+    [...cards].sort((a, b) => a.z - b.z).forEach(drawCard);
+
+    // Hào quang trung tâm
+    const grd = ctx.createRadialGradient(cx, cy, 5, cx, cy, 75);
+    grd.addColorStop(0, 'rgba(212,169,67,0.07)');
+    grd.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+
+    shuffleRAF = requestAnimationFrame(tick);
+  }
+
+  tick();
 }
 
 function showFanPhase() {
@@ -1963,6 +2082,23 @@ function buildYesNoVerdict(cards, question) {
     </div>`;
 }
 
+function detectTopic(q) {
+  if (!q) return null;
+  const ql = q.toLowerCase();
+  if (/yêu|tình|người ấy|bạn trai|bạn gái|hôn nhân|chia tay|gắn bó|cảm xúc|mối quan hệ|anh ấy|cô ấy/.test(ql)) return 'love';
+  if (/công việc|nghề|sự nghiệp|công ty|tiền|thu nhập|tài chính|kinh doanh|dự án|thăng chức|chuyển việc/.test(ql)) return 'career';
+  if (/sức khỏe|bệnh|cơ thể|mệt|ngủ|ăn|điều trị|khỏe/.test(ql)) return 'health';
+  if (/tâm linh|bản thân|nội tâm|ý nghĩa|mục đích|tinh thần|trưởng thành|định hướng/.test(ql)) return 'spirit';
+  return null;
+}
+
+function cardDetailByTopic(card, topic) {
+  if (!topic || !card.details?.[topic]) return null;
+  const raw = card.details[topic];
+  // Tách phần Xuôi / Ngược trong chuỗi details nếu có format "Xuôi: ... Ngược: ..."
+  return raw;
+}
+
 function buildOverallMsg(cards) {
   // Nếu có câu hỏi Yes/No → ưu tiên hiển thị verdict
   if (userQuestion && detectYesNoQuestion(userQuestion)) {
@@ -1971,52 +2107,161 @@ function buildOverallMsg(cards) {
 
   const labels = SPREAD_LABELS[cards.length] || cards.map((_,i)=>`Lá ${i+1}`);
   const reversedCount = cards.filter(c => c.reversed).length;
+  const hasQ = userQuestion && userQuestion.trim().length > 0;
+  const q = hasQ ? userQuestion.trim() : null;
+  const topic = detectTopic(q);
+  const topicLabel = { love: 'Tình yêu', career: 'Sự nghiệp', health: 'Sức khỏe', spirit: 'Tâm linh' }[topic] || null;
 
+  // ── 1 lá ──
   if (cards.length === 1) {
     const { card, reversed } = cards[0];
     const meaning = reversed ? card.reversed : card.upright;
-    const tone = reversed
-      ? `Lá bài xuất hiện ở chiều ngược, cho thấy năng lượng của <strong>${card.nameVi}</strong> đang bị chặn lại hoặc chưa được biểu hiện đúng hướng. Đây không phải điều xấu — mà là một tín hiệu để bạn chú ý và điều chỉnh.`
-      : `<strong>${card.nameVi}</strong> là thông điệp vũ trụ gửi đến bạn lúc này.`;
+
+    let opening;
+    if (q) {
+      opening = reversed
+        ? `Bạn hỏi: <em>"${q}"</em><br><br><strong>${card.nameVi}</strong> xuất hiện ngược — thông điệp không phải là "không", mà là: có thứ gì đó đang cản bạn mà bạn chưa nhìn thấy rõ. Hãy xem lại câu hỏi từ một góc độ khác.`
+        : `Bạn hỏi: <em>"${q}"</em><br><br><strong>${card.nameVi}</strong> là câu trả lời của lá bài. Ý nghĩa của lá này nói thẳng vào điều bạn đang tìm kiếm:`;
+    } else {
+      opening = reversed
+        ? `<strong>${card.nameVi}</strong> xuất hiện ngược — năng lượng của lá này đang bị chặn lại hoặc quay vào bên trong. Đây là tín hiệu để bạn dừng lại và chú ý:`
+        : `<strong>${card.nameVi}</strong> là thông điệp dành cho bạn lúc này:`;
+    }
+
+    const reversedNote = reversed
+      ? `<br><br><em>Lá ngược không có nghĩa là xấu — nó cho thấy năng lượng đang bị chặn, chưa được biểu hiện đúng hướng, hoặc bạn đang cưỡng lại điều gì đó.</em>`
+      : '';
+
+    const topicDetail = topic && card.details?.[topic]
+      ? `<br><br><strong>${topicLabel}:</strong> ${card.details[topic]}`
+      : '';
+
     const adviceText = card.details?.advice
       ? `<br><br><strong>Lời khuyên:</strong> ${card.details.advice}`
-      : `<br><br><strong>Lời khuyên:</strong> Hãy để thông điệp này ngấm dần — đôi khi câu trả lời không đến ngay lập tức, mà hiện ra khi bạn sẵn sàng nhìn nhận nó.`;
-    return `${tone}<br><br>${meaning}${reversed ? '<br><br><em>Lá ngược thường phản ánh điều đang diễn ra bên trong — nỗi sợ chưa được thừa nhận, năng lượng bị kìm nén, hoặc bài học chưa được tiêu hóa hết. Không xấu, chỉ là chưa đến lúc bùng phát.</em>' : ''}${adviceText}`;
+      : reversed
+        ? `<br><br><strong>Lời khuyên:</strong> Đừng ép buộc mọi thứ phải diễn ra ngay. ${card.nameVi} ngược thường nhắc bạn rằng có điều gì đó cần được nhìn lại trước khi tiến lên.`
+        : `<br><br><strong>Lời khuyên:</strong> Hãy để thông điệp này hướng dẫn hành động của bạn — không cần suy nghĩ nhiều, chỉ cần làm một bước nhỏ theo hướng nó chỉ ra.`;
+
+    return `${opening}<br><br>${meaning}${reversedNote}${topicDetail}${adviceText}`;
   }
 
-  const cardNames = cards.map((c, i) => `<strong>${labels[i]}: ${c.card.nameVi}${c.reversed?' (ngược)':''}</strong>`).join(', ');
+  // ── Mở đầu có câu hỏi ──
+  const questionLine = q ? `Bạn hỏi: <em>"${q}"</em><br><br>` : '';
 
-  let opening = '';
+  // ── 3 lá ──
   if (cards.length === 3) {
     const [past, present, future] = cards;
-    const pastTone = past.reversed ? 'một điều gì đó từ quá khứ chưa được giải quyết xong' : 'nền tảng từ quá khứ vẫn đang ảnh hưởng đến hiện tại';
-    const presentTone = present.reversed ? 'hiện tại đang có chút bất ổn hoặc chưa rõ hướng đi' : 'hiện tại mang một năng lượng khá rõ ràng';
-    const futureTone = future.reversed ? 'tương lai phụ thuộc vào việc bạn nhìn lại và xử lý những gì đang bị bỏ qua' : 'tương lai đang mở ra theo hướng tích cực nếu bạn tiếp tục như hiện tại';
-    opening = `Trải bài hôm nay gồm ${cardNames}. Nhìn tổng thể, ${pastTone}, ${presentTone}, và ${futureTone}.`;
-  } else if (cards.length >= 5) {
-    const dominant = reversedCount > cards.length / 2 ? 'Phần lớn các lá xuất hiện ngược, cho thấy đây là giai đoạn bạn cần nhìn vào bên trong nhiều hơn là hành động ra bên ngoài.' : 'Phần lớn các lá xuất hiện thuận, cho thấy năng lượng đang chuyển động và bạn đang đi đúng hướng.';
-    opening = `Trải bài 5 lá hôm nay bao gồm ${cardNames}. ${dominant}`;
+
+    const pastCore   = past.reversed   ? past.card.reversed   : past.card.upright;
+    const presentCore= present.reversed? present.card.reversed: present.card.upright;
+    const futureCore = future.reversed ? future.card.reversed : future.card.upright;
+
+    let opening;
+    if (q) {
+      opening = `Liên quan đến câu hỏi của bạn, ba lá bài vẽ ra một bức tranh rõ ràng hơn bạn nghĩ.`;
+    } else {
+      opening = `Ba lá bài vẽ ra một câu chuyện liền mạch — từ điều đang để lại dấu ấn, qua thực tại, đến nơi mọi thứ đang hướng đến.`;
+    }
+
+    const pastLabel    = past.reversed    ? `${past.card.nameVi} (ngược)`    : past.card.nameVi;
+    const presentLabel = present.reversed ? `${present.card.nameVi} (ngược)` : present.card.nameVi;
+    const futureLabel  = future.reversed  ? `${future.card.nameVi} (ngược)`  : future.card.nameVi;
+
+    function cardBlock(c, lbl, posNote, posDesc) {
+      const core = c.reversed ? c.card.reversed : c.card.upright;
+      const posCtx = c.reversed ? posNote : posDesc;
+      const topicLine = topic && c.card.details?.[topic]
+        ? `<br><em>${topicLabel}: ${c.card.details[topic]}</em>`
+        : '';
+      const adviceLine = c.card.details?.advice
+        ? `<br><strong>→</strong> ${c.card.details.advice}`
+        : '';
+      return `<strong>${lbl} — ${c.card.nameVi}${c.reversed?' (ngược)':''}:</strong> ${core} ${posCtx}${topicLine}${adviceLine}`;
+    }
+
+    const pastLine = cardBlock(
+      past, 'Quá Khứ',
+      '<em>(Đây là điều từ quá khứ chưa được xử lý xong, vẫn đang ảnh hưởng đến bạn.)</em>',
+      'Nền tảng này — dù bạn có nhận ra hay không — đang định hình cách bạn đối phó với tình huống hiện tại.'
+    );
+    const presentLine = cardBlock(
+      present, 'Hiện Tại',
+      '<em>(Hiện tại đang có sự bất ổn hoặc kìm nén — điều bạn đang trải qua thực ra phức tạp hơn bề ngoài.)</em>',
+      'Đây là thực tế bạn đang sống — không phải nhận định, mà là mô tả đúng những gì đang xảy ra.'
+    );
+    const futureLine = cardBlock(
+      future, 'Tương Lai',
+      '<em>(Tương lai này không cố định — nhưng để thay đổi nó, bạn cần chú ý đến điều đang bị bỏ qua ở hiện tại.)</em>',
+      'Đây không phải lời hứa, mà là xu hướng: nếu bạn tiếp tục như hiện tại, đây là nơi mọi thứ đang dẫn đến.'
+    );
+
+    let closing;
+    if (q) {
+      if (reversedCount === 0) {
+        closing = `Nhìn lại câu hỏi của bạn — <em>"${q}"</em> — ba lá bài cho thấy năng lượng đang chuyển động theo hướng thuận. Hướng đi khá rõ, bạn không cần phải đoán mò thêm nữa.`;
+      } else if (reversedCount === 3) {
+        closing = `Câu hỏi <em>"${q}"</em> đang chạm đến một vùng khá phức tạp. Cả ba lá đều ngược — không phải dấu hiệu xấu, mà là lời nhắc rằng đây chưa phải lúc hành động. Có điều gì đó cần được nhìn lại trước.`;
+      } else {
+        closing = `Cho câu hỏi <em>"${q}"</em>: tình huống không đơn giản theo một chiều. Một số phần đang thuận, một số phần còn vướng — quan trọng là bạn biết phần nào cần ưu tiên hơn.`;
+      }
+    } else {
+      closing = reversedCount === 0
+        ? 'Ba lá thuận tạo ra một câu chuyện mạch lạc. Hướng đi đang rõ — điều còn lại là bạn có sẵn sàng bước tiếp không.'
+        : reversedCount === 3
+        ? 'Cả ba lá đều ngược — đây là thời điểm cần dừng lại, không phải hành động thêm. Có điều gì đó cần được nhìn thẳng trước khi tiến lên.'
+        : 'Sự kết hợp giữa thuận và ngược cho thấy tình huống đang ở trạng thái chuyển tiếp — không hoàn toàn rõ ràng, nhưng cũng không bế tắc. Chú ý vào lá ở vị trí quan trọng nhất với bạn.';
+    }
+
+    return `${questionLine}${opening}<br><br>${closing}<br><br>${pastLine}<br><br>${presentLine}<br><br>${futureLine}`;
   }
 
+  // ── 5 lá ──
+  if (cards.length >= 5) {
+    const dominant = reversedCount > cards.length / 2
+      ? 'Phần lớn các lá ngược — cho thấy đây là giai đoạn nhiều thứ đang bị chặn lại hoặc chưa chín muồi. Hành động ít đi, nhìn vào bên trong nhiều hơn.'
+      : 'Phần lớn các lá thuận — năng lượng đang chuyển động và bạn đang đi đúng hướng, dù có thể chưa cảm nhận được rõ.';
+
+    const openLine = q
+      ? `Bạn hỏi: <em>"${q}"</em><br><br>Trải bài 5 lá nhìn vào câu hỏi này từ nhiều góc độ. ${dominant}`
+      : `Trải bài 5 lá hôm nay. ${dominant}`;
+
+    const threads = cards.map(({ card, reversed }, i) => {
+      const lbl = labels[i];
+      const meaning = reversed ? card.reversed : card.upright;
+      const ctx = POS_CONTEXT[lbl] || { intro: 'Ở vị trí này', role: 'nói về tình huống của bạn' };
+      const reversedNote = reversed
+        ? ' <em>(Lá ngược: điều này đang bị cản lại hoặc chưa được nhìn nhận đúng mức.)</em>'
+        : '';
+      const topicLine = topic && card.details?.[topic]
+        ? `<br><em>${topicLabel}: ${card.details[topic]}</em>`
+        : '';
+      const adviceLine = card.details?.advice
+        ? `<br><strong>→</strong> ${card.details.advice}`
+        : '';
+      return `<strong>${lbl} — ${card.nameVi}${reversed?' (ngược)':''}:</strong> ${ctx.intro}, lá này ${ctx.role}. ${meaning}${reversedNote}${topicLine}${adviceLine}`;
+    }).join('<br><br>');
+
+    let closing;
+    if (q) {
+      closing = `<br><br>Nhìn lại <em>"${q}"</em> qua toàn bộ trải bài: câu trả lời không nằm ở một lá duy nhất — nó nằm ở cách các lá nói chuyện với nhau. Lá nào gây ra phản ứng mạnh nhất trong bạn? Đó thường là lá bạn cần chú ý nhất.`;
+    } else {
+      closing = '<br><br>Đọc toàn bộ như một câu chuyện liên kết — không lá nào đứng một mình. Bức tranh tổng thể thường tiết lộ điều mà từng lá đơn lẻ không nói hết.';
+    }
+
+    return `${openLine}<br><br>${threads}${closing}`;
+  }
+
+  // fallback
   const threads = cards.map(({ card, reversed }, i) => {
     const lbl = labels[i];
     const meaning = reversed ? card.reversed : card.upright;
     const ctx = POS_CONTEXT[lbl] || { intro: 'Ở vị trí này', role: 'nói về tình huống của bạn' };
-    return `${ctx.intro}, <strong>${card.nameVi}</strong> ${ctx.role}. ${meaning}${reversed ? ' <em>(Lá ngược: năng lượng này có thể đang bị kìm nén hoặc chưa được nhận ra.)</em>' : ''}`;
+    const topicLine = topic && card.details?.[topic]
+      ? `<br><em>${topicLabel}: ${card.details[topic]}</em>`
+      : '';
+    return `${ctx.intro}, <strong>${card.nameVi}</strong> ${ctx.role}. ${meaning}${reversed ? ' <em>(Lá ngược: năng lượng này có thể đang bị kìm nén hoặc chưa được nhận ra.)</em>' : ''}${topicLine}`;
   }).join('<br><br>');
-
-  let closing = '';
-  if (cards.length === 3) {
-    closing = reversedCount === 0
-      ? '<br><br>Nhìn chung, ba lá này vẽ ra một câu chuyện đang chuyển động theo hướng tốt. Hãy tin vào quá trình và tiếp tục đi.'
-      : reversedCount === 3
-      ? '<br><br>Cả ba lá đều ngược — đây là thời điểm đặc biệt để dừng lại, nhìn lại, và không vội vã đưa ra quyết định lớn. Năng lượng đang cần được tái cân bằng trước khi tiến lên.'
-      : '<br><br>Sự kết hợp giữa lá thuận và lá ngược cho thấy tình huống không đơn giản chỉ tốt hay xấu — có những phần đang phát triển tốt, có những phần cần thêm chú ý. Đọc từng lá để hiểu rõ hơn phần nào cần ưu tiên.';
-  } else if (cards.length >= 5) {
-    closing = '<br><br>Đọc toàn bộ trải bài như một câu chuyện liên kết — không lá nào đứng một mình. Bức tranh tổng thể thường tiết lộ điều mà từng lá đơn lẻ không thể nói hết.';
-  }
-
-  return `${opening}<br><br>${threads}${closing}`;
+  return `${questionLine}${threads}`;
 }
 
 function showSynthesis() {
@@ -2043,11 +2288,18 @@ function showSynthesis() {
 
     const mainText = `${posCtx.intro}, <strong>${card.nameVi}</strong> ${posCtx.role}.<br><br>${meaning}${reversed ? `<br><br><em>↓ Lá ngược: ${card.reversed}</em>` : ''}`;
 
+    const topic = detectTopic(userQuestion);
+    const topicLabel = { love: 'Tình yêu', career: 'Sự nghiệp', health: 'Sức khỏe', spirit: 'Tâm linh' }[topic] || null;
     const extras = [];
-    if (card.details?.love)   extras.push(`<strong>Tình yêu:</strong> ${card.details.love}`);
-    if (card.details?.career) extras.push(`<strong>Sự nghiệp:</strong> ${card.details.career}`);
-    if (card.details?.health) extras.push(`<strong>Sức khỏe:</strong> ${card.details.health}`);
-    if (card.details?.spirit) extras.push(`<strong>Tâm linh:</strong> ${card.details.spirit}`);
+    // Nếu có topic từ câu hỏi → đưa lên đầu và nổi bật
+    if (topic && card.details?.[topic]) {
+      extras.push(`<strong>📌 ${topicLabel} (liên quan câu hỏi của bạn):</strong> ${card.details[topic]}`);
+    }
+    // Các lĩnh vực còn lại (bỏ qua topic đã hiển thị ở trên)
+    if (topic !== 'love'   && card.details?.love)   extras.push(`<strong>Tình yêu:</strong> ${card.details.love}`);
+    if (topic !== 'career' && card.details?.career) extras.push(`<strong>Sự nghiệp:</strong> ${card.details.career}`);
+    if (topic !== 'health' && card.details?.health) extras.push(`<strong>Sức khỏe:</strong> ${card.details.health}`);
+    if (topic !== 'spirit' && card.details?.spirit) extras.push(`<strong>Tâm linh:</strong> ${card.details.spirit}`);
     const adviceText = card.details?.advice
       || (reversed
         ? `${card.nameVi} ngược thường là dấu hiệu nên dừng lại — không phải vì sai, mà vì có thứ gì đó chưa rõ cần được nhìn lại trước khi tiếp tục.`
