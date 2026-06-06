@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
@@ -531,7 +531,7 @@
     .deck-card:hover:not(.selected-card) {
       transform: translateY(-12px);
       filter: brightness(1.35) drop-shadow(0 0 8px rgba(212,169,67,0.8));
-      z-index: 200 !important;
+      z-index: 9999 !important;
     }
     .deck-card.selected-card { pointer-events: none; }
     @keyframes cardDeal {
@@ -824,12 +824,92 @@
     }
     .rare-flash-overlay.flash { opacity: 1; }
 
+    /* ─── Daily inline shuffle + fan ─── */
+    .daily-phase { animation: fadeInUp 0.4s ease; }
+    .daily-shuffle-inline {
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      padding: 10px 0 6px;
+    }
+    .daily-shuffle-title {
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.8rem;
+      color: var(--gold); letter-spacing: 3px; text-align: center;
+    }
+    #dailyShuffleCanvas { border-radius: 12px; cursor: crosshair; touch-action: none; display: block; }
+    .daily-shuffle-label {
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.82rem;
+      color: var(--gold-light); letter-spacing: 2px; text-align: center; min-height: 1.4em;
+    }
+    .daily-shuffle-bar-wrap {
+      width: 260px; height: 5px;
+      background: rgba(255,255,255,0.08); border-radius: 6px; overflow: hidden;
+    }
+    #dailyShuffleBar {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+      border-radius: 6px; transition: width 0.35s ease;
+    }
+    .daily-shuffle-hint {
+      font-size: 0.75rem; color: #7a6a9a; letter-spacing: 1px; text-align: center;
+      animation: hintPulse 2.2s ease-in-out infinite;
+    }
+    /* Nút role chọn vị trí */
+    .daily-role-grid {
+      display: grid; grid-template-columns: repeat(4, auto);
+      justify-content: center; gap: 10px;
+      padding: 4px 0 8px;
+    }
+    .daily-role-btn {
+      background: linear-gradient(135deg, rgba(212,169,67,0.10), rgba(139,105,20,0.15));
+      border: 1px solid var(--gold-dark); border-radius: 8px;
+      color: var(--gold-light); font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 0.72rem; letter-spacing: 2px; padding: 10px 18px;
+      cursor: pointer; transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s, transform 0.2s;
+      box-shadow: 0 0 10px rgba(212,169,67,0.08);
+    }
+    .daily-role-btn:hover {
+      background: linear-gradient(135deg, rgba(212,169,67,0.22), rgba(139,105,20,0.28));
+      border-color: var(--gold); color: var(--gold);
+      box-shadow: 0 0 20px rgba(212,169,67,0.3);
+      transform: translateY(-2px);
+    }
+    .daily-role-btn.active {
+      background: linear-gradient(135deg, rgba(212,169,67,0.28), rgba(139,105,20,0.38));
+      border-color: var(--gold); color: var(--gold);
+      box-shadow: 0 0 24px rgba(212,169,67,0.4);
+    }
+
+    /* Fan inline */
+    .daily-fan-wrap { width: 100%; overflow: visible; }
+    .daily-fan-hint {
+      font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.75rem;
+      color: var(--gold); letter-spacing: 2px; text-align: center;
+      margin-bottom: 10px; animation: hintPulse 2s ease-in-out infinite;
+    }
+    #dailyDeckRows { padding: 4px 0 8px; }
+    .daily-fan-card { transition: transform 0.18s ease, filter 0.18s ease; }
+
     /* ─── Daily card (collapsible sidebar style) ─── */
     .daily-bar {
       max-width: 720px; margin: 0 auto 12px;
       background: linear-gradient(135deg, rgba(12,12,12,0.7), rgba(0,0,0,0.88));
       border: 1px solid var(--gold-dark); border-radius: 18px;
-      overflow: hidden;
+    }
+    #dailyCardSection {
+      position: relative;
+    }
+    #dailyCardSection.has-bg::before {
+      content: '';
+      position: absolute;
+      inset: -14px -24px;
+      background: url('anh-ban.png') center center / cover no-repeat;
+      opacity: 0.32;
+      z-index: 0;
+      pointer-events: none;
+      border-radius: 14px;
+    }
+    #dailyCardSection.has-bg > * {
+      position: relative;
+      z-index: 1;
     }
     .daily-bar-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -940,6 +1020,55 @@
       15%  { opacity: 0.85; }
       60%  { opacity: 0.5; }
       100% { opacity: 0;  transform: translate(calc(var(--sx,0px)*2), -80px) scale(2.2); }
+    }
+
+    /* ─── Daily Candle Countdown ─── */
+    .daily-candle-wrap {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      margin-top: -8px; padding: 0;
+    }
+    .daily-candle-stage {
+      width: 140px; height: 180px; position: relative;
+    }
+    .daily-candle-progress {
+      display: flex; align-items: center; gap: 8px; width: 160px;
+    }
+    .daily-candle-track {
+      flex: 1; height: 5px; background: rgba(255,255,255,0.1);
+      border-radius: 3px; overflow: hidden;
+    }
+    .daily-candle-bar {
+      height: 100%; width: 100%;
+      background: linear-gradient(90deg, #8b6914, #e89a2c);
+      border-radius: 3px; transition: width 1s linear;
+    }
+    .daily-candle-timer {
+      font-size: 0.72rem; color: #b8ad9a; min-width: 28px; text-align: right;
+      font-family: 'Be Vietnam Pro', sans-serif; letter-spacing: 1px;
+    }
+    .daily-result-content {
+      position: relative;
+    }
+    #dailySmokeCanvas {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 10; border-radius: 18px;
+    }
+    .daily-work-now {
+      display: none; text-align: center; padding: 24px 16px 8px;
+      animation: workNowAppear 0.8s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    .daily-work-now.show { display: block; }
+    @keyframes workNowAppear {
+      0%   { opacity: 0; transform: scale(0.7) translateY(10px); }
+      60%  { transform: scale(1.08) translateY(-4px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .daily-work-now-text {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(1.4rem, 4vw, 2.2rem);
+      color: var(--gold-light);
+      text-shadow: 0 0 24px var(--glow), 0 0 50px rgba(212,169,67,0.5);
+      letter-spacing: 3px;
     }
 
     /* ─── Footer ─── */
@@ -1189,54 +1318,32 @@
     <div class="divider-line"></div>
   </div>
 
-  <!-- Step indicator -->
-  <div class="step-indicator" id="stepIndicator">
-    <div class="step-item active" data-step="1">
+  <!-- Step indicator (ẩn) -->
+  <div class="step-indicator" id="stepIndicator" style="display:none">
+    <div class="step-item active" data-step="2">
       <div class="step-circle active">1</div>
-      <div class="step-label">Phương thức</div>
-    </div>
-    <div class="step-connector" id="conn-1-2"></div>
-    <div class="step-item" data-step="2">
-      <div class="step-circle">2</div>
       <div class="step-label">Kiểu trải</div>
     </div>
     <div class="step-connector" id="conn-2-3"></div>
     <div class="step-item" data-step="3">
-      <div class="step-circle">3</div>
+      <div class="step-circle">2</div>
       <div class="step-label">Câu hỏi</div>
     </div>
     <div class="step-connector" id="conn-3-4"></div>
     <div class="step-item" data-step="4">
-      <div class="step-circle">4</div>
+      <div class="step-circle">3</div>
       <div class="step-label">Xáo & Kết quả</div>
     </div>
   </div>
 
-  <!-- ════ WIZARD PANEL ════ -->
-  <div class="wizard-panel">
+  <!-- ════ WIZARD PANEL (ẩn) ════ -->
+  <div class="wizard-panel" style="display:none">
 
-    <!-- STEP 1: Phương thức bói -->
-    <div class="step-screen active" id="screen1">
-      <div class="screen-title">✦ CHỌN PHƯƠNG THỨC BÓI ✦</div>
-      <div class="method-grid">
-        <div class="method-card" data-method="question" onclick="selectMethod(this)">
-          <span class="method-icon">🔮</span>
-          <div class="method-name">CÂU HỎI CỤ THỂ</div>
-          <div class="method-desc">Nhập câu hỏi của bạn — bộ bài sẽ phản chiếu chính xác điều bạn đang tìm kiếm.</div>
-        </div>
-        <div class="method-card" data-method="theme" onclick="selectMethod(this)">
-          <span class="method-icon">🌙</span>
-          <div class="method-name">THEO CHỦ ĐỀ</div>
-          <div class="method-desc">Chọn chủ đề và câu hỏi gợi ý — vũ trụ sẽ dẫn lối theo từng lĩnh vực của cuộc sống.</div>
-        </div>
-      </div>
-      <div class="nav-row center">
-        <button class="btn-primary" id="step1Next" disabled onclick="goToStep(2)">TIẾP THEO ›</button>
-      </div>
-    </div>
+    <!-- STEP 1: Phương thức bói (ẩn) -->
+    <div class="step-screen" id="screen1" style="display:none"></div>
 
     <!-- STEP 2: Kiểu trải bài -->
-    <div class="step-screen" id="screen2">
+    <div class="step-screen active" id="screen2">
       <div class="screen-title">✦ CHỌN KIỂU TRẢI BÀI ✦</div>
       <div class="spread-grid">
         <div class="spread-option" data-spread="1" onclick="selectSpread(this)">
@@ -1278,7 +1385,6 @@
         </div>
       </div>
       <div class="nav-row">
-        <button class="btn-secondary" onclick="goToStep(1)">‹ QUAY LẠI</button>
         <button class="btn-primary" id="step2Next" disabled onclick="goToStep(3)">TIẾP THEO ›</button>
       </div>
     </div>
@@ -1417,6 +1523,7 @@
 <!-- Rare card flash overlay -->
 <div id="rareFlashOverlay" class="rare-flash-overlay"></div>
 
+
 <!-- Rare card toast -->
 <div id="rareToast" class="rare-toast">
   <span class="rare-toast-icon" id="rareToastIcon">✨</span>
@@ -1512,8 +1619,8 @@ function makeCardImageHTML(card) {
 // ══════════════════════════════════════════════════════
 //  State
 // ══════════════════════════════════════════════════════
-let currentStep    = 1;
-let chosenMethod   = null;   // 'question' | 'theme'
+let currentStep    = 2;
+let chosenMethod   = 'question';   // 'question' | 'theme'
 let chosenSpread   = null;   // 1 | 3 | 5
 let userQuestion   = '';
 let selectedCards  = [];     // [{card, reversed, imgSrc}]
@@ -2445,7 +2552,8 @@ function resetAll() {
   document.getElementById('synthPanel').classList.remove('visible');
   document.getElementById('detailSection').innerHTML = '';
   document.querySelector('.wizard-panel').classList.remove('result-mode');
-  goToStep(1);
+  chosenMethod = 'question';
+  goToStep(2);
 }
 
 // ── Particles ──
@@ -2588,6 +2696,649 @@ function isRareCard(card) {
   return !!(RARE_CARDS[card.id]);
 }
 
+const ROLE_READINGS = {
+  MANAGER: [
+    {u:"Hôm nay mạnh dạn thử cách quản lý mới đi, team sẽ theo bạn!",r:"Hôm nay khoan quyết vội, lên kế hoạch chút rồi hẵng làm nha."},
+    {u:"Hôm nay bạn đủ tài đủ nguồn lực, điều phối gì cũng trơn tru!",r:"Hôm nay bớt hứa hẹn lại, làm thực tế là team phục liền."},
+    {u:"Hôm nay tin trực giác lãnh đạo của mình, quyết là đúng đó!",r:"Hôm nay có chuyện ngầm trong team, lắng nghe thêm rồi hẵng xử."},
+    {u:"Hôm nay quan tâm team chân thành, năng suất sẽ lên đẹp!",r:"Hôm nay đừng ôm hết việc, để anh em tự làm cho cứng cáp nha."},
+    {u:"Hôm nay set quy trình rõ ràng, mọi thứ vào nề nếp ngon lành!",r:"Hôm nay đừng kiểm soát từng li, tin team một chút đi nha."},
+    {u:"Hôm nay làm theo quy trình chuẩn, kèm đàn em là chắc ăn!",r:"Hôm nay quy trình cũ hơi cứng, linh hoạt chút cho hợp thời."},
+    {u:"Hôm nay quyết định nhân sự sẽ suôn sẻ nếu theo giá trị cốt lõi!",r:"Hôm nay đừng quyết theo cảm tính, cân nhắc kỹ là ổn nha."},
+    {u:"Hôm nay cầm cương chắc tay, cả team về đích ngon lành!",r:"Hôm nay mỗi người một hướng à? Gom lại là chạy êm liền."},
+    {u:"Hôm nay cứ kiên nhẫn dẫn dắt, kiểu gì team cũng tiến lên!",r:"Hôm nay hơi căng à? Hít thở bình tĩnh rồi xử là ổn thôi."},
+    {u:"Hôm nay lùi lại nhìn bức tranh lớn, sẽ ra quyết định sáng suốt!",r:"Hôm nay đừng tách team xa quá, xuống chơi với anh em nha."},
+    {u:"Hôm nay có khúc cua may mắn cho phòng ban — chộp lấy ngay!",r:"Hôm nay có biến động nhỏ, lo phần mình làm được là ổn thôi."},
+    {u:"Hôm nay công bằng minh bạch là anh em phục, uy tín lên cao!",r:"Hôm nay nhớ giữ sự nhất quán, đừng thiên vị ai là yên chuyện."},
+    {u:"Hôm nay thử nhìn vấn đề từ góc khác, sẽ thông suốt bất ngờ!",r:"Hôm nay bế tắc à? Đổi cách nghĩ chút là gỡ được liền."},
+    {u:"Hôm nay mạnh dạn dẹp cái cũ không hợp, làm mới là đúng!",r:"Hôm nay đừng tiếc cái đã hỏng, buông nhẹ là khỏe hơn nha."},
+    {u:"Hôm nay cân đối nguồn lực khéo léo, mọi thứ hài hòa êm đẹp!",r:"Hôm nay đừng làm quá tay, giữ cân bằng là bền hơn nha."},
+    {u:"Hôm nay coi chừng áp lực doanh số đè nặng, giữ tỉnh táo nha!",r:"Hôm nay đang gỡ được áp lực rồi, nhẹ nhõm hẳn lên thôi!"},
+    {u:"Hôm nay có thể có biến nhỏ, nhưng đó là cơ hội làm lại tốt hơn!",r:"Hôm nay nếu kế hoạch lung lay, bình tĩnh xử là qua nhanh thôi."},
+    {u:"Hôm nay tầm nhìn của bạn truyền lửa cho cả team — tỏa sáng đi!",r:"Hôm nay team hơi xuống tinh thần à? Nhắc lại mục tiêu là vực dậy."},
+    {u:"Hôm nay có chuyện chưa rõ, làm rõ rồi hẵng kết luận là chuẩn!",r:"Hôm nay sương sắp tan, hiểu lầm sẽ được gỡ thôi mà."},
+    {u:"Hôm nay team thắng lớn và được ghi nhận — ăn mừng đi nào!",r:"Hôm nay vui rồi nhưng giữ tỉnh táo, đừng quên rủi ro nha."},
+    {u:"Hôm nay tổng kết và chốt hướng đi lớn — quyết định sáng suốt!",r:"Hôm nay đừng tự dằn vặt vì chuyện cũ, nhìn tới phía trước nha."},
+    {u:"Hôm nay một dự án về đích trọn vẹn, team trưởng thành — quá đỉnh!",r:"Hôm nay gần xong rồi, ráng nốt mắt xích cuối là hoàn hảo!"},
+    {u:"Hôm nay có ý tưởng cháy lắm, châm lửa cho team là bùng nổ!",r:"Hôm nay cảm hứng hơi nguội à? Một cú hích nhỏ là cháy lại."},
+    {u:"Hôm nay lên kế hoạch mở rộng — tầm nhìn xa là thắng lớn!",r:"Hôm nay đừng do dự nữa, chốt kế hoạch rồi triển khai thôi."},
+    {u:"Hôm nay kế hoạch bắt đầu ra trái ngọt, nhìn xa hơn là lên!",r:"Hôm nay tiến độ hơi chậm, soi khâu nghẽn là thông ngay."},
+    {u:"Hôm nay qua được cột mốc, team gắn kết — ghi công anh em đi!",r:"Hôm nay nội bộ hơi lỏng, gắn kết lại tí là vững liền."},
+    {u:"Hôm nay tranh luận sôi nổi là tốt, bạn cầm trịch là ra kết quả!",r:"Hôm nay mâu thuẫn âm ỉ à? Đưa ra nói thẳng là êm thôi."},
+    {u:"Hôm nay thành tích của bạn được sếp ghi nhận — tự tin lên!",r:"Hôm nay vui chiến thắng nhưng giữ khiêm tốn là bền nha."},
+    {u:"Hôm nay giữ vững quan điểm trước áp lực — bạn làm được!",r:"Hôm nay hơi đuối à? Chọn trận quan trọng mà đánh thôi nha."},
+    {u:"Hôm nay mọi việc tăng tốc, xử dứt khoát là chạy băng băng!",r:"Hôm nay nếu giao tiếp tắc, khơi thông là thông suốt liền."},
+    {u:"Hôm nay sắp tới đích rồi, ráng thêm chút là thành công!",r:"Hôm nay mệt thì nghỉ, nhờ team support cho đỡ gồng nha."},
+    {u:"Hôm nay nhiều việc nhưng bạn lo được hết, cứ tin mình đi!",r:"Hôm nay ôm nhiều quá à? Chia bớt cho team là nhẹ liền."},
+    {u:"Hôm nay có nhân viên trẻ máu lửa hoặc ý hay — ủng hộ đi!",r:"Hôm nay nhiệt huyết dễ tắt, định hướng cho rõ là bền nha."},
+    {u:"Hôm nay làm tới đi, táo bạo là đẩy dự án phóng nhanh!",r:"Hôm nay đừng bốc đồng quá, ổn định rồi hẵng lao nha."},
+    {u:"Hôm nay sự tự tin ấm áp của bạn giữ chân người tài — tuyệt!",r:"Hôm nay thiếu tự tin à? Bạn giỏi hơn bạn nghĩ nhiều đó."},
+    {u:"Hôm nay tầm nhìn của bạn dẫn dắt cả team — lãnh đạo bằng lửa!",r:"Hôm nay nghe team trước khi áp tầm nhìn là khôn ngoan nha."},
+    {u:"Hôm nay văn hóa team ấm lên, sự đồng cảm gắn kết mọi người!",r:"Hôm nay mở lòng nghe anh em nhiều hơn là team gần lại liền."},
+    {u:"Hôm nay có hợp tác đôi bên cùng lợi — bắt tay là thắng!",r:"Hôm nay quan hệ hơi lệch, xây lại niềm tin là ổn nha."},
+    {u:"Hôm nay team vui vẻ, tinh thần lên cao — ăn mừng cùng nhau!",r:"Hôm nay vui thì vui, coi chừng bè phái với drama nha."},
+    {u:"Hôm nay để ý điều tốt đang bị xem nhẹ, sẽ thấy cơ hội đó!",r:"Hôm nay đang lấy lại động lực rồi, cơ hội mới sắp tới!"},
+    {u:"Hôm nay một cú vấp nhỏ đừng buồn, vẫn còn nhiều thứ tốt mà!",r:"Hôm nay đang hồi phục rồi, rút bài học là đi tiếp thôi."},
+    {u:"Hôm nay dùng lại kinh nghiệm cũ hoặc người cũ là hiệu quả!",r:"Hôm nay đừng bám cách cũ mãi, cập nhật tí cho hợp thời."},
+    {u:"Hôm nay nhiều lựa chọn quá, chọn cái thực tế nhất mà làm nha!",r:"Hôm nay đã rõ rồi, chốt trọng tâm là team tập trung liền."},
+    {u:"Hôm nay mạnh dạn buông cái hết ý nghĩa, tìm giá trị sâu hơn!",r:"Hôm nay phân vân đi hay ở à? Nghe lòng mình là biết thôi."},
+    {u:"Hôm nay mục tiêu sẽ toại nguyện — tận hưởng thành quả đi!",r:"Hôm nay vui rồi nhưng còn dư sức, đừng dừng sớm nha."},
+    {u:"Hôm nay team hòa hợp, ai cũng chung hướng — hạnh phúc ghê!",r:"Hôm nay nếu có bất hòa ngầm, vun đắp lại là ấm liền."},
+    {u:"Hôm nay có ý tưởng sáng tạo từ đàn em — mở lòng đón nha!",r:"Hôm nay dìu dắt nhẹ nhàng đứa hơi tự ái là ổn thôi."},
+    {u:"Hôm nay có lời mời hợp tác hấp dẫn — cân cả lý lẫn tình nha!",r:"Hôm nay lời hứa nghe hay mà chưa chắc, kiểm chứng tí đi."},
+    {u:"Hôm nay bạn thấu cảm team, họ cảm nhận được — lợi thế lớn!",r:"Hôm nay đừng ôm hết cảm xúc người khác, giữ ranh giới nha."},
+    {u:"Hôm nay điềm tĩnh giữa áp lực, bạn là chỗ dựa của team — giỏi!",r:"Hôm nay nếu dồn nén, xả lành mạnh đi đừng để bùng nha."},
+    {u:"Hôm nay đầu óc sắc bén, có giải pháp đột phá — chốt là ngon!",r:"Hôm nay làm rõ thông tin trước khi quyết là chắc ăn nha."},
+    {u:"Hôm nay có quyết định khó, đối diện thẳng là gỡ được liền!",r:"Hôm nay đừng né nữa, nhìn vào số liệu là quyết được thôi."},
+    {u:"Hôm nay nếu có góp ý đau, đó là cơ hội team tốt lên đó!",r:"Hôm nay đang nguôi sau chuyện cũ, buông là nhẹ nhõm liền."},
+    {u:"Hôm nay nghỉ ngơi sạc lại năng lượng cũng là khôn ngoan đó!",r:"Hôm nay nghỉ đủ rồi thì cân lại nghỉ với làm cho hợp nha."},
+    {u:"Hôm nay đừng thắng bằng mọi giá, giữ lòng người mới bền!",r:"Hôm nay căng đang dịu, chủ động làm hòa là êm liền."},
+    {u:"Hôm nay đang rời vùng bão, tiến về chỗ êm hơn — đúng hướng!",r:"Hôm nay dứt cái cũ chưa xong, buông quá khứ là tiến nhanh."},
+    {u:"Hôm nay tỉnh táo với chuyện mờ ám trong team là khôn đó!",r:"Hôm nay minh bạch là an toàn nhất, làm thẳng thắn nha."},
+    {u:"Hôm nay thấy kẹt chứ thật ra bạn nhiều lựa chọn hơn bạn nghĩ!",r:"Hôm nay đang tự cởi trói rồi, nhìn ra lối đi rõ hơn thôi."},
+    {u:"Hôm nay đừng lo quá, chia sẻ với team là nhẹ gánh liền!",r:"Hôm nay nỗi lo đang tan, không đáng sợ như bạn tưởng đâu."},
+    {u:"Hôm nay nếu cái cũ kết thúc, mừng đi vì cái mới sắp tới!",r:"Hôm nay đang gượng dậy rồi, buông cái nên dẹp là khỏe hơn."},
+    {u:"Hôm nay ham học hỏi, hỏi sắc bén — khuyến khích cái tò mò đó!",r:"Hôm nay coi chừng tin đồn nội bộ chưa kiểm chứng nha."},
+    {u:"Hôm nay xử nhanh, trực diện là lợi thế — làm dứt khoát đi!",r:"Hôm nay đừng gắt gỏng quá, chậm lại tí là êm hơn nha."},
+    {u:"Hôm nay tư duy sắc bén, nói thẳng — quyết bằng sự thật là chuẩn!",r:"Hôm nay thêm tí tử tế vào lời nói là team dễ nghe hơn nha."},
+    {u:"Hôm nay lãnh đạo bằng trí tuệ và nguyên tắc — uy mà đáng tin!",r:"Hôm nay dùng trí tuệ để giúp team, đừng áp đặt quá nha."},
+    {u:"Hôm nay có cơ hội nguồn lực/dự án sinh lời mới — nắm lấy nha!",r:"Hôm nay soi lại nguồn lực thực tế trước khi cam kết là chắc."},
+    {u:"Hôm nay cân nhiều việc khéo lắm, linh hoạt là điểm mạnh đó!",r:"Hôm nay hơi quá tải à? Sắp xếp lại ưu tiên là gọn liền."},
+    {u:"Hôm nay phối hợp nhóm ăn ý, ra kết quả chất lượng — tuyệt!",r:"Hôm nay làm rõ vai trò từng người là chạy trơn tru ngay."},
+    {u:"Hôm nay quản nguồn lực chặt chẽ là khôn ngoan đúng lúc!",r:"Hôm nay đừng khắt khe quá, dám đầu tư là team mới tiến."},
+    {u:"Hôm nay khó khăn nguồn lực sẽ qua, đưa tay đỡ team là quý!",r:"Hôm nay khó đang qua rồi, hỗ trợ đang tới đừng ngại nhờ."},
+    {u:"Hôm nay phân bổ và khen thưởng công bằng là củng cố team!",r:"Hôm nay soi lại sự công bằng trong phân bổ là yên chuyện."},
+    {u:"Hôm nay đánh giá thành quả, kiên nhẫn chờ chín là sẽ gặt!",r:"Hôm nay đừng sốt ruột, gieo đúng là gặt đúng thôi mà."},
+    {u:"Hôm nay chú trọng chất lượng, nâng tầm team — được đền đáp!",r:"Hôm nay tìm lại cân bằng, đừng cầu toàn quá là ổn nha."},
+    {u:"Hôm nay tự chủ nguồn lực, thành quả xứng đáng — hưởng đi!",r:"Hôm nay cân lại thành tựu với đời sống cho khỏe nha."},
+    {u:"Hôm nay nền tảng vững vàng, thịnh vượng bền lâu — quá tốt!",r:"Hôm nay củng cố nền móng trước khi mở rộng là chắc nha."},
+    {u:"Hôm nay có cơ hội học/dự án mới đáng đầu tư — khởi đầu chắc!",r:"Hôm nay bắt tay làm bước cụ thể, đừng để kế hoạch viển vông."},
+    {u:"Hôm nay làm bền bỉ, có phương pháp — chậm mà chắc là thắng!",r:"Hôm nay thêm tí linh hoạt và tốc độ là hiệu quả hơn nha."},
+    {u:"Hôm nay lo việc lo người khéo, môi trường ổn và ấm — giỏi!",r:"Hôm nay đừng quên chăm bản thân giữa lúc lo cho mọi người nha."},
+    {u:"Hôm nay bạn xây sự thịnh vượng bền cho tổ chức — bài bản lắm!",r:"Hôm nay cân giữa lợi nhuận và giá trị con người là bền nha."},
+  ],
+  SELLER: [
+    {u:"Hôm nay mạnh dạn thử ngách mới hoặc sàn mới đi, biết đâu trúng!",r:"Hôm nay khoan đổ tiền vội, research thị trường rồi hẵng làm nha."},
+    {u:"Hôm nay đủ ý tưởng đủ tool, lên listing là ra đơn thôi!",r:"Hôm nay listing đẹp mà thiếu SEO thì khách khó thấy lắm nha."},
+    {u:"Hôm nay nhạy trend ngầm, bắt được món sắp hot là thắng!",r:"Hôm nay đừng copy ngách khi chưa hiểu vì sao nó bán được nha."},
+    {u:"Hôm nay shop nở rộ, listing nào cũng có khách ngó — chăm tiếp!",r:"Hôm nay ôm nhiều SKU quá dễ đuối, lọc bớt cho gọn nha."},
+    {u:"Hôm nay lập quy trình đăng bài, quản kho gọn gàng — chuẩn chỉnh!",r:"Hôm nay đừng cứng một format, sàn đổi thuật toán là phải linh hoạt."},
+    {u:"Hôm nay theo đúng policy sàn, làm chuẩn SEO — an toàn lâu dài!",r:"Hôm nay bám rule cũ quá, ngách mới đang mở mà bỏ lỡ là tiếc."},
+    {u:"Hôm nay chọn ngách để dồn lực — quyết là bán bùng đó!",r:"Hôm nay đứng giữa nhiều ngách à? Chốt một cái mà tập trung nha."},
+    {u:"Hôm nay đơn về đều, giao đúng hẹn — giữ guồng là lên top!",r:"Hôm nay nhiều đơn quá à? Sắp xếp lại kẻo trễ ship trừ sao nha."},
+    {u:"Hôm nay cứ kiên nhẫn nuôi listing, đơn với review tốt sẽ tới!",r:"Hôm nay sốt ruột chưa ra đơn à? Bình tĩnh, ngách cần thời gian."},
+    {u:"Hôm nay ngồi phân tích data shop, sẽ tìm ra món bán chạy!",r:"Hôm nay đừng làm một mình mãi, hỏi cộng đồng seller cho nhanh."},
+    {u:"Hôm nay đúng mùa vụ rồi, đẩy hàng đúng sóng là nổ đơn!",r:"Hôm nay thuật toán đổi đơn tụt à? Tối ưu lại listing là lên thôi."},
+    {u:"Hôm nay mô tả đúng, ship đúng hẹn — review 5 sao tự tới!",r:"Hôm nay listing đừng thổi phồng kẻo ăn review xấu, thật thà nha."},
+    {u:"Hôm nay listing ế thì đổi ảnh/tiêu đề/giá thử là khác liền!",r:"Hôm nay bế tắc doanh số à? Đừng làm y cũ, đổi cách đi nha."},
+    {u:"Hôm nay dẹp listing chết, dọn chỗ cho hàng mới là đúng!",r:"Hôm nay đừng tiếc listing không bán mà giữ hoài, buông nhẹ nha."},
+    {u:"Hôm nay cân giá vốn với giá bán khéo, test từ từ — ổn áp!",r:"Hôm nay đừng phá giá hay đội giá quá tay kẻo mất khách nha."},
+    {u:"Hôm nay coi chừng ngách vi phạm bản quyền — tỉnh táo kẻo bay shop!",r:"Hôm nay đang gỡ được mấy listing rủi ro rồi, làm sạch shop tiếp!"},
+    {u:"Hôm nay nếu có biến với shop, backup đa kênh là an toàn nha!",r:"Hôm nay đừng làm liều bản quyền, dừng lại là tránh được rủi ro."},
+    {u:"Hôm nay có listing bắt đầu lên — nhân bản công thức là thắng!",r:"Hôm nay mất niềm tin vào ngách à? Nhớ lý do bạn chọn nó nha."},
+    {u:"Hôm nay số liệu hơi mập mờ, đo kỹ rồi hẵng kết luận listing nha!",r:"Hôm nay sương sắp tan, bạn sẽ thấy món nào thật sự ra đơn."},
+    {u:"Hôm nay đơn nổ, review đẹp — shop vào phom, đẩy mạnh đi!",r:"Hôm nay ngon rồi đừng chủ quan, đối thủ copy nhanh lắm nha."},
+    {u:"Hôm nay tổng kết, chốt giữ ngách nào bỏ ngách nào là sáng suốt!",r:"Hôm nay đừng tự dằn vặt vì listing ế, mỗi cái là bài học mà."},
+    {u:"Hôm nay shop ổn định, ngách chủ lực vững — mở rộng được rồi!",r:"Hôm nay gần đạt mốc rồi, tối ưu nốt vài listing cuối là xong!"},
+    {u:"Hôm nay có ý tưởng sản phẩm cháy, list ngay khi còn nóng là nổ!",r:"Hôm nay ý tưởng để lâu nguội mất, làm liền kẻo đối thủ chiếm."},
+    {u:"Hôm nay lên plan mở rộng dòng sản phẩm — tầm nhìn tốt đó!",r:"Hôm nay đừng do dự thêm SKU, dám thử là shop mới lớn nha."},
+    {u:"Hôm nay listing ra đơn rồi, nghĩ tới scale và đa kênh đi!",r:"Hôm nay đơn ì ạch à? Soi xem SEO hay ảnh đang yếu chỗ nào."},
+    {u:"Hôm nay đạt mốc doanh số — ăn mừng rồi làm tiếp nha!",r:"Hôm nay nền shop chưa vững, đừng vội mở rộng ồ ạt nha."},
+    {u:"Hôm nay ngách cạnh tranh gắt, khác biệt hóa là bạn thắng!",r:"Hôm nay đua giá mệt à? Tìm ngách ngách hơn mà đánh nha."},
+    {u:"Hôm nay listing lên top tìm kiếm — tận dụng đà này nhân thêm!",r:"Hôm nay top hôm nay tụt mai đó, đừng tự mãn ngừng tối ưu nha."},
+    {u:"Hôm nay giữ vững giá và chất lượng dù đối thủ phá giá — đúng!",r:"Hôm nay đuối vì cạnh tranh à? Chọn ngách ít đối thủ mà đánh."},
+    {u:"Hôm nay đơn về dồn dập, xử ship nhanh gọn — bắt nhịp đi!",r:"Hôm nay đơn ùn mà ship chậm là trừ sao, khơi thông kho nha."},
+    {u:"Hôm nay sắp qua mùa cao điểm, ráng giữ chất lượng nốt nha!",r:"Hôm nay kiệt sức mùa lễ à? Thuê người phụ đóng gói cho đỡ gồng."},
+    {u:"Hôm nay nhiều việc nhưng bạn lo được, cứ tin mình đi!",r:"Hôm nay ôm hết list-ship-CSKH à? Giao bớt việc cho nhẹ nha."},
+    {u:"Hôm nay có ý tưởng ngách mới đáng test thử nghiệm nhỏ — vui đó!",r:"Hôm nay hứng lên list rồi dễ bỏ bê, theo tới cùng một ngách nha."},
+    {u:"Hôm nay tung loạt listing mới táo bạo, chiếm ngách là thắng!",r:"Hôm nay list ồ ạt thiếu chăm thì phí công, làm kỹ từng cái nha."},
+    {u:"Hôm nay shop có gu, thương hiệu rõ — khách nhớ mặt bạn lắm!",r:"Hôm nay đừng bán rẻ công sức, tự tin định giá đúng tầm nha."},
+    {u:"Hôm nay tầm nhìn thương hiệu lớn, dẫn dắt ngách — bài bản!",r:"Hôm nay đừng tham mở rộng nóng vội, củng cố ngách lõi trước nha."},
+    {u:"Hôm nay khách bắt đầu yêu shop, review ấm áp — vun tiếp nha!",r:"Hôm nay trả lời tin nhắn nhiệt hơn là khách quý shop hơn liền."},
+    {u:"Hôm nay có khách quay lại mua lần hai — chăm tệp trung thành!",r:"Hôm nay quan hệ khách hơi lệch, đừng để khách thấy bị bỏ rơi nha."},
+    {u:"Hôm nay khách khen, giới thiệu bạn bè — truyền miệng đang chạy!",r:"Hôm nay coi chừng review ảo, làm thật là bền hơn nha."},
+    {u:"Hôm nay đọc lại review góp ý sẽ thấy ý tưởng sản phẩm hay đó!",r:"Hôm nay đang để ý lại nhu cầu khách, sắp ra món trúng rồi!"},
+    {u:"Hôm nay dính review 1 sao đừng buồn, đống 5 sao vẫn còn đó!",r:"Hôm nay đang hồi sau review xấu, cải thiện listing là lên thôi."},
+    {u:"Hôm nay bán lại món best-seller cũ là chắc ăn đó!",r:"Hôm nay đừng sống mãi nhờ một món hit cũ, làm mới đi nha."},
+    {u:"Hôm nay nhiều ý tưởng quá, lọc cái khách thật sự cần mà làm!",r:"Hôm nay đã rõ rồi, chốt dòng sản phẩm trọng tâm là ngon thôi."},
+    {u:"Hôm nay bỏ ngách hết duyên, tìm ngách hợp gu mình hơn — hay!",r:"Hôm nay phân vân giữ hay bỏ ngách à? Nghe data và lòng mình nha."},
+    {u:"Hôm nay doanh số như mơ, khách hài lòng — tận hưởng đi!",r:"Hôm nay đừng tự mãn dừng sớm, ngách còn dư địa mà nha."},
+    {u:"Hôm nay tệp khách trung thành đông, shop bền — quá đẹp!",r:"Hôm nay nếu có khách thầm lặng thất vọng, hậu mãi tốt hơn nha."},
+    {u:"Hôm nay có ý tưởng sản phẩm quà tặng dễ thương — thử đi!",r:"Hôm nay sản phẩm cảm tính quá, kiểm xem khách cần thật không nha."},
+    {u:"Hôm nay có cơ hội đơn sỉ/hợp tác hấp dẫn — cân nhắc kỹ nha!",r:"Hôm nay đơn sỉ hứa ngọt mà chưa chắc, kiểm chứng rồi hẵng nhận."},
+    {u:"Hôm nay CSKH có tâm, khách cảm nhận được — lợi thế lớn đó!",r:"Hôm nay đừng ôm cảm xúc khách khó tính, đặt ranh giới nha."},
+    {u:"Hôm nay điềm tĩnh xử khách khó, giữ uy tín shop — giỏi đó!",r:"Hôm nay nếu bực khách, xả lành mạnh đi đừng để dồn nén nha."},
+    {u:"Hôm nay tìm ra từ khóa vàng, insight sắc — tối ưu listing liền!",r:"Hôm nay SEO hơi mù mờ à? Research keyword kỹ rồi hẵng list nha."},
+    {u:"Hôm nay phân vân giữ giá hay giảm, nhìn số liệu mà quyết nha!",r:"Hôm nay đừng lừng khừng, đối thủ chiếm ngách mất đó nha."},
+    {u:"Hôm nay nếu dính review đau hay đơn hủy, rút bài học mà sửa!",r:"Hôm nay đang nguôi sau cú sốc doanh số, đứng dậy tối ưu tiếp."},
+    {u:"Hôm nay mùa thấp điểm, nghỉ sạc lại ý tưởng cũng hợp lý đó!",r:"Hôm nay nghỉ đủ rồi thì quay lại tối ưu shop dần nha."},
+    {u:"Hôm nay đừng đua phá giá thắng đơn mà lỗ vốn, cân nhắc nha!",r:"Hôm nay drama với đối thủ/khách đang dịu, tập trung làm hàng đi."},
+    {u:"Hôm nay chuyển ngách khó sang ngách dễ thở hơn — đúng hướng!",r:"Hôm nay dứt ngách lỗ chưa xong, mạnh tay cắt là nhẹ liền."},
+    {u:"Hôm nay coi chừng bị copy listing hay đối thủ chơi xấu — đề phòng!",r:"Hôm nay làm minh bạch là an toàn, đừng lách rule quá đà nha."},
+    {u:"Hôm nay thấy bí ngách chứ còn nhiều cơ hội bạn chưa thử đó!",r:"Hôm nay đang thoát khỏi mindset bí, nhìn ra ngách mới rồi!"},
+    {u:"Hôm nay đừng lo đơn ít quá, chia sẻ cộng đồng cho đỡ stress!",r:"Hôm nay nỗi lo đang dịu, tình hình không tệ như bạn nghĩ đâu."},
+    {u:"Hôm nay nếu một ngách chết, dẹp dứt điểm là chỉ còn đi lên!",r:"Hôm nay đang gượng dậy sau ngách lỗ, buông cái nên bỏ nha."},
+    {u:"Hôm nay ham học SEO, theo dõi trend sát — giữ cái nhạy đó nha!",r:"Hôm nay coi chừng nghe tin đồn ngách hot chưa kiểm chứng nha."},
+    {u:"Hôm nay quyết nhanh đổi giá/ảnh khi data báo — tốc độ là lợi thế!",r:"Hôm nay đừng đổi listing xoành xoạch, để thuật toán kịp học nha."},
+    {u:"Hôm nay nhìn số liệu sắc, cắt ngách lỗ không tiếc — quyết đoán!",r:"Hôm nay đừng bỏ ngách khi chưa cho đủ thời gian, kiên nhẫn tí."},
+    {u:"Hôm nay chiến lược ngách bài bản, quyết bằng dữ liệu — vững!",r:"Hôm nay chừa chỗ cho trực giác ngách, đừng cứng theo data quá."},
+    {u:"Hôm nay có ngách sinh lời mới mở ra — nền tảng ngon để đầu tư!",r:"Hôm nay tính lời nhớ trừ phí sàn/ship, soi lại giá vốn nha."},
+    {u:"Hôm nay xoay nhiều SKU nhiều đơn khéo lắm — linh hoạt là mạnh!",r:"Hôm nay quá tải đơn à? Sắp xếp lại quy trình kho cho gọn nha."},
+    {u:"Hôm nay phối hợp với xưởng/đối tác ra hàng chất — ăn ý đó!",r:"Hôm nay làm rõ quy trình với bên gia công là hết lộn xộn nha."},
+    {u:"Hôm nay giữ chặt dòng tiền, quản tồn kho — lúc cần thận trọng!",r:"Hôm nay đừng tiếc tiền quảng cáo quá, có lúc phải chi để có đơn."},
+    {u:"Hôm nay ế ẩm cũng đừng nản, bình tĩnh tìm cách gỡ là qua!",r:"Hôm nay khó qua rồi, đơn đang nhúc nhích lại, ráng tí nha."},
+    {u:"Hôm nay tái đầu tư lời vào quảng cáo/sản phẩm hợp lý — cân bằng!",r:"Hôm nay đổ tiền ads lệch à? Soi lại cái nào ra đơn thật nha."},
+    {u:"Hôm nay đánh giá ngách nào sinh lời, kiên nhẫn chờ chín là gặt!",r:"Hôm nay đừng sốt ruột bỏ ngách sớm, xem nó còn đáng nuôi không."},
+    {u:"Hôm nay mài kỹ năng chụp ảnh, viết listing — chất lượng lên rõ!",r:"Hôm nay đừng làm listing qua loa, chăm chút mới ra đơn nha."},
+    {u:"Hôm nay shop tự chạy ổn, thu nhập đều — thành quả xứng đáng!",r:"Hôm nay cày shop quên nghỉ rồi, cân lại sức khỏe tí nha."},
+    {u:"Hôm nay shop bền vững, có tệp khách và ngách chắc — nền tảng tốt!",r:"Hôm nay dòng tiền bấp bênh à? Củng cố ngách lõi trước nha."},
+    {u:"Hôm nay có ngách mới hoặc kỹ năng đáng học — khởi đầu chắc tay!",r:"Hôm nay đừng kế hoạch viển vông, test nhỏ thực tế trước nha."},
+    {u:"Hôm nay làm bền bỉ, list đều mỗi ngày — chậm mà chắc lên đơn!",r:"Hôm nay thêm tí nhanh nhạy bắt trend, đừng ì quá nha."},
+    {u:"Hôm nay quản tiền-hàng-khách khéo, shop ổn và ấm — giỏi đó!",r:"Hôm nay ôm hết vận hành kiệt sức à? Thuê người phụ kho nha."},
+    {u:"Hôm nay bạn xây shop thành tài sản — bài bản, bền vững lắm!",r:"Hôm nay đừng bảo thủ giữ ngách cũ, thị trường đổi rồi đó nha."},
+  ],
+  SUPPORT: [
+    {u:"Hôm nay thử cách soạn đơn/tạo promotion mới đi, sẽ nhanh hơn đó!",r:"Hôm nay khoan làm vội, kiểm kỹ thông tin đơn rồi hẵng chốt nha."},
+    {u:"Hôm nay bạn đủ tool đủ tay nghề, up listing hay soạn đơn đều mượt!",r:"Hôm nay đừng ôm nhiều việc quá, làm chắc từng cái là ổn nha."},
+    {u:"Hôm nay nhạy với data acc, bạn sẽ thấy điều cần chỉnh ngay!",r:"Hôm nay note Ads chưa rõ đừng đoán, xem kỹ số liệu rồi ghi nha."},
+    {u:"Hôm nay chăm acc tỉ mỉ, listing lên đẹp — nuôi acc khỏe lắm!",r:"Hôm nay ôm nhiều acc quá dễ đuối, chia bớt cho team nha."},
+    {u:"Hôm nay làm theo quy trình soạn đơn chuẩn là gọn gàng, ít sai!",r:"Hôm nay đừng cứng nhắc một kiểu, có đơn cần linh hoạt tí nha."},
+    {u:"Hôm nay theo đúng policy sàn khi tạo FS/promotion là an toàn!",r:"Hôm nay bám rule cũ quá, cách làm promotion mới đang hiệu quả hơn."},
+    {u:"Hôm nay chọn đúng listing để up trước là ra đơn nhanh đó!",r:"Hôm nay phân vân up acc nào trước à? Ưu tiên acc tiềm năng nha."},
+    {u:"Hôm nay nhiều đơn nhiều task, bạn xử gọn đúng hẹn — giữ guồng tốt!",r:"Hôm nay việc dồn quá à? Ưu tiên đơn gấp với acc chính trước nha."},
+    {u:"Hôm nay cứ kiên trì up listing đều, kiểu gì acc cũng lên!",r:"Hôm nay hơi nản vì việc lặp à? Bình tĩnh, chăm acc cần thời gian."},
+    {u:"Hôm nay ngồi rà lại Ads US+UK kỹ, sẽ tối ưu được chi phí đó!",r:"Hôm nay đừng làm một mình mãi, hỏi team về acc cho nhanh nha."},
+    {u:"Hôm nay đúng đợt sale, tạo promotion kịp sóng là nổ đơn!",r:"Hôm nay sàn đổi chính sách à? Linh hoạt cập nhật là ổn thôi."},
+    {u:"Hôm nay soạn đơn chuẩn xác, không sai sót — đáng tin cậy lắm!",r:"Hôm nay nhớ kiểm thông tin đơn UK/US kỹ kẻo nhầm địa chỉ nha."},
+    {u:"Hôm nay listing chưa lên thì đổi tiêu đề/ảnh thử là khác liền!",r:"Hôm nay bí cách up acc à? Nghỉ chút đổi góc nhìn là ra ý thôi."},
+    {u:"Hôm nay dẹp listing chết, dồn sức cho acc tiềm năng là đúng!",r:"Hôm nay đừng tiếc listing không ra đơn mà giữ hoài, buông nhẹ nha."},
+    {u:"Hôm nay cân giữa up listing, soạn đơn và note Ads — khéo léo lắm!",r:"Hôm nay đừng làm quá sức, chia đều việc trong ngày cho khỏe nha."},
+    {u:"Hôm nay coi chừng sa đà chỉnh sửa một listing quên việc khác nha!",r:"Hôm nay đang gỡ được mớ việc tồn rồi, nhẹ nhõm hẳn lên thôi!"},
+    {u:"Hôm nay nếu acc gặp trục trặc, xử bình tĩnh là qua nhanh thôi!",r:"Hôm nay đừng làm liều với acc, cẩn thận là tránh được rủi ro nha."},
+    {u:"Hôm nay listing AI bạn làm sẽ lên đẹp — cứ tự tin tạo đi!",r:"Hôm nay hơi xuống tinh thần à? Nhớ acc nào bạn nuôi lên để vực dậy."},
+    {u:"Hôm nay số liệu Ads hơi mơ hồ, theo dõi thêm rồi hẵng kết luận nha!",r:"Hôm nay sương sắp tan, bạn sẽ thấy acc nào thật sự hiệu quả."},
+    {u:"Hôm nay acc lên đơn, listing chạy tốt — bạn đang làm rất ổn!",r:"Hôm nay vui rồi nhưng kiểm lại đơn đã soạn kẻo sót chi tiết nha."},
+    {u:"Hôm nay nhìn lại data các acc sẽ rút ra cách up listing hiệu quả!",r:"Hôm nay đừng tự ti vì listing chưa lên, mỗi cái là một bài học."},
+    {u:"Hôm nay hoàn thành trọn vẹn cả đống task — quá đỉnh luôn!",r:"Hôm nay gần xong rồi, làm nốt mấy đơn cuối là sạch việc thôi!"},
+    {u:"Hôm nay có ý tưởng làm vid AI cho listing — làm liền là cuốn lắm!",r:"Hôm nay ý tưởng để đó hoài không làm thì cũng bằng không nha."},
+    {u:"Hôm nay lên kế hoạch up listing cho cả tuần — tầm nhìn tốt đó!",r:"Hôm nay đừng do dự, chốt acc nào up trước rồi làm thôi nha."},
+    {u:"Hôm nay listing up hôm trước bắt đầu có đơn — đà này lên là chắc!",r:"Hôm nay listing ì ạch à? Soi xem tiêu đề hay ảnh đang yếu chỗ nào."},
+    {u:"Hôm nay up đủ chỉ tiêu listing trong ngày — tự thưởng tí đi!",r:"Hôm nay làm chưa đều à? Sắp xếp lại để mai chạy mượt hơn nha."},
+    {u:"Hôm nay acc cạnh tranh gắt, làm listing khác biệt là bạn thắng!",r:"Hôm nay đừng đua y hệt đối thủ, làm nét riêng cho acc nha."},
+    {u:"Hôm nay listing bạn up lên top, được ghi nhận — tự hào đi!",r:"Hôm nay đừng tự mãn, giữ phong độ up đều mỗi ngày nha."},
+    {u:"Hôm nay giữ vững cách làm đã hiệu quả dù ai nói gì — đúng đó!",r:"Hôm nay đuối vì việc dồn à? Chọn task quan trọng làm trước thôi."},
+    {u:"Hôm nay đơn về dồn, soạn nhanh gọn đúng hẹn là khách hài lòng!",r:"Hôm nay đừng để đơn ùn, xử dứt điểm từng cái là thông liền."},
+    {u:"Hôm nay sắp hết task rồi, ráng làm nốt là nhẹ nhõm cả ngày!",r:"Hôm nay mệt vì làm nhiều à? Nghỉ giải lao rồi làm tiếp nha."},
+    {u:"Hôm nay nhiều acc nhiều đơn nhưng bạn lo được hết, tin mình đi!",r:"Hôm nay ôm nhiều quá à? San bớt acc cho team là khỏe liền."},
+    {u:"Hôm nay có cách up listing mới đáng thử — test trên một acc xem!",r:"Hôm nay hứng thử cái mới rồi dễ bỏ, theo tới cùng nha."},
+    {u:"Hôm nay làm tới đi, up loạt listing táo bạo là chiếm sóng nhanh!",r:"Hôm nay đừng vội quá kẻo sai info đơn, kiểm rồi hẵng chốt nha."},
+    {u:"Hôm nay listing bạn làm có gu, cuốn hút — tỏa sáng đi!",r:"Hôm nay thiếu tự tin à? Listing bạn làm tốt hơn bạn nghĩ đó."},
+    {u:"Hôm nay bạn dẫn cách làm acc/listing cho team — bài bản lắm!",r:"Hôm nay nghe team góp ý trước khi áp cách của mình là hay nha."},
+    {u:"Hôm nay có cảm hứng làm vid AI mới mẻ — listing sẽ cuốn lắm!",r:"Hôm nay thêm chút sáng tạo vào listing là khác hẳn đó nha."},
+    {u:"Hôm nay phối hợp ăn ý với seller/media — việc chạy mượt ghê!",r:"Hôm nay nếu phối hợp hơi lệch, nói rõ với nhau là êm liền nha."},
+    {u:"Hôm nay cả team support làm việc vui vẻ, đẩy task nhanh — mừng!",r:"Hôm nay vui thì vui, đừng quên kiểm kỹ đơn kẻo sót nha."},
+    {u:"Hôm nay để ý data acc bị bỏ quên sẽ thấy listing tiềm năng đó!",r:"Hôm nay đang lấy lại hứng làm việc rồi, cơ hội mới sắp tới!"},
+    {u:"Hôm nay một listing flop đừng buồn, mấy cái khác vẫn chạy tốt mà!",r:"Hôm nay đang vực lại, rút kinh nghiệm là up cái sau ngon hơn."},
+    {u:"Hôm nay dùng lại mẫu listing cũ từng hit là chắc ăn đó!",r:"Hôm nay đừng bám mãi template cũ, làm mới tí cho tươi nha."},
+    {u:"Hôm nay nhiều ý tưởng listing quá, chọn cái khả thi nhất mà làm!",r:"Hôm nay đã rõ rồi, chốt listing chính là làm ngon thôi."},
+    {u:"Hôm nay buông acc hết tiềm năng, dồn sức cho acc đáng nuôi hơn!",r:"Hôm nay phân vân giữ acc nào à? Nhìn data là quyết được thôi."},
+    {u:"Hôm nay acc lên đơn như ý, mọi việc trôi chảy — tận hưởng đi!",r:"Hôm nay vui rồi nhưng còn dư sức, up thêm listing nữa đi!"},
+    {u:"Hôm nay team support gắn kết, việc đâu ra đó — hạnh phúc ghê!",r:"Hôm nay nếu thấy lạc nhịp với team, trao đổi tí là ăn ý lại."},
+    {u:"Hôm nay có ý tưởng listing dễ thương, sáng tạo — làm là mê!",r:"Hôm nay đừng ngại thử ý mới cho listing, cứ vui mà làm nha."},
+    {u:"Hôm nay có listing/sản phẩm hay đáng đẩy mạnh — nắm lấy nha!",r:"Hôm nay ý tưởng nghe hay mà chưa chắc hiệu quả, test nhỏ đã nha."},
+    {u:"Hôm nay bạn hiểu acc cần gì để lên, chăm là trúng — lợi thế lớn!",r:"Hôm nay đừng để việc lặp làm chán, đổi không khí tí cho vui nha."},
+    {u:"Hôm nay bình tĩnh xử việc dù acc trục trặc — vững vàng lắm!",r:"Hôm nay nếu căng thẳng vì việc dồn, hít thở rồi làm từng cái nha."},
+    {u:"Hôm nay đầu óc sắc bén, note Ads rõ ràng — tối ưu là ngon liền!",r:"Hôm nay số liệu Ads rối à? Ghi ra cho rõ là dễ quyết hơn nha."},
+    {u:"Hôm nay phân vân tăng hay giảm Ads, nhìn số liệu mà quyết nha!",r:"Hôm nay đừng lừng khừng lâu, chốt nhanh là kịp tối ưu đó."},
+    {u:"Hôm nay nếu acc bị tụt, đừng nản — đó là dữ liệu để chỉnh tốt hơn!",r:"Hôm nay đang nguôi sau acc flop, bỏ qua là up cái mới thôi."},
+    {u:"Hôm nay nghỉ tí giữa đống task cũng là sạc lại năng lượng đó!",r:"Hôm nay nghỉ đủ rồi thì cân lại nghỉ với làm cho hợp nha."},
+    {u:"Hôm nay đừng đua phá giá promotion mà lỗ, cân nhắc kỹ nha!",r:"Hôm nay nếu có bất đồng trong cách làm, trao đổi nhẹ là êm thôi."},
+    {u:"Hôm nay chuyển acc khó sang cách làm mới êm hơn — đúng hướng!",r:"Hôm nay dứt acc lỗ chưa xong, mạnh dạn buông là nhẹ liền."},
+    {u:"Hôm nay làm promotion minh bạch đúng policy là an toàn nhất nha!",r:"Hôm nay đừng lách rule sàn để lên nhanh, cẩn thận kẻo bay acc."},
+    {u:"Hôm nay thấy bí cách up acc chứ có cách đó, hỏi team đi nha!",r:"Hôm nay đang gỡ được nút thắt, nhìn ra hướng làm rồi đó!"},
+    {u:"Hôm nay đừng lo acc không lên, cứ làm đều là kết quả sẽ tới!",r:"Hôm nay nỗi lo đang tan, acc ổn hơn bạn tưởng nhiều đó."},
+    {u:"Hôm nay nếu một acc/listing chết hẳn, mừng đi vì cái mới sắp tới!",r:"Hôm nay đang gượng dậy rồi, buông cái nên dẹp là khỏe hơn nha."},
+    {u:"Hôm nay ham học cách tối ưu Ads mới — giữ cái tò mò đó nha!",r:"Hôm nay coi chừng làm theo mẹo chưa kiểm chứng, thử nhỏ đã nha."},
+    {u:"Hôm nay quyết nhanh chỉnh Ads/listing khi data báo — lợi thế đó!",r:"Hôm nay đừng chỉnh xoành xoạch, để số liệu kịp phản ánh nha."},
+    {u:"Hôm nay nhìn data sắc, cắt acc lỗ không tiếc — quyết đoán lắm!",r:"Hôm nay đừng bỏ acc khi chưa cho đủ thời gian, kiên nhẫn tí nha."},
+    {u:"Hôm nay làm acc/Ads bài bản, quyết bằng dữ liệu — vững vàng!",r:"Hôm nay chừa chỗ cho trực giác, đừng cứng theo số liệu quá nha."},
+    {u:"Hôm nay có acc/listing tiềm năng sinh lời mới — nắm lấy nha!",r:"Hôm nay tính hiệu quả nhớ trừ chi phí Ads, soi lại cho đúng nha."},
+    {u:"Hôm nay xoay nhiều acc nhiều task khéo lắm — linh hoạt là mạnh!",r:"Hôm nay quá tải à? Sắp xếp lại thứ tự ưu tiên cho gọn nha."},
+    {u:"Hôm nay phối hợp với seller/media ra listing chất — ăn ý đó!",r:"Hôm nay làm rõ ai làm khâu nào là hết lộn xộn việc nha."},
+    {u:"Hôm nay quản ngân sách Ads chặt chẽ là khôn ngoan đúng lúc!",r:"Hôm nay đừng tiếc tiền Ads quá, có lúc phải chi để acc lên nha."},
+    {u:"Hôm nay acc hiệu quả thấp cũng đừng nản, chỉnh dần là khá lên!",r:"Hôm nay khó qua rồi, acc đang nhúc nhích lại, ráng tí nha."},
+    {u:"Hôm nay phân bổ ngân sách Ads cho các acc hợp lý — cân bằng tốt!",r:"Hôm nay đổ tiền Ads lệch à? Soi lại acc nào ra đơn thật nha."},
+    {u:"Hôm nay đánh giá acc nào đáng nuôi, kiên nhẫn là sẽ gặt đơn!",r:"Hôm nay đừng sốt ruột bỏ acc sớm, xem nó còn tiềm năng không nha."},
+    {u:"Hôm nay mài kỹ năng up listing, làm vid AI — tay nghề lên rõ!",r:"Hôm nay đừng làm qua loa, chăm chút listing tí là khác hẳn đó."},
+    {u:"Hôm nay tự chủ làm việc gọn gàng, được tin tưởng — xứng đáng!",r:"Hôm nay cày việc quên nghỉ rồi, chăm sức khỏe tí nha."},
+    {u:"Hôm nay acc bạn nuôi ổn định, ra đơn đều — nền tảng bền đó!",r:"Hôm nay củng cố acc chính trước khi ôm thêm acc mới nha."},
+    {u:"Hôm nay có kỹ năng mới (vid AI, tối ưu Ads) đáng học — đầu tư nha!",r:"Hôm nay làm từng bước nhỏ thực tế, đừng ôm kế hoạch viển vông nha."},
+    {u:"Hôm nay up listing đều, soạn đơn tỉ mỉ — chậm mà chắc là lên!",r:"Hôm nay thêm tí nhanh nhạy bắt trend, đừng ì quá nha."},
+    {u:"Hôm nay quản acc-đơn-Ads ngăn nắp, mọi thứ đâu ra đó — giỏi!",r:"Hôm nay ôm hết việc kiệt sức à? San bớt cho team là khỏe nha."},
+    {u:"Hôm nay bạn nuôi acc thành tài sản bền vững — bài bản lắm!",r:"Hôm nay đừng bảo thủ cách cũ, sàn và acc đổi rồi, cập nhật nha."},
+  ],
+  MEDIA: [
+    {u:"Hôm nay cứ mạnh dạn thử format mới đi, biết đâu lại nổ!",r:"Hôm nay khoan đăng vội, ngó lại nội dung chút cho chắc nha."},
+    {u:"Hôm nay bạn đủ ý tưởng đủ tay nghề, làm gì cũng ra hit!",r:"Hôm nay đừng ôm đồm nhiều quá, làm một cái cho tới đi."},
+    {u:"Hôm nay tin vào trực giác chọn nội dung của mình, chuẩn đó!",r:"Hôm nay có trend ngầm chưa rõ, nghe ngóng thêm rồi hẵng làm."},
+    {u:"Hôm nay nội dung bạn làm sẽ rất cuốn, lượt xem lên đẹp!",r:"Hôm nay làm nhiều quá dễ đuối, chăm chút một bài thôi nha."},
+    {u:"Hôm nay lên lịch đăng bài bài bản, mọi thứ vào guồng ngon!",r:"Hôm nay đừng cứng nhắc một kiểu, thử linh hoạt chút đi."},
+    {u:"Hôm nay làm theo công thức đã hiệu quả là chắc ăn!",r:"Hôm nay công thức cũ hơi nhàm, thêm chút mới cho tươi nha."},
+    {u:"Hôm nay chọn đúng chủ đề bạn thích, làm là lên liền!",r:"Hôm nay phân vân chọn nội dung à? Theo cái tim mách bảo đi."},
+    {u:"Hôm nay năng lượng đầy, đẩy nội dung là viral tới nơi!",r:"Hôm nay nhiều việc một lúc, làm từng cái cho chắc tay nha."},
+    {u:"Hôm nay cứ kiên trì đăng đều, kiểu gì cũng lên xu hướng!",r:"Hôm nay hơi nản à? Bình tĩnh, content cần thời gian mà."},
+    {u:"Hôm nay ngồi nghiên cứu trend kỹ, sẽ tìm ra ý tưởng vàng!",r:"Hôm nay đừng làm một mình mãi, hỏi team góp ý cho hay hơn."},
+    {u:"Hôm nay đúng sóng trend rồi, bắt nhịp là nổ ngay!",r:"Hôm nay trend đổi nhanh, linh hoạt tí là bắt kịp thôi mà."},
+    {u:"Hôm nay làm nội dung tử tế, chân thật — khán giả sẽ thương!",r:"Hôm nay nhớ kiểm bản quyền nhạc/hình trước khi đăng nha."},
+    {u:"Hôm nay thử nhìn chủ đề từ góc lạ, sẽ ra ý hay bất ngờ!",r:"Hôm nay bí ý à? Nghỉ chút đổi không khí rồi ý sẽ tới thôi."},
+    {u:"Hôm nay mạnh dạn bỏ ý tưởng cũ, làm cái mới là đúng đắn!",r:"Hôm nay đừng tiếc nội dung không hiệu quả, buông nhẹ thôi."},
+    {u:"Hôm nay cân bằng được sáng tạo và deadline — mượt mà lắm!",r:"Hôm nay đừng làm quá sức, nghỉ ngơi rồi làm tiếp nha."},
+    {u:"Hôm nay coi chừng sa đà lướt trend quên làm việc nha!",r:"Hôm nay đang thoát được cái áp lực view rồi, nhẹ nhõm lên!"},
+    {u:"Hôm nay có thể có trục trặc nhỏ, nhưng qua nhanh ấy mà!",r:"Hôm nay nếu kế hoạch đổ, bình tĩnh — đó là cơ hội làm mới đó."},
+    {u:"Hôm nay tràn đầy cảm hứng, nội dung của bạn sẽ tỏa sáng!",r:"Hôm nay hơi xuống tinh thần à? Nhớ lý do bạn bắt đầu đi nha."},
+    {u:"Hôm nay số liệu hơi mơ hồ, cứ làm hết mình rồi đo sau nha!",r:"Hôm nay sương sắp tan, mọi thứ sẽ rõ ràng hơn thôi mà."},
+    {u:"Hôm nay content của bạn chắc chắn lên xu hướng, cứ tự tin đăng nhé!",r:"Hôm nay vui rồi nhưng đừng chủ quan, kiểm bài kỹ tí nha."},
+    {u:"Hôm nay nhìn lại bài cũ sẽ rút ra bí kíp viral cho mình!",r:"Hôm nay đừng tự ti vì bài chưa nổi, mỗi bài là một bài học."},
+    {u:"Hôm nay một dự án nội dung hoàn thành trọn vẹn — quá đỉnh!",r:"Hôm nay gần xong rồi, ráng nốt khâu cuối là viral thôi!"},
+    {u:"Hôm nay có ý tưởng cháy lắm, làm liền khi còn nóng là nổ!",r:"Hôm nay ý tưởng hơi nguội à? Lướt tí trend là có cảm hứng ngay."},
+    {u:"Hôm nay lên kế hoạch nội dung tuần — tầm nhìn xa là thắng!",r:"Hôm nay đừng do dự nữa, chốt ý tưởng rồi làm thôi nha."},
+    {u:"Hôm nay bài đăng bắt đầu có tương tác, đà này lên là chắc!",r:"Hôm nay tương tác hơi chậm, kiên nhẫn chút rồi sẽ bùng."},
+    {u:"Hôm nay ăn mừng được một bài lên tốt — bạn xứng đáng đó!",r:"Hôm nay nền tảng chưa vững, làm chắc từng bài đã nha."},
+    {u:"Hôm nay cạnh tranh trend gắt, nhưng nét riêng của bạn sẽ thắng!",r:"Hôm nay đừng đua theo người khác mệt, làm chất mình thôi."},
+    {u:"Hôm nay bài của bạn lên top, được ghi nhận — tự hào đi!",r:"Hôm nay vui chiến thắng rồi nhưng giữ phong độ tiếp nha."},
+    {u:"Hôm nay giữ vững phong cách riêng dù ai nói gì — đúng đó!",r:"Hôm nay hơi đuối vì áp lực à? Chọn việc quan trọng làm thôi."},
+    {u:"Hôm nay mọi thứ tăng tốc, đăng bài là lan nhanh chóng mặt!",r:"Hôm nay nếu bị nghẽn ý, gỡ rối từ từ là thông ngay thôi."},
+    {u:"Hôm nay sắp tới đích rồi, ráng thêm chút là viral đó!",r:"Hôm nay mệt thì nghỉ tí, đừng gồng quá sức mình nha."},
+    {u:"Hôm nay nhiều việc nhưng bạn làm được hết, cứ tin mình đi!",r:"Hôm nay ôm nhiều quá à? Nhờ team phụ một tay cho nhẹ nha."},
+    {u:"Hôm nay có ý tưởng mới mẻ đáng thử, làm là vui lắm đó!",r:"Hôm nay hứng lên rồi dễ bỏ giữa chừng, theo tới cùng nha."},
+    {u:"Hôm nay làm tới đi, táo bạo là sẽ tạo được hit bất ngờ!",r:"Hôm nay đừng vội quá kẻo sót chi tiết, chậm lại tí thôi."},
+    {u:"Hôm nay sự tự tin của bạn cuốn hút khán giả — tỏa sáng đi!",r:"Hôm nay thiếu tự tin à? Bạn giỏi hơn bạn nghĩ nhiều đó."},
+    {u:"Hôm nay tầm nhìn nội dung của bạn dẫn đầu — cứ mạnh dạn!",r:"Hôm nay đừng ôm hết, để team cùng sáng tạo cho vui nha."},
+    {u:"Hôm nay nội dung chạm cảm xúc, khán giả sẽ yêu bạn lắm!",r:"Hôm nay thêm chút cảm xúc thật vào bài là cuốn hơn nha."},
+    {u:"Hôm nay có cơ hội collab hay ho, bắt tay là đôi bên cùng lên!",r:"Hôm nay quan hệ hợp tác hơi lệch, nói chuyện rõ ràng đi nha."},
+    {u:"Hôm nay khán giả tương tác vui vẻ, cộng đồng đang yêu bạn!",r:"Hôm nay vui quá đừng quên chất lượng nội dung nha."},
+    {u:"Hôm nay để ý feedback khán giả sẽ thấy ý tưởng vàng đó!",r:"Hôm nay đang lấy lại cảm hứng rồi, cơ hội mới sắp tới!"},
+    {u:"Hôm nay một bài chưa nổi cũng đừng buồn, bài sau sẽ bùng!",r:"Hôm nay đang vực dậy rồi, rút kinh nghiệm là lên thôi mà."},
+    {u:"Hôm nay làm lại format cũ từng hit là chắc ăn đó!",r:"Hôm nay đừng bám mãi cái cũ, thêm tí mới cho tươi nha."},
+    {u:"Hôm nay nhiều ý tưởng quá, chọn cái khả thi nhất mà làm nha!",r:"Hôm nay đã rõ rồi, chốt ý tưởng chính là làm ngon thôi!"},
+    {u:"Hôm nay mạnh dạn bỏ chủ đề hết duyên, tìm cái hợp mình hơn!",r:"Hôm nay phân vân đổi hướng à? Nghe lòng mình là biết thôi."},
+    {u:"Hôm nay điều bạn mong sẽ thành, nội dung lên như ý đó!",r:"Hôm nay vui rồi nhưng còn dư sức, làm thêm cái nữa đi!"},
+    {u:"Hôm nay cộng đồng của bạn ấm áp, gắn kết — hạnh phúc ghê!",r:"Hôm nay thấy hơi lạc lõng à? Tương tác với fan là vui lại liền."},
+    {u:"Hôm nay có ý tưởng dễ thương, sáng tạo — làm là khán giả mê!",r:"Hôm nay đừng ngại thử ý mới, cứ vui vẻ sáng tạo đi nha."},
+    {u:"Hôm nay có lời mời hợp tác lãng mạn với nội dung — cân nhắc nha!",r:"Hôm nay lời mời nghe hay mà chưa chắc, kiểm lại tí đi."},
+    {u:"Hôm nay bạn hiểu khán giả muốn gì, làm là trúng tim họ!",r:"Hôm nay đừng ôm hết cảm xúc tiêu cực, thả lỏng chút nha."},
+    {u:"Hôm nay bình tĩnh xử mọi comment, giữ hình ảnh đẹp — giỏi!",r:"Hôm nay nếu có bình luận khó chịu, hít thở rồi xử nhẹ nhàng."},
+    {u:"Hôm nay đầu óc sắc bén, nghĩ ra tiêu đề giật là cuốn liền!",r:"Hôm nay ý hơi rối à? Viết ra giấy là rõ ràng ngay thôi."},
+    {u:"Hôm nay phân vân chọn ý nào, cứ tin trực giác mà quyết nha!",r:"Hôm nay đừng lừng khừng lâu, chốt nhanh là làm kịp đó."},
+    {u:"Hôm nay nếu có chê bai, đừng buồn — đó là động lực tốt lên!",r:"Hôm nay đang nguôi rồi, bỏ qua góp ý tiêu cực mà đi tiếp."},
+    {u:"Hôm nay nghỉ ngơi sạc pin sáng tạo cũng là làm việc đó!",r:"Hôm nay nghỉ đủ rồi thì quay lại làm nha, ý sẽ tuôn trào."},
+    {u:"Hôm nay đừng hơn thua comment, tập trung làm nội dung hay hơn!",r:"Hôm nay tranh cãi đang dịu, làm hòa rồi làm việc cho vui."},
+    {u:"Hôm nay chuyển sang hướng nội dung mới êm hơn — đúng đắn đó!",r:"Hôm nay dứt cái cũ chưa xong, mạnh dạn buông là nhẹ liền."},
+    {u:"Hôm nay có chiêu thông minh để tăng reach, thử khéo nha!",r:"Hôm nay làm minh bạch là an toàn nhất, đừng lách quá đà."},
+    {u:"Hôm nay thấy bí chứ thật ra bạn nhiều cách hơn bạn nghĩ đó!",r:"Hôm nay đang gỡ được bí rồi, ý tưởng sắp tuôn ra thôi!"},
+    {u:"Hôm nay đừng lo bài không nổi, cứ làm hết mình là được rồi!",r:"Hôm nay nỗi lo đang tan, mọi thứ ổn hơn bạn tưởng nhiều."},
+    {u:"Hôm nay nếu một ý tưởng chết, mừng đi vì cái mới sắp tới!",r:"Hôm nay đang gượng dậy rồi, buông cái cũ là khởi đầu mới."},
+    {u:"Hôm nay ham học trend mới, hỏi nhiều — sẽ nắm bí kíp viral!",r:"Hôm nay coi chừng tin đồn trend chưa chắc, kiểm lại nha."},
+    {u:"Hôm nay quyết nhanh bắt trend là lợi thế lớn, làm liền đi!",r:"Hôm nay đừng hấp tấp quá, đọc kỹ trend rồi hẵng làm nha."},
+    {u:"Hôm nay tư duy rõ ràng, lên kịch bản sắc — nội dung chất lắm!",r:"Hôm nay đừng khắt khe với bản thân quá, làm là ổn thôi mà."},
+    {u:"Hôm nay chiến lược nội dung bài bản của bạn sẽ thắng lớn!",r:"Hôm nay linh hoạt tí, đừng cứng nhắc theo kế hoạch quá nha."},
+    {u:"Hôm nay có cơ hội nội dung sinh lời mới — nắm lấy là ngon!",r:"Hôm nay kế hoạch hơi xa thực tế, làm cái khả thi trước nha."},
+    {u:"Hôm nay xoay nhiều nền tảng khéo lắm, linh hoạt là điểm mạnh!",r:"Hôm nay hơi quá tải à? Sắp xếp lại ưu tiên cho gọn nha."},
+    {u:"Hôm nay phối hợp với team ra sản phẩm chất — ăn ý ghê!",r:"Hôm nay vai trò hơi lẫn lộn, chia rõ việc là chạy ngon liền."},
+    {u:"Hôm nay giữ vững phong cách thương hiệu là khôn ngoan đó!",r:"Hôm nay đừng ngại đầu tư cho nội dung, dám chi là dám lên."},
+    {u:"Hôm nay reach hơi thấp cũng đừng nản, bài sau sẽ khá hơn!",r:"Hôm nay khó qua rồi, tương tác đang nhúc nhích lên lại đó."},
+    {u:"Hôm nay chia sẻ kiến thức cho team, cho đi là nhận lại đó!",r:"Hôm nay cân lại đầu tư công sức cho đều các kênh nha."},
+    {u:"Hôm nay nhìn lại thành quả nội dung, kiên nhẫn là sẽ gặt!",r:"Hôm nay đừng sốt ruột, content cần thời gian mới chín mà."},
+    {u:"Hôm nay mài kỹ năng dựng/edit — tay nghề lên là nội dung chất!",r:"Hôm nay đừng làm qua loa, chăm chút tí là khác hẳn đó."},
+    {u:"Hôm nay tự hào về kênh mình gây dựng, thành quả xứng đáng!",r:"Hôm nay cày quên nghỉ rồi đó, chăm sức khỏe tí nha."},
+    {u:"Hôm nay nền tảng nội dung của bạn vững vàng, bền lâu lắm!",r:"Hôm nay củng cố kênh chính trước khi mở thêm cái mới nha."},
+    {u:"Hôm nay có kỹ năng mới đáng học, đầu tư là lợi về sau đó!",r:"Hôm nay đừng mơ mộng xa, bắt tay làm bước nhỏ thực tế nha."},
+    {u:"Hôm nay đăng đều đặn, chăm chỉ — chậm mà chắc là sẽ lên!",r:"Hôm nay thêm tí nhanh nhạy bắt trend, đừng ì quá nha."},
+    {u:"Hôm nay quản lý nội dung ngăn nắp, mọi thứ đâu ra đó — giỏi!",r:"Hôm nay ôm đồm quá à? Chia bớt việc cho team đi nha."},
+    {u:"Hôm nay bạn xây kênh thành tài sản bền vững — bài bản lắm!",r:"Hôm nay đừng bảo thủ format cũ, thị trường đổi rồi đó nha."},
+  ],
+  DESIGNER: [
+    {u:"Hôm nay thử phong cách thiết kế mới đi, biết đâu ra concept để đời!",r:"Hôm nay khoan gửi vội, ngó lại bố cục chút cho chắc rồi hẵng nộp nha."},
+    {u:"Hôm nay bạn đủ tool đủ ý tưởng, design gì cũng ra đẹp!",r:"Hôm nay đừng ôm nhiều file một lúc, làm tới một cái cho chỉn chu nha."},
+    {u:"Hôm nay tin vào gu thẩm mỹ của mình, chọn là chuẩn đó!",r:"Hôm nay brief chưa rõ đừng đoán, hỏi lại cho kỹ rồi hẵng làm nha."},
+    {u:"Hôm nay nguồn cảm hứng dạt dào, sản phẩm sẽ đẹp mê ly!",r:"Hôm nay ôm nhiều dự án quá dễ đuối, chăm chút một cái thôi nha."},
+    {u:"Hôm nay làm theo guideline/grid chuẩn là layout gọn gàng, pro!",r:"Hôm nay đừng cứng nhắc một khuôn, phá cách tí cho tươi nha."},
+    {u:"Hôm nay theo đúng brand guideline là an toàn mà chuyên nghiệp!",r:"Hôm nay rập khuôn cũ hơi nhàm, thêm chút sáng tạo cho mới nha."},
+    {u:"Hôm nay chọn đúng concept mình thích, làm là cuốn hút liền!",r:"Hôm nay phân vân 2 phương án à? Nghe trực giác thẩm mỹ mà chọn."},
+    {u:"Hôm nay năng lượng đầy, kéo deadline về đích ngon lành!",r:"Hôm nay nhiều brief một lúc à? Làm từng cái cho chắc tay nha."},
+    {u:"Hôm nay cứ kiên nhẫn chỉnh từng chi tiết, thành phẩm sẽ tuyệt!",r:"Hôm nay nản vì sửa nhiều lần à? Bình tĩnh, sắp ưng rồi đó."},
+    {u:"Hôm nay ngồi research reference kỹ, sẽ ra ý tưởng vàng đó!",r:"Hôm nay đừng cắm đầu một mình, hỏi team feedback cho hay hơn nha."},
+    {u:"Hôm nay đúng trend thiết kế đang hot — bắt nhịp là ăn điểm!",r:"Hôm nay trend đổi nhanh, cập nhật style mới tí là kịp thôi mà."},
+    {u:"Hôm nay làm đúng tỉ lệ, đúng yêu cầu — bản thiết kế chuẩn chỉnh!",r:"Hôm nay nhớ kiểm bản quyền font/ảnh trước khi dùng nha."},
+    {u:"Hôm nay thử lật ngược bố cục, sẽ ra góc nhìn mới bất ngờ đó!",r:"Hôm nay bí ý à? Nghỉ chút đổi không khí rồi cảm hứng sẽ tới thôi."},
+    {u:"Hôm nay mạnh dạn bỏ bản nháp cũ, làm lại từ đầu là đáng đó!",r:"Hôm nay đừng tiếc cái design không ổn, buông để làm cái tốt hơn nha."},
+    {u:"Hôm nay cân màu sắc và bố cục hài hòa — mắt nhìn là mê liền!",r:"Hôm nay đừng nhồi quá nhiều chi tiết, tối giản tí cho thoáng nha."},
+    {u:"Hôm nay coi chừng sa đà chỉnh một chi tiết nhỏ quên cả deadline nha!",r:"Hôm nay đang thoát được cái bí ý rồi, nhẹ nhõm sáng tạo lại thôi!"},
+    {u:"Hôm nay nếu file lỗi hay phải làm lại, bình tĩnh — bản mới sẽ đẹp hơn!",r:"Hôm nay nhớ lưu file thường xuyên, tránh mất công sửa lại nha."},
+    {u:"Hôm nay tràn đầy cảm hứng, thiết kế của bạn sẽ tỏa sáng!",r:"Hôm nay hơi xuống mood à? Lật portfolio cũ ra là tự hào lại liền."},
+    {u:"Hôm nay brief hơi mơ hồ, làm rõ với khách rồi hẵng vẽ nha!",r:"Hôm nay sương sắp tan, bạn sẽ hiểu khách muốn gì rõ hơn thôi."},
+    {u:"Hôm nay design của bạn được khen nức nở — cứ tự tin gửi đi!",r:"Hôm nay vui rồi nhưng soát lại file export kỹ tí kẻo sai size nha."},
+    {u:"Hôm nay nhìn lại bản cũ sẽ rút ra cách làm đẹp hơn cho lần sau!",r:"Hôm nay đừng tự ti vì bị sửa nhiều, mỗi lần sửa là một bài học."},
+    {u:"Hôm nay hoàn thành trọn vẹn một bộ thiết kế — quá đỉnh luôn!",r:"Hôm nay gần xong rồi, chỉnh nốt vài pixel cuối là hoàn hảo!"},
+    {u:"Hôm nay có ý tưởng concept cháy lắm, phác liền khi còn nóng nha!",r:"Hôm nay cảm hứng hơi nguội à? Lướt reference tí là cháy lại thôi."},
+    {u:"Hôm nay lên kế hoạch cho cả bộ thiết kế — tầm nhìn tốt đó!",r:"Hôm nay đừng do dự, chốt hướng concept rồi bắt tay làm thôi nha."},
+    {u:"Hôm nay bản thiết kế bắt đầu thành hình đẹp — đà này là ngon!",r:"Hôm nay tiến độ hơi chậm à? Soi xem khâu nào đang vướng nha."},
+    {u:"Hôm nay hoàn thành một bộ design ưng ý — tự thưởng tí đi!",r:"Hôm nay nền tảng file chưa gọn, sắp xếp layer lại cho dễ sửa nha."},
+    {u:"Hôm nay có tranh luận về phương án, giữ quan điểm thẩm mỹ là đúng!",r:"Hôm nay đôi co về style mệt à? Cho khách xem mockup là rõ liền."},
+    {u:"Hôm nay thiết kế của bạn được chọn, được khen — tự hào đi!",r:"Hôm nay đừng tự mãn, giữ phong độ cho bản tiếp theo nha."},
+    {u:"Hôm nay bảo vệ ý tưởng thiết kế của mình trước góp ý — vững vào!",r:"Hôm nay đuối vì sửa hoài à? Chọn góp ý hợp lý mà chỉnh thôi nha."},
+    {u:"Hôm nay làm nhanh mà vẫn đẹp, file ra liên tục — bắt nhịp đi!",r:"Hôm nay nếu bị nghẽn ý, gỡ từ từ là cảm hứng thông lại thôi."},
+    {u:"Hôm nay sắp xong bộ design rồi, ráng thêm chút là hoàn thiện!",r:"Hôm nay mỏi mắt rồi à? Nghỉ tí rồi làm tiếp kẻo sai màu nha."},
+    {u:"Hôm nay nhiều brief nhưng bạn làm được hết, cứ tin tay nghề đi!",r:"Hôm nay ôm nhiều job quá à? Nhờ team chia bớt cho nhẹ nha."},
+    {u:"Hôm nay có ý tưởng mới mẻ đáng thử — vẽ là vui lắm đó!",r:"Hôm nay hứng lên làm rồi dễ bỏ giữa chừng, theo tới cùng nha."},
+    {u:"Hôm nay làm tới đi, táo bạo về style là tạo dấu ấn riêng!",r:"Hôm nay đừng vội quá kẻo ẩu chi tiết, chậm lại tí cho chỉn chu."},
+    {u:"Hôm nay gu thẩm mỹ tự tin của bạn cuốn hút — tỏa sáng đi!",r:"Hôm nay thiếu tự tin à? Thiết kế của bạn đẹp hơn bạn nghĩ đó."},
+    {u:"Hôm nay tầm nhìn thẩm mỹ của bạn dẫn dắt cả nhóm — bài bản!",r:"Hôm nay nghe ý team trước khi áp style của mình là hay nha."},
+    {u:"Hôm nay thiết kế chạm cảm xúc, người xem sẽ mê mẩn lắm!",r:"Hôm nay thêm chút cảm xúc vào design là cuốn hơn hẳn đó nha."},
+    {u:"Hôm nay phối hợp ăn ý với khách/team — ra sản phẩm đẹp ghê!",r:"Hôm nay nếu lệch ý với khách, trao đổi rõ là hợp gu lại liền."},
+    {u:"Hôm nay được cả team khen design — vui và có động lực ghê!",r:"Hôm nay vui quá đừng quên kiểm chi tiết kỹ thuật nha."},
+    {u:"Hôm nay để ý feedback bị bỏ qua sẽ thấy hướng cải thiện hay đó!",r:"Hôm nay đang lấy lại cảm hứng rồi, ý tưởng mới sắp tới!"},
+    {u:"Hôm nay một bản bị từ chối đừng buồn, bản sau sẽ đẹp hơn mà!",r:"Hôm nay đang vực dậy rồi, rút kinh nghiệm là làm tốt hơn thôi."},
+    {u:"Hôm nay dùng lại style cũ từng được khen là chắc ăn đó!",r:"Hôm nay đừng bám mãi phong cách cũ, làm mới tí cho hợp thời nha."},
+    {u:"Hôm nay nhiều concept quá, chọn cái mạnh nhất mà phát triển nha!",r:"Hôm nay đã rõ rồi, chốt một hướng là làm tập trung được liền."},
+    {u:"Hôm nay mạnh dạn bỏ concept hết duyên, tìm hướng hợp mình hơn!",r:"Hôm nay phân vân đổi style à? Nghe gu của mình là biết thôi."},
+    {u:"Hôm nay thiết kế ra đúng như mình hình dung — toại nguyện ghê!",r:"Hôm nay ưng rồi nhưng còn dư sức, polish thêm tí cho hoàn hảo đi!"},
+    {u:"Hôm nay khách và team đều hài lòng với design — hạnh phúc ghê!",r:"Hôm nay nếu thấy chưa ưng, chỉnh nhẹ tí là trọn vẹn liền."},
+    {u:"Hôm nay có ý tưởng dễ thương, sáng tạo — làm là ai cũng thích!",r:"Hôm nay đừng ngại thử ý ngộ nghĩnh, cứ vui mà sáng tạo nha."},
+    {u:"Hôm nay có dự án thiết kế đẹp đáng dồn tâm huyết — nắm lấy nha!",r:"Hôm nay concept nghe lãng mạn mà chưa chắc khả thi, cân nhắc nha."},
+    {u:"Hôm nay bạn cảm được điều khách muốn, design là trúng tim họ!",r:"Hôm nay đừng để feedback gắt làm nản, thả lỏng rồi làm tiếp nha."},
+    {u:"Hôm nay bình tĩnh nhận feedback, chỉnh khéo — chuyên nghiệp ghê!",r:"Hôm nay nếu bị chê hơi đau, hít thở rồi tách cảm xúc ra mà sửa nha."},
+    {u:"Hôm nay đầu óc sắc bén, ra ý tưởng layout rõ ràng — sắc lắm!",r:"Hôm nay ý hơi rối à? Phác sketch ra giấy là rõ ràng ngay thôi."},
+    {u:"Hôm nay phân vân chọn phương án nào, tin con mắt mình mà quyết!",r:"Hôm nay đừng lừng khừng lâu, chốt nhanh là kịp deadline đó."},
+    {u:"Hôm nay nếu bị chê thẳng, đừng buồn — đó là cách lên tay đó!",r:"Hôm nay đang nguôi sau góp ý đau, bỏ qua là làm tiếp được rồi."},
+    {u:"Hôm nay nghỉ cho mắt thư giãn cũng là sạc lại cảm hứng đó!",r:"Hôm nay nghỉ đủ rồi thì quay lại, mắt tươi nhìn ra lỗi liền."},
+    {u:"Hôm nay đừng tranh hơn thua về gu, cho mockup nói thay là êm!",r:"Hôm nay căng về phương án đang dịu, làm hòa rồi làm việc nha."},
+    {u:"Hôm nay chuyển sang hướng thiết kế mới êm hơn — đúng đắn đó!",r:"Hôm nay dứt concept cũ chưa xong, buông là nhẹ đầu sáng tạo liền."},
+    {u:"Hôm nay có mẹo hay rút ngắn thời gian làm — thử khéo nha!",r:"Hôm nay đừng xài asset chưa rõ bản quyền, dùng nguồn sạch nha."},
+    {u:"Hôm nay thấy bí ý chứ thật ra bạn nhiều hướng hơn bạn nghĩ đó!",r:"Hôm nay đang gỡ được bí rồi, ý tưởng sắp tuôn ra thôi!"},
+    {u:"Hôm nay đừng lo design không đẹp, cứ làm hết mình là ổn thôi!",r:"Hôm nay nỗi lo đang tan, bản của bạn ổn hơn bạn tưởng nhiều."},
+    {u:"Hôm nay nếu một concept chết, mừng đi vì ý mới sắp tới đó!",r:"Hôm nay đang gượng dậy rồi, buông bản nên bỏ là khởi đầu mới."},
+    {u:"Hôm nay ham học tool/kỹ thuật mới — giữ cái tò mò đó là lên tay!",r:"Hôm nay coi chừng làm theo tutorial chưa chắc hợp, thử nhỏ đã nha."},
+    {u:"Hôm nay làm nhanh dứt khoát là kịp deadline — cứ tự tin lao!",r:"Hôm nay đừng hấp tấp kẻo sai chi tiết, soát lại tí rồi gửi nha."},
+    {u:"Hôm nay tư duy bố cục rõ ràng, sắc sảo — thiết kế gọn mà chất!",r:"Hôm nay đừng khắt khe với bản thân quá, design vậy là ổn rồi mà."},
+    {u:"Hôm nay tư duy thiết kế bài bản, có nguyên tắc — bản nào cũng chuẩn!",r:"Hôm nay linh hoạt tí, đừng cứng theo quy tắc quá kẻo khô khan nha."},
+    {u:"Hôm nay có dự án/khách thiết kế xịn mở ra — nắm lấy là ngon!",r:"Hôm nay báo giá nhớ tính đủ công sửa, đừng để thiệt mình nha."},
+    {u:"Hôm nay xoay nhiều job nhiều deadline khéo lắm — linh hoạt là mạnh!",r:"Hôm nay hơi quá tải à? Sắp xếp lại ưu tiên cho gọn là nhẹ liền."},
+    {u:"Hôm nay phối hợp với team marketing/sản phẩm ra mẫu chất — ăn ý!",r:"Hôm nay làm rõ vai trò ai làm khâu nào là chạy trơn tru ngay."},
+    {u:"Hôm nay giữ vững phong cách thương hiệu là khôn ngoan đúng lúc!",r:"Hôm nay đừng ngại đầu tư font/asset xịn, công cụ tốt là làm nhanh hơn."},
+    {u:"Hôm nay ý tưởng hơi cạn cũng đừng nản, nghỉ rồi sẽ bật lại!",r:"Hôm nay khó qua rồi, cảm hứng đang quay lại đó, ráng tí nha."},
+    {u:"Hôm nay chia sẻ tip thiết kế cho team, cho đi là nhận lại đó!",r:"Hôm nay cân lại công sức cho đều các job, đừng dồn hết một cái nha."},
+    {u:"Hôm nay nhìn lại portfolio, kiên nhẫn trau dồi là tay nghề lên!",r:"Hôm nay đừng sốt ruột, kỹ năng design cần thời gian mới chín mà."},
+    {u:"Hôm nay mài kỹ năng, luyện tool — tay nghề lên thấy rõ luôn!",r:"Hôm nay đừng làm qua loa, chăm chút từng chi tiết là khác hẳn đó."},
+    {u:"Hôm nay tự hào về tay nghề mình gây dựng — thành quả xứng đáng!",r:"Hôm nay cày design quên nghỉ rồi đó, chăm mắt với sức khỏe tí nha."},
+    {u:"Hôm nay phong cách riêng của bạn đã vững, thành thương hiệu cá nhân!",r:"Hôm nay củng cố thế mạnh cốt lõi trước khi ôm thêm mảng mới nha."},
+    {u:"Hôm nay có kỹ năng/khóa học mới đáng đầu tư — học là lợi về sau!",r:"Hôm nay đừng mơ mộng xa, luyện từng bước nhỏ thực tế là chắc nha."},
+    {u:"Hôm nay làm tỉ mỉ, chăm chút từng pixel — chậm mà chắc là chất!",r:"Hôm nay thêm tí nhanh nhạy bắt trend, đừng quá cầu toàn mà chậm nha."},
+    {u:"Hôm nay quản lý file, deadline ngăn nắp — mọi thứ đâu ra đó, giỏi!",r:"Hôm nay ôm đồm nhiều quá à? Chia bớt job cho team đi nha."},
+    {u:"Hôm nay bạn xây tay nghề thành giá trị bền vững — bài bản lắm!",r:"Hôm nay đừng bảo thủ style cũ, xu hướng đổi rồi, cập nhật tí nha."},
+  ],
+  QC: [
+    {u:"Hôm nay thử cách kiểm hàng nhanh hơn đi, sẽ tiết kiệm thời gian đó!",r:"Hôm nay đừng kiểm vội kẻo sót lỗi, chậm mà chắc là an toàn nha."},
+    {u:"Hôm nay mắt tinh tay nhanh, lô nào qua tay bạn cũng chuẩn!",r:"Hôm nay đừng làm ẩu cho xong, soi kỹ từng cái là yên tâm nha."},
+    {u:"Hôm nay trực giác mách lô này có vấn đề — kiểm kỹ là đúng đó!",r:"Hôm nay nghi nghi chỗ nào thì soi thêm, đừng bỏ qua linh cảm nha."},
+    {u:"Hôm nay kiểm hàng tỉ mỉ, hàng ra cửa đẹp không tì vết — giỏi!",r:"Hôm nay ôm nhiều lô quá dễ mỏi mắt, chia ca nghỉ hợp lý nha."},
+    {u:"Hôm nay làm theo checklist chuẩn là không sót lỗi nào — chắc chắn!",r:"Hôm nay đừng cứng nhắc quá, lô đặc biệt cần linh hoạt tiêu chí nha."},
+    {u:"Hôm nay theo đúng tiêu chuẩn QC là hàng đạt chuẩn, khách hài lòng!",r:"Hôm nay tiêu chí cũ có chỗ lỗi thời, đề xuất cập nhật là hay nha."},
+    {u:"Hôm nay phân loại đạt/lỗi rạch ròi — quyết đúng là hàng chuẩn!",r:"Hôm nay phân vân cái này đạt hay lỗi à? Theo tiêu chuẩn mà quyết."},
+    {u:"Hôm nay nhiều lô cần kiểm, bạn xử gọn đúng tiến độ — giữ guồng tốt!",r:"Hôm nay hàng dồn quá à? Ưu tiên lô sắp xuất trước cho kịp ship nha."},
+    {u:"Hôm nay cứ kiên nhẫn soi từng cái, tỉ lệ lỗi sẽ giảm rõ!",r:"Hôm nay nản vì việc lặp à? Bình tĩnh, mắt bạn là tuyến phòng cuối đó."},
+    {u:"Hôm nay ngồi rà lại lỗi hay gặp, sẽ tìm ra nguyên nhân gốc đó!",r:"Hôm nay đừng tự ôm hết, báo bộ phận sản xuất phối hợp cho nhanh nha."},
+    {u:"Hôm nay lô hàng đẹp đều tay — may mắn ít lỗi, làm phơi phới!",r:"Hôm nay nếu gặp lô lỗi nhiều ngoài ý muốn, bình tĩnh kiểm từng cái nha."},
+    {u:"Hôm nay kiểm công tâm, đúng là đúng sai là sai — đáng tin cậy lắm!",r:"Hôm nay đừng nể nang cho hàng lỗi qua, để lọt là khách trả về đó nha."},
+    {u:"Hôm nay thử đổi góc soi sẽ phát hiện lỗi mà trước giờ bỏ sót đó!",r:"Hôm nay mỏi mắt nhìn không ra à? Nghỉ chút rồi soi lại là thấy liền."},
+    {u:"Hôm nay mạnh dạn loại hàng lỗi, đừng tiếc — giữ uy tín mới quan trọng!",r:"Hôm nay đừng cố cho hàng cận chuẩn qua, loại dứt khoát là an toàn nha."},
+    {u:"Hôm nay cân giữa tốc độ và độ kỹ — vừa nhanh vừa chuẩn, tuyệt!",r:"Hôm nay đừng kiểm quá gắt thành chậm, cân lại tiêu chí cho hợp lý nha."},
+    {u:"Hôm nay coi chừng quen tay bỏ qua lỗi nhỏ — giữ chuẩn mực nha!",r:"Hôm nay đang bỏ được thói quen kiểm ẩu rồi, chỉn chu hẳn lên thôi!"},
+    {u:"Hôm nay nếu phát hiện lô lỗi hàng loạt, báo gấp là chặn được thiệt hại!",r:"Hôm nay đừng giấu lỗi cho qua, báo sớm là cả xưởng đỡ khổ nha."},
+    {u:"Hôm nay tỉ lệ hàng đạt cao, công bạn giữ chất lượng — đáng tự hào!",r:"Hôm nay hơi mệt à? Nhớ mỗi sản phẩm đẹp ra cửa là có công bạn đó."},
+    {u:"Hôm nay có lỗi mập mờ khó định, soi kỹ rồi hẵng kết luận nha!",r:"Hôm nay sương sắp tan, lô nghi ngờ sẽ rõ đạt hay lỗi thôi mà."},
+    {u:"Hôm nay hàng đạt chuẩn đẹp đều — bạn làm rất tốt, cứ tự tin!",r:"Hôm nay vui rồi nhưng đừng lơ là cuối ca, một cái lỗi lọt là phiền đó."},
+    {u:"Hôm nay nhìn lại lỗi cũ sẽ rút ra cách kiểm chuẩn hơn cho lần sau!",r:"Hôm nay đừng tự trách vì sót lỗi, ghi nhận rồi cải thiện là được."},
+    {u:"Hôm nay kiểm xong trọn lô, hàng sạch lỗi xuất kho — quá đỉnh!",r:"Hôm nay gần xong rồi, soát nốt mấy cái cuối là yên tâm xuất nha."},
+    {u:"Hôm nay có ý cải tiến cách kiểm — làm liền là nhanh gọn hơn đó!",r:"Hôm nay ý hay để đó không làm thì cũng phí, thử áp dụng đi nha."},
+    {u:"Hôm nay lên kế hoạch kiểm theo thứ tự ưu tiên — bài bản là đỡ rối!",r:"Hôm nay đừng do dự, sắp lô nào kiểm trước rồi làm thôi nha."},
+    {u:"Hôm nay nhịp kiểm vào guồng, lô qua đều tay — đà này ngon!",r:"Hôm nay tiến độ chậm à? Soi xem khâu nào đang nghẽn nha."},
+    {u:"Hôm nay kiểm xong chỉ tiêu trong ngày — nghỉ ngơi tí xứng đáng!",r:"Hôm nay khu kiểm hơi lộn xộn, dọn gọn lại để mai làm mượt nha."},
+    {u:"Hôm nay có tranh luận về lỗi đạt/không, giữ tiêu chuẩn là đúng!",r:"Hôm nay đôi co với sản xuất mệt à? Đưa ra tiêu chí là rõ liền nha."},
+    {u:"Hôm nay bạn chặn được lô lỗi quan trọng, được ghi nhận — tự hào đi!",r:"Hôm nay đừng tự mãn, lô sau vẫn phải soi kỹ như thường nha."},
+    {u:"Hôm nay giữ vững nguyên tắc loại hàng lỗi dù bị hối — đúng đó!",r:"Hôm nay đuối vì áp lực tiến độ à? Chất lượng vẫn là ưu tiên nha."},
+    {u:"Hôm nay hàng về dồn, kiểm nhanh gọn đúng nhịp — bắt nhịp đi!",r:"Hôm nay đừng để hàng ùn, kiểm dứt điểm từng lô là thông liền."},
+    {u:"Hôm nay sắp hết lô rồi, ráng soi nốt là sạch việc cả ngày!",r:"Hôm nay mỏi mắt rồi à? Nghỉ tí cho mắt khỏe rồi kiểm tiếp nha."},
+    {u:"Hôm nay nhiều hàng nhưng bạn kiểm được hết, cứ tin mắt mình đi!",r:"Hôm nay ôm nhiều lô quá à? Chia bớt cho đồng nghiệp là khỏe nha."},
+    {u:"Hôm nay có cách kiểm mới đáng thử — test trên một lô nhỏ xem!",r:"Hôm nay hứng thử cái mới rồi dễ bỏ, theo tới cùng cho ra kết quả nha."},
+    {u:"Hôm nay làm nhanh dứt khoát, kiểm gọn là kịp xuất hàng đúng hẹn!",r:"Hôm nay đừng nhanh quá kẻo sót lỗi, kỹ tí vẫn hơn nha."},
+    {u:"Hôm nay con mắt tinh tường của bạn là điểm tựa của cả xưởng — giỏi!",r:"Hôm nay thiếu tự tin với quyết định à? Mắt bạn nhạy hơn bạn nghĩ đó."},
+    {u:"Hôm nay bạn dẫn dắt chuẩn kiểm cho cả nhóm — bài bản đáng nể!",r:"Hôm nay nghe anh em góp ý trước khi áp tiêu chí mới là hay nha."},
+    {u:"Hôm nay làm việc với tinh thần vui, kiểm hàng cũng nhẹ nhàng hơn!",r:"Hôm nay việc lặp hơi chán à? Đổi nhịp tí cho tinh thần tươi lại nha."},
+    {u:"Hôm nay phối hợp ăn ý với sản xuất — lỗi giảm, việc chạy mượt!",r:"Hôm nay nếu lệch ý với bộ phận khác, trao đổi rõ là êm liền nha."},
+    {u:"Hôm nay cả tổ kiểm làm việc vui vẻ, nhịp nhàng — mừng ghê!",r:"Hôm nay vui thì vui, đừng để mất tập trung mà sót lỗi nha."},
+    {u:"Hôm nay để ý lỗi lặp lại sẽ thấy cách phòng từ gốc đó!",r:"Hôm nay đang lấy lại hứng làm việc rồi, nhịp sẽ nhanh hơn thôi!"},
+    {u:"Hôm nay nếu lỡ sót một lỗi đừng nản, rút kinh nghiệm là tốt hơn!",r:"Hôm nay đang vực dậy rồi, học từ sai sót là kiểm chuẩn hơn thôi."},
+    {u:"Hôm nay áp dụng kinh nghiệm cũ phát hiện lỗi quen — hiệu quả đó!",r:"Hôm nay đừng chủ quan với lỗi cũ, lô mới có thể khác đó nha."},
+    {u:"Hôm nay nhiều việc rối, chọn lô gấp nhất mà kiểm trước nha!",r:"Hôm nay đã rõ thứ tự rồi, làm tập trung từng lô là gọn thôi."},
+    {u:"Hôm nay buông cách kiểm cũ chậm chạp, thử cách mới hiệu quả hơn!",r:"Hôm nay phân vân đổi quy trình à? Cái nào đỡ sót lỗi thì theo nha."},
+    {u:"Hôm nay lô hàng đẹp như ý, kiểm trơn tru — tận hưởng tí đi!",r:"Hôm nay ổn rồi nhưng vẫn soát cuối ca cho chắc nha."},
+    {u:"Hôm nay cả tổ gắn kết, hàng ra chuẩn đẹp — vui và yên tâm ghê!",r:"Hôm nay nếu thấy lạc nhịp với tổ, trao đổi tí là ăn ý lại liền."},
+    {u:"Hôm nay có ý tưởng nhỏ cải thiện cách kiểm — chia sẻ với tổ đi!",r:"Hôm nay đừng ngại nói ra ý mình, biết đâu giúp cả tổ đỡ mệt nha."},
+    {u:"Hôm nay có đề xuất cải tiến đáng nghe — cân nhắc áp dụng nha!",r:"Hôm nay ý nghe hay mà chưa chắc thực tế, thử lô nhỏ trước nha."},
+    {u:"Hôm nay bạn tinh ý cảm được chỗ dễ lỗi — kiểm là trúng ngay!",r:"Hôm nay đừng để áp lực làm căng thẳng, thả lỏng rồi soi cho tỉnh nha."},
+    {u:"Hôm nay bình tĩnh xử lý dù hàng lỗi nhiều — vững vàng đáng nể!",r:"Hôm nay nếu bực vì lỗi lặp, hít thở rồi báo gốc vấn đề cho bình tĩnh nha."},
+    {u:"Hôm nay mắt sắc như dao, lỗi nào cũng không qua được bạn — đỉnh!",r:"Hôm nay tiêu chí hơi mơ hồ à? Làm rõ chuẩn đạt/lỗi rồi hẵng kiểm nha."},
+    {u:"Hôm nay phân vân cái này cho qua không, đối chiếu chuẩn mà quyết!",r:"Hôm nay đừng lừng khừng lâu, quyết theo tiêu chí là chắc nhất nha."},
+    {u:"Hôm nay nếu bị trách vì lỗi lọt, đừng nản — đó là bài học quý!",r:"Hôm nay đang nguôi rồi, bỏ qua chuyện cũ mà soi lô mới cho tỉnh nha."},
+    {u:"Hôm nay cho mắt nghỉ giữa ca cũng là giữ độ chính xác đó!",r:"Hôm nay nghỉ đủ rồi thì quay lại, mắt tươi soi ra lỗi liền nha."},
+    {u:"Hôm nay đừng hơn thua với sản xuất, đưa bằng chứng lỗi là họ phục!",r:"Hôm nay căng với bộ phận khác đang dịu, phối hợp lại cho êm nha."},
+    {u:"Hôm nay chuyển sang quy trình kiểm gọn hơn — đúng hướng đó!",r:"Hôm nay dứt cách cũ rườm rà chưa xong, mạnh dạn đổi là nhẹ liền."},
+    {u:"Hôm nay tỉnh táo với hàng bị tráo/ngụy trang lỗi — soi kỹ nha!",r:"Hôm nay đừng cho qua nhanh để kịp tiến độ, kiểm thật là an toàn nha."},
+    {u:"Hôm nay thấy bí cách phát hiện lỗi chứ có cách đó, hỏi tổ trưởng nha!",r:"Hôm nay đang gỡ được rồi, nhìn ra điểm hay lỗi rồi đó!"},
+    {u:"Hôm nay đừng lo sót lỗi quá, làm đúng quy trình là yên tâm thôi!",r:"Hôm nay nỗi lo đang tan, lô hàng ổn hơn bạn tưởng nhiều đó."},
+    {u:"Hôm nay nếu một lô phải loại bỏ hết, mừng vì bạn chặn được thiệt hại lớn!",r:"Hôm nay đang gượng sau lô lỗi nặng, báo gốc rồi làm tiếp là ổn nha."},
+    {u:"Hôm nay ham học tiêu chuẩn mới, hỏi kỹ — cẩn thận là điểm mạnh đó!",r:"Hôm nay coi chừng nghe đồn tiêu chí mà chưa xác nhận, hỏi lại nha."},
+    {u:"Hôm nay quyết loại hàng lỗi dứt khoát là chuẩn — không nương tay!",r:"Hôm nay đừng vội quyết khi chưa soi kỹ, chậm tí cho chắc nha."},
+    {u:"Hôm nay phân định đạt/lỗi rạch ròi, công tâm — đáng tin cậy lắm!",r:"Hôm nay khắt khe quá thành chậm à? Cân lại tiêu chí cho hợp lý nha."},
+    {u:"Hôm nay kiểm theo nguyên tắc vững, không cảm tính — chuẩn mực!",r:"Hôm nay có ca đặc biệt cần linh hoạt, đừng cứng nhắc quá nha."},
+    {u:"Hôm nay có công cụ/cách kiểm mới giúp tăng độ chính xác — thử nha!",r:"Hôm nay đặt chỉ tiêu vừa sức trước, đo lại khối lượng cho hợp nha."},
+    {u:"Hôm nay xoay nhiều lô nhiều loại hàng khéo lắm — linh hoạt là mạnh!",r:"Hôm nay quá tải à? Sắp xếp lại thứ tự kiểm cho gọn là nhẹ liền."},
+    {u:"Hôm nay phối hợp với sản xuất/đóng gói nhịp nhàng — ăn ý ghê!",r:"Hôm nay làm rõ ai chịu khâu nào là hết đổ lỗi qua lại nha."},
+    {u:"Hôm nay giữ vững tiêu chuẩn chất lượng là khôn ngoan đúng lúc!",r:"Hôm nay đừng quá khắt khe chi tiết không quan trọng, cân nhẹ lại nha."},
+    {u:"Hôm nay tỉ lệ lỗi cao thấy nản, nhưng bạn chặn được là quý lắm!",r:"Hôm nay khó qua rồi, lô hàng đang đẹp hơn dần đó, ráng tí nha."},
+    {u:"Hôm nay chia sẻ kinh nghiệm soi lỗi cho lính mới, cho đi là tốt!",r:"Hôm nay cân lại khối lượng cho đều cả tổ, đừng dồn hết một người nha."},
+    {u:"Hôm nay nhìn lại số liệu lỗi, kiên nhẫn cải thiện là tỉ lệ sẽ giảm!",r:"Hôm nay đừng sốt ruột, giảm lỗi từ gốc cần thời gian mới thấy mà."},
+    {u:"Hôm nay mài con mắt soi lỗi, càng làm càng nhạy — tay nghề lên rõ!",r:"Hôm nay đừng kiểm qua loa, soi kỹ từng cái là khác hẳn đó nha."},
+    {u:"Hôm nay tự chủ kiểm gọn gàng, được tin tưởng — thành quả xứng đáng!",r:"Hôm nay làm nhiều quên nghỉ mắt rồi, chăm sức khỏe tí nha."},
+    {u:"Hôm nay chất lượng hàng ổn định, uy tín xưởng vững — nền tảng tốt!",r:"Hôm nay củng cố quy trình kiểm lõi trước cho chất lượng vững nha."},
+    {u:"Hôm nay có kỹ năng/tiêu chuẩn mới đáng học — đầu tư là lợi về sau!",r:"Hôm nay học từng bước nhỏ thực tế, đừng ôm lý thuyết suông nha."},
+    {u:"Hôm nay kiểm tỉ mỉ, đều tay từng cái — chậm mà chắc là chất lượng cao!",r:"Hôm nay thêm tí tốc độ kẻo nghẽn hàng, cân giữa nhanh và kỹ nha."},
+    {u:"Hôm nay quản lô hàng, hồ sơ kiểm ngăn nắp — mọi thứ đâu ra đó, giỏi!",r:"Hôm nay ôm hết việc kiệt sức à? San bớt cho tổ là khỏe hơn nha."},
+    {u:"Hôm nay bạn dựng chuẩn kiểm thành quy trình bền vững — bài bản lắm!",r:"Hôm nay đừng bảo thủ tiêu chí cũ, sản phẩm đổi rồi, cập nhật tí nha."},
+  ],
+  SAN_XUAT: [
+    {u:"Hôm nay thử cách canh máy/sắp đơn mới đi, biết đâu nhanh hơn đó!",r:"Hôm nay đừng chạy máy vội khi chưa canh kỹ, test mẫu trước đã nha."},
+    {u:"Hôm nay tay nghề bạn đỉnh, máy nào canh cũng ra thành phẩm chuẩn!",r:"Hôm nay đừng ôm nhiều máy một lúc, lo chắc từng cái là ổn nha."},
+    {u:"Hôm nay nghe tiếng máy lạ là biết có vấn đề — kiểm sớm là đúng đó!",r:"Hôm nay máy hơi khác thường mà chưa rõ, dừng kiểm rồi hẵng chạy nha."},
+    {u:"Hôm nay máy chạy êm, thành phẩm ra đẹp đều tay — ngon lành!",r:"Hôm nay ôm nhiều đơn quá dễ đuối, chia ca nghỉ hợp lý nha."},
+    {u:"Hôm nay làm theo quy trình vận hành chuẩn là an toàn, ít lỗi!",r:"Hôm nay đừng cứng nhắc thông số cũ, vật liệu khác phải chỉnh lại nha."},
+    {u:"Hôm nay theo đúng thông số kỹ thuật là thành phẩm đạt chuẩn!",r:"Hôm nay thông số cũ có chỗ chưa tối ưu, thử điều chỉnh tí xem nha."},
+    {u:"Hôm nay chọn đúng chỉ/mực/vật liệu cho đơn là ra hàng đẹp!",r:"Hôm nay phân vân dùng loại nào à? Test mẫu nhỏ rồi quyết cho chắc."},
+    {u:"Hôm nay máy chạy hết công suất đúng tiến độ — giữ guồng là kịp đơn!",r:"Hôm nay nhiều đơn dồn à? Ưu tiên đơn gấp chạy trước cho kịp ship nha."},
+    {u:"Hôm nay cứ kiên nhẫn canh chỉnh, máy vào phom là chạy ngon cả ngày!",r:"Hôm nay máy hơi khó canh à? Bình tĩnh chỉnh từ từ là vào thôi."},
+    {u:"Hôm nay ngồi rà lại lỗi máy hay gặp, sẽ tìm ra nguyên nhân gốc!",r:"Hôm nay đừng tự mò một mình, hỏi thợ kinh nghiệm cho nhanh nha."},
+    {u:"Hôm nay máy chạy trơn không trục trặc — ngày đẹp, làm phơi phới!",r:"Hôm nay nếu máy dở chứng bất ngờ, bình tĩnh khắc phục là qua thôi."},
+    {u:"Hôm nay làm đúng thông số, đúng số lượng — thành phẩm chuẩn chỉnh!",r:"Hôm nay đừng cho hàng cận lỗi qua, làm đúng từ đầu đỡ phải làm lại nha."},
+    {u:"Hôm nay đổi góc nhìn về lỗi sẽ ra cách khắc phục bất ngờ đó!",r:"Hôm nay máy cứ lỗi hoài à? Dừng nghĩ lại cách khác, đừng cố ép nha."},
+    {u:"Hôm nay mạnh dạn bỏ cách làm cũ kém hiệu quả, đổi mới là đáng!",r:"Hôm nay đừng tiếc dao/kim/linh kiện đã mòn, thay mới là chạy ngon hơn."},
+    {u:"Hôm nay cân tốc độ và chất lượng — vừa nhanh vừa đẹp, tuyệt!",r:"Hôm nay đừng đẩy máy quá tải, chạy điều độ là máy bền hơn nha."},
+    {u:"Hôm nay coi chừng bỏ qua bước an toàn cho nhanh — cẩn thận nha!",r:"Hôm nay đang bỏ được thói quen làm tắt rồi, làm chuẩn lại là an toàn!"},
+    {u:"Hôm nay nếu máy hỏng đột ngột, bình tĩnh — sửa xong sẽ chạy ổn hơn!",r:"Hôm nay nhớ bảo trì định kỳ, phòng trước là đỡ hỏng giữa đơn gấp nha."},
+    {u:"Hôm nay thành phẩm ra đẹp, công bạn giữ chất lượng — đáng tự hào!",r:"Hôm nay hơi mệt à? Nhớ mỗi sản phẩm đẹp ra lò là có tay nghề bạn đó."},
+    {u:"Hôm nay lỗi mập mờ khó định, kiểm kỹ rồi hẵng kết luận nguyên nhân nha!",r:"Hôm nay sương sắp tan, bạn sẽ tìm ra chỗ trục trặc thôi mà."},
+    {u:"Hôm nay máy chạy đẹp, hàng ra chuẩn — bạn làm rất tốt, tự tin lên!",r:"Hôm nay vui rồi nhưng đừng lơ là cuối ca, một lỗi lọt là phải làm lại."},
+    {u:"Hôm nay nhìn lại lỗi cũ sẽ rút ra cách vận hành chuẩn hơn lần sau!",r:"Hôm nay đừng tự trách vì máy lỗi, ghi nhận rồi cải thiện là được."},
+    {u:"Hôm nay hoàn thành trọn đơn, hàng ra đủ và đẹp — quá đỉnh luôn!",r:"Hôm nay gần xong rồi, kiểm nốt mẻ cuối là yên tâm giao xưởng nha."},
+    {u:"Hôm nay có ý cải tiến quy trình chạy máy — làm liền là nhanh hơn đó!",r:"Hôm nay ý hay để đó không làm thì phí, thử áp dụng nhỏ đi nha."},
+    {u:"Hôm nay lên kế hoạch sắp đơn chạy máy — bài bản là đỡ rối cả ngày!",r:"Hôm nay đừng do dự, chốt thứ tự đơn rồi cho máy chạy thôi nha."},
+    {u:"Hôm nay máy vào nhịp, hàng ra đều tay — đà này là kịp đơn ngon!",r:"Hôm nay tiến độ chậm à? Soi xem khâu nào đang nghẽn nha."},
+    {u:"Hôm nay xong chỉ tiêu sản lượng ngày — nghỉ ngơi tí xứng đáng!",r:"Hôm nay khu máy hơi bừa, dọn gọn vệ sinh máy để mai chạy mượt nha."},
+    {u:"Hôm nay có tranh luận về cách làm, ai có lý thì nghe — học hỏi lẫn nhau!",r:"Hôm nay đôi co mệt à? Test thực tế là biết cách nào tốt hơn liền nha."},
+    {u:"Hôm nay bạn xử được sự cố máy quan trọng, được ghi nhận — tự hào đi!",r:"Hôm nay đừng tự mãn, máy vẫn cần canh kỹ như thường nha."},
+    {u:"Hôm nay giữ vững nguyên tắc chất lượng dù bị hối tiến độ — đúng đó!",r:"Hôm nay đuối vì áp lực à? Chọn việc quan trọng làm trước thôi nha."},
+    {u:"Hôm nay máy chạy nhanh, hàng ra liên tục — bắt nhịp là về đích sớm!",r:"Hôm nay đừng để hàng ùn ở khâu mình, thông nhanh cho khâu sau nha."},
+    {u:"Hôm nay sắp hết đơn rồi, ráng chạy nốt là sạch việc cả ngày!",r:"Hôm nay mệt rồi à? Nghỉ tí cho tỉnh táo kẻo canh máy sai nha."},
+    {u:"Hôm nay nhiều máy nhiều đơn nhưng bạn lo được hết, cứ tin tay nghề!",r:"Hôm nay ôm nhiều quá à? Nhờ anh em phụ một tay cho nhẹ nha."},
+    {u:"Hôm nay có kỹ thuật mới đáng thử — test trên mẻ nhỏ xem sao!",r:"Hôm nay hứng thử cái mới rồi dễ bỏ, làm tới cùng cho ra kết quả nha."},
+    {u:"Hôm nay làm nhanh dứt khoát, chạy gọn là kịp giao hàng đúng hẹn!",r:"Hôm nay đừng nhanh ẩu kẻo hỏng vật liệu, canh kỹ rồi hẵng chạy nha."},
+    {u:"Hôm nay tay nghề tự tin của bạn là điểm tựa của cả xưởng — giỏi!",r:"Hôm nay thiếu tự tin à? Bạn rành máy hơn bạn nghĩ nhiều đó."},
+    {u:"Hôm nay bạn dẫn dắt nhịp xưởng, điều phối khéo — bài bản đáng nể!",r:"Hôm nay nghe anh em thợ góp ý trước khi đổi quy trình là hay nha."},
+    {u:"Hôm nay tinh thần vui, làm xưởng cũng nhẹ nhàng hơn hẳn đó!",r:"Hôm nay việc lặp hơi chán à? Đổi nhịp tí cho tinh thần tươi lại nha."},
+    {u:"Hôm nay phối hợp ăn ý giữa các khâu — hàng chạy mượt, lỗi giảm!",r:"Hôm nay nếu lệch nhịp với khâu khác, trao đổi rõ là êm liền nha."},
+    {u:"Hôm nay cả xưởng làm việc vui vẻ, nhịp nhàng — mừng ghê!",r:"Hôm nay vui thì vui, đừng để mất tập trung mà canh máy sai nha."},
+    {u:"Hôm nay để ý lỗi lặp lại sẽ thấy cách phòng từ gốc đó!",r:"Hôm nay đang lấy lại hứng làm việc rồi, nhịp sẽ nhanh hơn thôi!"},
+    {u:"Hôm nay lỡ một mẻ hỏng đừng nản, rút kinh nghiệm là mẻ sau ngon!",r:"Hôm nay đang vực dậy rồi, học từ sai sót là tay nghề lên thôi."},
+    {u:"Hôm nay áp dụng mẹo cũ từng hiệu quả là xử lỗi nhanh đó!",r:"Hôm nay đừng bám mãi cách cũ, máy mới vật liệu mới phải cập nhật nha."},
+    {u:"Hôm nay nhiều đơn rối, chọn đơn gấp nhất mà chạy trước nha!",r:"Hôm nay đã rõ thứ tự rồi, làm tập trung từng đơn là gọn thôi."},
+    {u:"Hôm nay buông cách làm cũ chậm chạp, thử cách mới hiệu quả hơn!",r:"Hôm nay phân vân đổi quy trình à? Cái nào đỡ lỗi hơn thì theo nha."},
+    {u:"Hôm nay máy chạy đẹp như ý, hàng ra chuẩn — tận hưởng tí đi!",r:"Hôm nay ổn rồi nhưng vẫn kiểm cuối ca cho chắc nha."},
+    {u:"Hôm nay cả xưởng gắn kết, hàng ra đẹp — vui và yên tâm ghê!",r:"Hôm nay nếu thấy lạc nhịp với anh em, trao đổi tí là ăn ý lại liền."},
+    {u:"Hôm nay có ý nhỏ cải thiện cách làm — chia sẻ với anh em đi!",r:"Hôm nay đừng ngại nói ra ý mình, biết đâu giúp cả xưởng đỡ mệt nha."},
+    {u:"Hôm nay có đề xuất cải tiến đáng nghe — cân nhắc áp dụng nha!",r:"Hôm nay ý nghe hay mà chưa chắc thực tế, thử mẻ nhỏ trước nha."},
+    {u:"Hôm nay bạn tinh ý cảm được chỗ máy sắp lỗi — kiểm là trúng ngay!",r:"Hôm nay đừng để áp lực làm căng, thả lỏng rồi canh máy cho tỉnh nha."},
+    {u:"Hôm nay bình tĩnh xử lý dù máy trục trặc — vững vàng đáng nể!",r:"Hôm nay nếu bực vì máy lỗi hoài, hít thở rồi tìm gốc cho bình tĩnh nha."},
+    {u:"Hôm nay đầu óc sắc bén, nhìn ra ngay lỗi máy ở đâu — đỉnh thật!",r:"Hôm nay thông số hơi rối à? Ghi ra rõ ràng là dễ chỉnh hơn nha."},
+    {u:"Hôm nay phân vân chỉnh thông số nào, test mẫu rồi quyết cho chắc!",r:"Hôm nay đừng lừng khừng lâu, chạy thử nhỏ là biết liền thôi nha."},
+    {u:"Hôm nay nếu bị trách vì lỗi máy, đừng nản — đó là bài học quý đó!",r:"Hôm nay đang nguôi rồi, bỏ qua chuyện cũ mà canh máy cho tỉnh nha."},
+    {u:"Hôm nay nghỉ giữa ca cho tỉnh táo cũng là giữ độ chính xác đó!",r:"Hôm nay nghỉ đủ rồi thì quay lại, tỉnh táo canh máy ít sai hơn nha."},
+    {u:"Hôm nay đừng hơn thua cách làm, kết quả thực tế nói thay là êm!",r:"Hôm nay căng với khâu khác đang dịu, phối hợp lại cho mượt nha."},
+    {u:"Hôm nay chuyển sang quy trình gọn hơn — đúng hướng đó!",r:"Hôm nay dứt cách cũ rườm rà chưa xong, mạnh dạn đổi là nhẹ liền."},
+    {u:"Hôm nay có mẹo hay rút ngắn thời gian setup máy — thử khéo nha!",r:"Hôm nay đừng bỏ bước kiểm để nhanh, làm đủ là an toàn hơn nha."},
+    {u:"Hôm nay thấy bí cách sửa máy chứ có cách đó, hỏi kỹ thuật trưởng nha!",r:"Hôm nay đang gỡ được rồi, nhìn ra chỗ trục trặc rồi đó!"},
+    {u:"Hôm nay đừng lo máy hỏng giữa chừng, bảo trì kỹ là yên tâm thôi!",r:"Hôm nay nỗi lo đang tan, máy ổn hơn bạn tưởng nhiều đó."},
+    {u:"Hôm nay nếu một linh kiện hỏng hẳn, thay mới là máy chạy ngon lại!",r:"Hôm nay đang khắc phục xong sự cố, hoặc cố cứu cái nên thay là mệt thêm."},
+    {u:"Hôm nay ham học kỹ thuật mới, hỏi kỹ — cẩn thận là điểm mạnh đó!",r:"Hôm nay coi chừng làm theo mẹo truyền miệng chưa chắc đúng, hỏi lại nha."},
+    {u:"Hôm nay xử sự cố nhanh dứt khoát là máy chạy lại liền — giỏi!",r:"Hôm nay đừng vội chỉnh khi chưa rõ lỗi, kiểm kỹ rồi hẵng làm nha."},
+    {u:"Hôm nay tư duy kỹ thuật rõ ràng, chẩn lỗi chính xác — đáng tin lắm!",r:"Hôm nay đừng khắt khe với bản thân quá, làm vậy là ổn rồi mà."},
+    {u:"Hôm nay vận hành theo nguyên tắc kỹ thuật vững — chuẩn mực đáng nể!",r:"Hôm nay có ca đặc biệt cần linh hoạt thông số, đừng cứng nhắc quá nha."},
+    {u:"Hôm nay có máy/công cụ mới giúp tăng năng suất — tận dụng nha!",r:"Hôm nay đặt chỉ tiêu vừa sức trước, đo lại công suất máy cho hợp nha."},
+    {u:"Hôm nay xoay nhiều máy nhiều đơn khéo lắm — linh hoạt là điểm mạnh!",r:"Hôm nay quá tải à? Sắp xếp lại thứ tự chạy máy cho gọn là nhẹ liền."},
+    {u:"Hôm nay phối hợp giữa thêu-laser-in nhịp nhàng — ăn ý ra hàng đẹp!",r:"Hôm nay làm rõ ai lo khâu nào là hết đổ lỗi qua lại nha."},
+    {u:"Hôm nay giữ chuẩn thông số ổn định là khôn ngoan đúng lúc!",r:"Hôm nay đừng tiếc tiền bảo trì/thay vật tư, máy tốt là chạy bền hơn."},
+    {u:"Hôm nay tỉ lệ lỗi cao thấy nản, nhưng chỉnh dần là sẽ giảm thôi!",r:"Hôm nay khó qua rồi, máy đang vào phom đẹp hơn đó, ráng tí nha."},
+    {u:"Hôm nay chia sẻ kinh nghiệm canh máy cho thợ mới, cho đi là tốt!",r:"Hôm nay cân lại khối lượng cho đều cả tổ, đừng dồn hết một người nha."},
+    {u:"Hôm nay nhìn lại số liệu sản lượng, kiên nhẫn cải thiện là sẽ lên!",r:"Hôm nay đừng sốt ruột, tối ưu năng suất cần thời gian mới thấy mà."},
+    {u:"Hôm nay mài tay nghề, càng làm càng khéo — kỹ thuật lên thấy rõ!",r:"Hôm nay đừng làm qua loa, chăm chút từng mẻ là chất lượng khác hẳn."},
+    {u:"Hôm nay tự chủ vận hành gọn gàng, được tin tưởng — xứng đáng đó!",r:"Hôm nay làm nhiều quên nghỉ rồi, chăm sức khỏe với mắt tí nha."},
+    {u:"Hôm nay xưởng chạy ổn định, chất lượng vững — nền tảng bền lâu!",r:"Hôm nay củng cố quy trình lõi và bảo trì máy cho ổn định dài hạn nha."},
+    {u:"Hôm nay có kỹ năng/máy mới đáng học — đầu tư là lợi về sau đó!",r:"Hôm nay học từng bước nhỏ thực tế, đừng ôm lý thuyết suông nha."},
+    {u:"Hôm nay làm bền bỉ, đều tay từng mẻ — chậm mà chắc là chất lượng cao!",r:"Hôm nay thêm tí tốc độ kẻo nghẽn đơn, cân giữa nhanh và kỹ nha."},
+    {u:"Hôm nay quản máy, vật tư, đơn ngăn nắp — mọi thứ đâu ra đó, giỏi!",r:"Hôm nay ôm hết việc kiệt sức à? San bớt cho anh em là khỏe hơn nha."},
+    {u:"Hôm nay bạn dựng quy trình xưởng thành chuẩn bền vững — bài bản lắm!",r:"Hôm nay đừng bảo thủ cách cũ, máy móc kỹ thuật đổi rồi, cập nhật nha."},
+  ],
+  CEO: [
+    {u:"Hôm nay mạnh dạn mở hướng đi mới cho công ty, trực giác bạn đúng đó!",r:"Hôm nay khoan quyết lớn vội, tính kỹ rủi ro rồi hẵng dấn nha."},
+    {u:"Hôm nay bạn đủ tầm đủ lực, biến tầm nhìn thành hiện thực được!",r:"Hôm nay đừng hứa quá nhiều với đội, làm thực tế là mọi người tin."},
+    {u:"Hôm nay tin vào trực giác lãnh đạo, quyết định lớn sẽ đúng đó!",r:"Hôm nay có điều đội chưa nói thẳng, lắng nghe thêm rồi hẵng quyết."},
+    {u:"Hôm nay nuôi dưỡng đội ngũ và văn hóa — công ty phát triển bền!",r:"Hôm nay đừng ôm hết mọi việc, tin và giao quyền cho đội đi nha."},
+    {u:"Hôm nay dựng cấu trúc, quy trình rõ ràng — vai cầm trịch của bạn vững!",r:"Hôm nay đừng kiểm soát quá chặt, cho đội không gian tự chủ nha."},
+    {u:"Hôm nay giữ giá trị cốt lõi và tầm nhìn là kim chỉ nam vững vàng!",r:"Hôm nay cách cũ kìm hãm đổi mới rồi, dám phá lệ khi cần nha."},
+    {u:"Hôm nay quyết định hợp tác/nhân sự lớn — chọn theo giá trị là đúng!",r:"Hôm nay đừng quyết theo cảm tính hay nể nang, cân nhắc kỹ nha."},
+    {u:"Hôm nay bạn cầm lái vững, đưa cả công ty về đích — giữ định hướng!",r:"Hôm nay các bộ phận kéo ngược nhau à? Gom lại một hướng đi nha."},
+    {u:"Hôm nay cứ kiên định dẫn dắt, bản lĩnh mềm mỏng là sức mạnh thật!",r:"Hôm nay áp lực lớn à? Bình tĩnh, sự điềm tĩnh của bạn giữ cả đội đó."},
+    {u:"Hôm nay lùi lại nhìn bức tranh lớn, sẽ ra chiến lược sáng suốt đó!",r:"Hôm nay đừng tách đội xa quá, giữ kết nối với anh em là quan trọng."},
+    {u:"Hôm nay có bước ngoặt thuận lợi cho công ty — nắm bắt ngay nha!",r:"Hôm nay có biến động thị trường, tập trung điều bạn kiểm soát được."},
+    {u:"Hôm nay quyết định công bằng, minh bạch — củng cố uy tín lãnh đạo!",r:"Hôm nay nhớ giữ nhất quán, một quyết định lệch là đội mất niềm tin."},
+    {u:"Hôm nay nhìn vấn đề từ góc khác sẽ thông được thế bế tắc đó!",r:"Hôm nay đừng trì hoãn quyết định mãi, đã đến lúc dứt khoát nha."},
+    {u:"Hôm nay mạnh dạn tái cấu trúc cái không còn hợp — cái mới sẽ tốt hơn!",r:"Hôm nay đừng níu kéo mô hình đã hỏng, buông để công ty tiến lên nha."},
+    {u:"Hôm nay cân đối nguồn lực, dung hòa các bên — sự ổn định đến từ đây!",r:"Hôm nay đừng để mất cân bằng, điều hòa xung đột nội bộ sớm nha."},
+    {u:"Hôm nay coi chừng bị cuốn vào lợi nhuận ngắn hạn — giữ tỉnh táo nha!",r:"Hôm nay đang gỡ được một ràng buộc tiêu cực rồi, nhẹ gánh hẳn lên!"},
+    {u:"Hôm nay nếu có biến cố lớn, bình tĩnh — đó là cơ hội dựng nền vững hơn!",r:"Hôm nay đừng trì hoãn xử lý khủng hoảng, đối mặt sớm là ít thiệt nhất."},
+    {u:"Hôm nay tầm nhìn của bạn truyền cảm hứng cho cả công ty — tỏa sáng đi!",r:"Hôm nay đội xuống tinh thần à? Nhắc lại sứ mệnh lớn là khơi lửa lại."},
+    {u:"Hôm nay có điều chưa rõ, làm rõ thông tin rồi hẵng quyết lớn nha!",r:"Hôm nay sương sắp tan, một nỗi lo mơ hồ sắp được giải tỏa thôi."},
+    {u:"Hôm nay công ty đạt thành quả lớn, được công nhận — ăn mừng đi nào!",r:"Hôm nay vui rồi nhưng giữ tỉnh táo, đừng quá lạc quan mà quên rủi ro."},
+    {u:"Hôm nay tổng kết và chốt định hướng lớn — một bước ngoặt sáng suốt!",r:"Hôm nay đừng né đánh giá thẳng thắn, cũng đừng quá khắt khe với đội nha."},
+    {u:"Hôm nay một chương lớn hoàn tất trọn vẹn, công ty trưởng thành — quá đỉnh!",r:"Hôm nay gần chạm mốc rồi, hoàn thiện nốt mắt xích cuối là xong nha."},
+    {u:"Hôm nay có ý tưởng/cơ hội lớn cháy lắm — châm lửa cho cả đội đi!",r:"Hôm nay cảm hứng hơi nguội à? Một mục tiêu rõ là cháy lại thôi."},
+    {u:"Hôm nay hoạch định mở rộng quy mô — tầm nhìn dài hạn đang thành hình!",r:"Hôm nay đừng để vùng an toàn cản bước, dám tính lớn là công ty lớn."},
+    {u:"Hôm nay chiến lược bắt đầu ra trái ngọt, nhìn xa hơn là bứt phá!",r:"Hôm nay tiến độ chậm à? Soi xem khâu nào đang nghẽn nguồn lực nha."},
+    {u:"Hôm nay đạt cột mốc lớn, đội gắn kết — ghi nhận công anh em đi!",r:"Hôm nay nền tảng chưa vững, củng cố nội lực trước khi mở rộng nha."},
+    {u:"Hôm nay tranh luận chiến lược sôi nổi là tốt, bạn cầm trịch là ra kết quả!",r:"Hôm nay mâu thuẫn nội bộ âm ỉ à? Đưa ra bàn thẳng là giải được nha."},
+    {u:"Hôm nay thành tựu công ty được công nhận rộng rãi — tự hào đi!",r:"Hôm nay đừng để tự mãn làm hỏng đà, giữ khiêm tốn là bền nha."},
+    {u:"Hôm nay giữ vững định hướng trước áp lực bên ngoài — bản lĩnh đó!",r:"Hôm nay đuối phòng thủ à? Chọn trận quan trọng mà dồn sức thôi nha."},
+    {u:"Hôm nay mọi việc tăng tốc, cơ hội dồn dập — bắt nhịp quyết nhanh!",r:"Hôm nay nếu giao tiếp nội bộ tắc, khơi thông luồng là chạy mượt liền."},
+    {u:"Hôm nay đã qua nhiều thử thách, gần đích rồi — đừng buông lúc này!",r:"Hôm nay kiệt sức à? Nghỉ và nhờ đội san sẻ, đừng gồng một mình nha."},
+    {u:"Hôm nay gánh nặng nhiều nhưng bạn lo được — nhớ phân bổ cho đội nha!",r:"Hôm nay ôm hết trách nhiệm à? Học cách giao quyền là nhẹ và lớn hơn."},
+    {u:"Hôm nay có ý tưởng/người trẻ đầy nhiệt huyết đáng đầu tư — ủng hộ đi!",r:"Hôm nay nhiệt huyết dễ tắt, dẫn dắt đúng hướng là phát huy được nha."},
+    {u:"Hôm nay hành động táo bạo đẩy công ty bứt phá — cứ tự tin lao tới!",r:"Hôm nay đừng bốc đồng thiếu kế hoạch, ổn định rồi hẵng dấn nha."},
+    {u:"Hôm nay sức ảnh hưởng tự tin của bạn thu hút nhân tài — tỏa sáng đi!",r:"Hôm nay thiếu tự tin à? Tầm nhìn của bạn xứng đáng được tin tưởng đó."},
+    {u:"Hôm nay tầm nhìn lớn cùng sự quyết đoán của bạn dẫn dắt cả công ty!",r:"Hôm nay nghe đội trước khi áp tầm nhìn xuống là khôn ngoan nha."},
+    {u:"Hôm nay văn hóa công ty ấm lên, sự đồng lòng gắn kết mọi người!",r:"Hôm nay mở lòng lắng nghe đội nhiều hơn là cả công ty gần lại liền."},
+    {u:"Hôm nay có hợp tác/đối tác đôi bên cùng lợi — bắt tay là thắng lớn!",r:"Hôm nay quan hệ đối tác hơi lệch, xây lại lòng tin là bền nha."},
+    {u:"Hôm nay tinh thần tập thể lên cao, ăn mừng thành quả chung — vui ghê!",r:"Hôm nay vui thì vui, coi chừng bè phái nội bộ làm rạn đội nha."},
+    {u:"Hôm nay để ý điều tốt đang bị xem nhẹ, sẽ thấy cơ hội bị bỏ lỡ đó!",r:"Hôm nay đang lấy lại động lực rồi, cơ hội mới sắp đến với công ty!"},
+    {u:"Hôm nay một thất bại đừng nặng lòng, vẫn còn nhiều thứ đáng giữ mà!",r:"Hôm nay đang phục hồi rồi, rút bài học là công ty mạnh hơn thôi."},
+    {u:"Hôm nay dùng lại bài học/đối tác cũ là nước đi khôn ngoan đó!",r:"Hôm nay đừng bám mãi mô hình cũ, cập nhật theo hiện tại nha."},
+    {u:"Hôm nay nhiều cơ hội quá, lọc cái thực tế nhất mà dồn lực nha!",r:"Hôm nay đã rõ rồi, chốt trọng tâm là cả đội tập trung được liền."},
+    {u:"Hôm nay mạnh dạn rời mảng hết tiềm năng, tìm giá trị sâu hơn — đúng!",r:"Hôm nay phân vân buông mảng nào à? Nghe điều thật sự quan trọng nha."},
+    {u:"Hôm nay mục tiêu lớn toại nguyện — tận hưởng thành quả xứng đáng đi!",r:"Hôm nay đừng tự mãn dừng sớm, công ty còn dư địa phát triển mà."},
+    {u:"Hôm nay cả công ty hòa hợp, chung một hướng — hạnh phúc và vững ghê!",r:"Hôm nay nếu có bất hòa ngầm, vun đắp lại sự gắn kết thật là bền nha."},
+    {u:"Hôm nay có ý tưởng sáng tạo từ đội — mở lòng đón nhận là quý đó!",r:"Hôm nay dẫn dắt nhẹ nhàng người còn non là họ trưởng thành nhanh nha."},
+    {u:"Hôm nay có lời mời hợp tác hấp dẫn — cân cả lý lẫn tình mà quyết nha!",r:"Hôm nay lời hứa nghe hoa mỹ mà chưa chắc, kiểm chứng kỹ rồi hẵng tin."},
+    {u:"Hôm nay bạn thấu cảm đội ngũ, họ cảm nhận được — lãnh đạo bằng tâm!",r:"Hôm nay đừng ôm hết cảm xúc của mọi người, giữ ranh giới cho khỏe nha."},
+    {u:"Hôm nay điềm tĩnh giữa áp lực, bạn là chỗ dựa của cả công ty — vững!",r:"Hôm nay nếu dồn nén căng thẳng, xả lành mạnh đi đừng để bùng nha."},
+    {u:"Hôm nay đầu óc sắc bén, ra quyết định đột phá và minh bạch — đỉnh!",r:"Hôm nay làm rõ thông tin trước khi quyết lớn là chắc chắn nha."},
+    {u:"Hôm nay có quyết định khó, đối diện thẳng dựa trên dữ liệu mà quyết!",r:"Hôm nay đừng né nữa, bế tắc kéo dài là cơ hội trôi qua đó nha."},
+    {u:"Hôm nay nếu có tin khó/phê bình, đó là cơ hội công ty tốt lên đó!",r:"Hôm nay đang nguôi sau chuyện cũ, buông để cả đội tiến lên nha."},
+    {u:"Hôm nay nghỉ ngơi tái tạo năng lượng sau giai đoạn căng là khôn ngoan!",r:"Hôm nay cân lại nghỉ và làm, kiệt sức kéo dài hại cả quyết định nha."},
+    {u:"Hôm nay đừng thắng bằng mọi giá, giữ quan hệ dài hạn mới quan trọng!",r:"Hôm nay xung đột đang lắng, chủ động hòa giải là mở đường hợp tác nha."},
+    {u:"Hôm nay đưa công ty từ giai đoạn khó sang ổn định hơn — đúng hướng!",r:"Hôm nay dứt vấn đề cũ chưa xong, buông quá khứ là tiến nhanh hơn nha."},
+    {u:"Hôm nay tỉnh táo với chiến lược ngầm hay điều mờ ám — minh bạch nha!",r:"Hôm nay đừng tự lừa dối mình về một vấn đề, trung thực là lối thoát."},
+    {u:"Hôm nay thấy bế tắc chứ thật ra bạn nhiều lựa chọn hơn bạn nghĩ đó!",r:"Hôm nay đang tự cởi trói tâm lý rồi, nhìn ra lối đi rõ hơn thôi."},
+    {u:"Hôm nay đừng lo lắng quá, chia sẻ gánh nặng với đội là nhẹ hơn nhiều!",r:"Hôm nay nỗi lo đang dịu, vấn đề không đáng sợ như bạn tưởng đâu."},
+    {u:"Hôm nay nếu một mảng kết thúc, mừng đi vì cái mới sắp mở ra đó!",r:"Hôm nay đang gượng dậy rồi, buông cái nên kết thúc là khởi đầu mới."},
+    {u:"Hôm nay ham học hỏi, thu thập thông tin sắc bén — giữ cái nhạy đó nha!",r:"Hôm nay coi chừng tin đồn nội bộ chưa kiểm chứng, xác minh đã nha."},
+    {u:"Hôm nay quyết nhanh, trực diện giải quyết vấn đề — tốc độ là lợi thế!",r:"Hôm nay đừng hấp tấp gay gắt, chậm lại tí để tránh va chạm nha."},
+    {u:"Hôm nay tư duy sắc, công bằng, quyết bằng sự thật — đáng tin cậy lắm!",r:"Hôm nay thêm tí cảm thông vào quyết định là đội dễ theo hơn nha."},
+    {u:"Hôm nay lãnh đạo bằng trí tuệ và nguyên tắc — quyền uy mà đáng tin!",r:"Hôm nay dùng trí tuệ để phục vụ chứ đừng áp chế, đội sẽ phục hơn nha."},
+    {u:"Hôm nay có cơ hội đầu tư/dòng tiền mới — nền tảng ngon để bứt phá!",r:"Hôm nay soi lại nguồn lực thực tế trước khi cam kết lớn là chắc nha."},
+    {u:"Hôm nay cân đối dòng tiền và ưu tiên khéo lắm — linh hoạt là điểm mạnh!",r:"Hôm nay quá tải nhiều việc à? Sắp xếp lại ưu tiên chiến lược cho gọn."},
+    {u:"Hôm nay phối hợp các bộ phận ăn ý, ra kết quả chất lượng — tuyệt!",r:"Hôm nay làm rõ vai trò từng bộ phận là cả công ty chạy trơn tru nha."},
+    {u:"Hôm nay quản dòng tiền chặt chẽ, thận trọng là khôn ngoan đúng lúc!",r:"Hôm nay đừng sợ rủi ro đến mức cản phát triển, dám đầu tư để tiến nha."},
+    {u:"Hôm nay giai đoạn thiếu hụt nguồn lực sẽ qua — tìm và trao hỗ trợ nha!",r:"Hôm nay khó đang qua rồi, nguồn lực dần phục hồi, đừng ngại nhờ nha."},
+    {u:"Hôm nay phân bổ nguồn lực và khen thưởng công bằng — củng cố đội ngũ!",r:"Hôm nay soi lại sự công bằng trong phân bổ là tránh phụ thuộc lệch nha."},
+    {u:"Hôm nay đánh giá thành quả đầu tư, kiên nhẫn chờ chín là sẽ gặt lớn!",r:"Hôm nay đừng sốt ruột bỏ cuộc sớm, xem hướng đi còn đáng theo không nha."},
+    {u:"Hôm nay chú trọng chất lượng và rèn đội — nỗ lực sẽ được đền đáp!",r:"Hôm nay tìm lại cân bằng, đừng cầu toàn quá mức mà chậm cả đội nha."},
+    {u:"Hôm nay tự chủ về nguồn lực, thành quả độc lập — an tâm và xứng đáng!",r:"Hôm nay đừng đánh đổi quá nhiều cho công việc, cân lại đời sống nha."},
+    {u:"Hôm nay nền tảng vững, thịnh vượng bền vững — di sản dài hạn đó!",r:"Hôm nay củng cố nền móng tài chính trước khi mở rộng quy mô nha."},
+    {u:"Hôm nay có cơ hội/dự án mới đáng đầu tư — khởi đầu thực tế, chắc tay!",r:"Hôm nay bắt tay vào bước cụ thể, đừng để kế hoạch mãi viển vông nha."},
+    {u:"Hôm nay làm bền bỉ, có phương pháp — chậm mà chắc là nền tảng vững!",r:"Hôm nay thêm tí linh hoạt và tốc độ, đừng quá ì ạch bảo thủ nha."},
+    {u:"Hôm nay quản nguồn lực và con người khéo, tạo môi trường ổn định ấm áp!",r:"Hôm nay đừng quên chăm bản thân giữa lúc lo cho cả công ty nha."},
+    {u:"Hôm nay bạn xây sự thịnh vượng bền vững cho tổ chức — bài bản, đáng tin!",r:"Hôm nay cân giữa lợi nhuận và giá trị con người là lãnh đạo bền nha."},
+  ],
+};
+
 // ══════════════════════════════════════════════════════
 //  Daily Card
 // ══════════════════════════════════════════════════════
@@ -2621,75 +3372,691 @@ function getDailyCard() {
   const now = new Date();
   const key = `daily_${now.getFullYear()}_${now.getMonth()+1}_${now.getDate()}`;
   const stored = JSON.parse(localStorage.getItem('tarot_daily') || 'null');
-  let cardIndex, reversed, affIdx;
+  let cardIndex, reversed, affIdx, role, revealed;
   if (stored && stored.date === key) {
-    cardIndex = stored.cardIndex; reversed = stored.reversed; affIdx = stored.affirmationIndex;
+    cardIndex = stored.cardIndex; reversed = stored.reversed;
+    affIdx    = stored.affirmationIndex; role = stored.role || null;
+    revealed  = stored.revealed || false;
   } else {
     cardIndex = Math.floor(Math.random() * CARDS.length);
     reversed  = Math.random() < 0.3;
     affIdx    = Math.floor(Math.random() * DAILY_AFFIRMATIONS.length);
-    localStorage.setItem('tarot_daily', JSON.stringify({ date: key, cardIndex, reversed, affirmationIndex: affIdx }));
+    role = null; revealed = false;
+    localStorage.setItem('tarot_daily', JSON.stringify({ date: key, cardIndex, reversed, affirmationIndex: affIdx, role, revealed }));
   }
   return {
-    card: CARDS[cardIndex], reversed,
+    card: CARDS[cardIndex], cardIndex, reversed,
     affirmation: DAILY_AFFIRMATIONS[affIdx],
+    role, revealed,
     dateStr: now.toLocaleDateString('vi-VN', { weekday:'long', year:'numeric', month:'long', day:'numeric' })
   };
 }
 
+function markDailyRevealed(role) {
+  const stored = JSON.parse(localStorage.getItem('tarot_daily') || 'null');
+  if (stored) {
+    stored.revealed = true;
+    stored.role = role || null;
+    localStorage.setItem('tarot_daily', JSON.stringify(stored));
+  }
+}
+
+let dailyShuffleRAF = null;
+let currentDailyRole = null;
+
 function renderDailyCard() {
-  const { card, reversed, affirmation, dateStr } = getDailyCard();
+  const { dateStr, revealed, card, cardIndex, reversed, role, affirmation } = getDailyCard();
   const sec = document.getElementById('dailyCardSection');
   if (!sec) return;
-  const imgSrc = CARD_IMAGES[card.id] || 'cards/mat-sau.jpg';
-  const meaning = reversed ? card.reversed : card.upright;
 
   const titleEl = document.getElementById('dailyBarTitle');
   if (titleEl) titleEl.innerHTML = `✦ LÁ BÀI TRONG NGÀY <span class="daily-title-date">— ${dateStr}</span>`;
 
+  // Đã rút hôm nay → hiện thẳng kết quả, không nến, không shuffle
+  if (revealed) {
+    currentDailyRole = role;
+    const imgSrc = CARD_IMAGES[cardIndex] || 'cards/mat-sau.jpg';
+    const roleData  = role && ROLE_READINGS[role];
+    const roleEntry = roleData ? roleData[card.id] : null;
+    const meaning   = roleEntry
+      ? (reversed ? roleEntry.r : roleEntry.u)
+      : (reversed ? card.reversed : card.upright);
+    sec.innerHTML = `
+      <div class="daily-phase daily-layout-mini">
+        <div class="daily-card-wrap">
+          <div class="daily-card flipped">
+            <div class="daily-card-back"><img src="cards/mat-sau.jpg" alt="mặt sau"></div>
+            <div class="daily-card-front">
+              <div class="card-img-wrap">
+                <img src="${imgSrc}" alt="${card.nameVi}" class="${reversed?'reversed-img':''}"
+                  onerror="this.src='cards/mat-sau.jpg'">
+              </div>
+              <div class="daily-card-name">${card.nameVi}${reversed?' ↓':''}</div>
+            </div>
+          </div>
+        </div>
+        <div class="daily-info">
+          ${role ? `<div style="font-family:'Be Vietnam Pro',sans-serif;font-size:0.68rem;letter-spacing:3px;color:var(--gold);opacity:0.8;margin-bottom:8px;">✦ ${role.replace('SAN_XUAT','SẢN XUẤT')} ✦</div>` : ''}
+          <div class="daily-card-title">
+            <span class="daily-numeral">${card.numeral}</span>
+            <span class="daily-name">${card.name} · ${card.nameVi}</span>
+            ${reversed ? '<span class="reversed-badge">↓ Ngược</span>' : ''}
+          </div>
+          <div class="daily-affirmation">
+            <span class="affirmation-label">✦ Lời Khẳng Định Hôm Nay ✦</span>
+            <p class="affirmation-text">"${meaning}"</p>
+          </div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const ROLES = [
+    {key:'SEO',       label:'SEO'},
+    {key:'MANAGER',   label:'MANAGER'},
+    {key:'SELLER',    label:'SELLER'},
+    {key:'SUPPORT',   label:'SUPPORT'},
+    {key:'MEDIA',     label:'MEDIA'},
+    {key:'DESIGNER',  label:'DESIGNER'},
+    {key:'QC',        label:'QC'},
+    {key:'SAN_XUAT',  label:'SẢN XUẤT'},
+  ];
+
+  // Phase 0: lá bài + grid nút vị trí
   sec.innerHTML = `
-    <div class="daily-layout-mini">
+    <div class="daily-phase" style="display:flex;flex-direction:column;align-items:center;gap:16px;padding-bottom:8px">
       <div class="daily-card-wrap" id="dailyWrap">
         <div class="daily-card" id="dailyCardEl">
           <div class="daily-card-back"><img src="cards/mat-sau.jpg" alt="mặt sau"></div>
-          <div class="daily-card-front">
-            <div class="card-img-wrap">
-              <img src="${imgSrc}" alt="${card.nameVi}" class="${reversed?'reversed-img':''}"
-                onerror="this.src='cards/mat-sau.jpg'">
-            </div>
-            <div class="daily-card-name">${card.nameVi}${reversed?' ↓':''}</div>
-          </div>
+          <div class="daily-card-front"></div>
         </div>
-        <div class="daily-flip-hint" id="dailyHint">✦ Nhấn để lật ✦</div>
       </div>
-      <div class="daily-info" id="dailyInfo" style="display:none">
-        <div class="daily-card-title">
-          <span class="daily-numeral">${card.numeral}</span>
-          <span class="daily-name">${card.name} · ${card.nameVi}</span>
-          ${reversed ? '<span class="reversed-badge">↓ Ngược</span>' : ''}
-        </div>
-        <p class="daily-meaning">${meaning}</p>
-        <div class="daily-affirmation">
-          <span class="affirmation-label">✦ Lời Khẳng Định Hôm Nay ✦</span>
-          <p class="affirmation-text">"${affirmation}"</p>
-        </div>
+      <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:0.72rem;color:var(--gold);letter-spacing:2px;text-align:center;opacity:0.85;">✦ CHỌN VỊ TRÍ CỦA BẠN ✦</div>
+      <div class="daily-role-grid" id="dailyRoleGrid">
+        ${ROLES.map(r => `<button class="daily-role-btn" data-role="${r.key}">${r.label}</button>`).join('')}
       </div>
     </div>`;
 
-  let flipped = false;
-  document.getElementById('dailyWrap').addEventListener('click', () => {
-    if (flipped) return;
-    flipped = true;
-    document.getElementById('dailyCardEl').classList.add('flipped');
-    document.getElementById('dailyHint').style.visibility = 'hidden';
-    spawnParticles(document.getElementById('dailyWrap'));
+  document.getElementById('dailyRoleGrid').addEventListener('click', (e) => {
+    const btn = e.target.closest('.daily-role-btn');
+    if (!btn) return;
+    document.querySelectorAll('.daily-role-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentDailyRole = btn.dataset.role;
     setTimeout(() => {
-      const info = document.getElementById('dailyInfo');
-      info.style.display = 'block';
-      info.style.animation = 'fadeInUp 0.6s ease';
-      triggerAffirmationBurst();
-    }, 600);
+      if (dailyShuffleRAF) { cancelAnimationFrame(dailyShuffleRAF); dailyShuffleRAF = null; }
+      showDailyShuffle(sec);
+    }, 200);
   });
+}
+
+function showDailyShuffle(sec) {
+  sec.classList.add('has-bg');
+  sec.innerHTML = `
+    <div class="daily-phase daily-shuffle-inline">
+      <div class="daily-shuffle-title">✦ XÁO BÀI ✦</div>
+      <canvas id="dailyShuffleCanvas" width="340" height="200"></canvas>
+      <div class="daily-shuffle-label" id="dailyShuffleLabel">Di chuyển tay qua bộ bài để xáo</div>
+      <div class="daily-shuffle-bar-wrap"><div id="dailyShuffleBar"></div></div>
+      <div class="daily-shuffle-hint">← di chuyển qua lại →</div>
+    </div>`;
+
+  initDailyShuffleCanvas(() => {
+    if (dailyShuffleRAF) { cancelAnimationFrame(dailyShuffleRAF); dailyShuffleRAF = null; }
+    showDailyFan(sec);
+  });
+}
+
+function showDailyFan(sec) {
+  sec.innerHTML = `
+    <div class="daily-phase daily-fan-wrap">
+      <div class="daily-fan-hint">✦ Tập trung · Chọn lá bài bạn cảm nhận được ✦</div>
+      <div id="dailyDeckRows"></div>
+    </div>`;
+
+  const { reversed: reversedToday } = getDailyCard();
+  const container = document.getElementById('dailyDeckRows');
+  const deck = [...CARDS].sort(() => Math.random() - 0.5);
+  const N = deck.length;
+
+  const CARD_W = 62, CARD_H = 100;
+  const ROWS = 3;
+  const perRow = Math.ceil(N / ROWS); // 26 lá/hàng cho 78 lá
+  const containerW = sec.offsetWidth - 32 || 640;
+  // Tính overlap để vừa container
+  const OVERLAP = Math.max(30, CARD_W - Math.floor((containerW - CARD_W) / (perRow - 1)));
+  const rowWidth = CARD_W + (perRow - 1) * (CARD_W - OVERLAP);
+
+  // Chia thành các hàng
+  const rows = [];
+  for (let i = 0; i < N; i += perRow) rows.push(deck.slice(i, i + perRow));
+
+  // Một container phẳng duy nhất — tất cả lá dùng position:absolute
+  // nên z-index xuyên suốt, không bị chặn bởi stacking context của từng hàng
+  const totalH = ROWS * CARD_H + (ROWS - 1) * 8;
+  const maxRowW = CARD_W + (perRow - 1) * (CARD_W - OVERLAP);
+  container.style.cssText = `position:relative;height:${totalH}px;width:${maxRowW}px;margin:0 auto;`;
+
+  let globalIdx = 0;
+  rows.forEach((rowCards, rowIdx) => {
+    const thisRowW = CARD_W + (rowCards.length - 1) * (CARD_W - OVERLAP);
+    const offsetX = Math.round((maxRowW - thisRowW) / 2); // căn giữa hàng ngắn
+    const topY = rowIdx * (CARD_H + 8);
+
+    rowCards.forEach((card, j) => {
+      const imgSrc = CARD_IMAGES[card.id] || 'cards/mat-sau.jpg';
+      const baseZ = globalIdx;
+      const slot = document.createElement('div');
+      slot.className = 'deck-card daily-fan-card';
+      slot.style.cssText = `
+        position:absolute;
+        left:${offsetX + j*(CARD_W-OVERLAP)}px;
+        top:${topY}px;
+        width:${CARD_W}px; height:${CARD_H}px;
+        z-index:${baseZ}; cursor:pointer;
+        animation:cardDeal 0.3s ease both; animation-delay:${globalIdx*8}ms;
+      `;
+      slot.innerHTML = `
+        <div class="deck-card-inner">
+          <div class="deck-card-back"><img src="cards/mat-sau.jpg" alt="mặt sau"></div>
+          <div class="deck-card-front"><img src="${imgSrc}" alt="${card.nameVi}" style="${reversedToday?'transform:rotate(180deg);':''}"></div>
+        </div>`;
+      slot.addEventListener('mouseenter', () => {
+        if (!slot.classList.contains('selected-card')) {
+          slot.style.zIndex = 9000;
+          slot.style.transform = 'translateY(-14px)';
+          slot.style.filter = 'brightness(1.4) drop-shadow(0 0 9px rgba(212,169,67,0.9))';
+        }
+      });
+      slot.addEventListener('mouseleave', () => {
+        if (!slot.classList.contains('selected-card')) {
+          slot.style.zIndex = baseZ;
+          slot.style.transform = '';
+          slot.style.filter = '';
+        }
+      });
+      slot.addEventListener('click', () => {
+        slot.style.zIndex = 10000;
+        slot.style.transform = 'translateY(-20px)';
+        slot.style.filter = 'drop-shadow(0 0 18px rgba(212,169,67,1))';
+        slot.style.transition = 'transform 0.3s ease, filter 0.3s ease';
+        setTimeout(() => onDailyCardPick(sec, slot, card, reversedToday, imgSrc), 320);
+      });
+      container.appendChild(slot);
+      globalIdx++;
+    });
+  });
+}
+
+function onDailyCardPick(sec, slot, card, reversed, imgSrc) {
+  slot.classList.add('selected-card');
+
+  // Dim tất cả lá khác ngay lập tức
+  document.querySelectorAll('.daily-fan-card:not(.selected-card)').forEach(s => {
+    s.style.transition = 'opacity 0.4s ease';
+    s.style.opacity = '0.15';
+    s.style.pointerEvents = 'none';
+  });
+
+  // Lật chậm sau 100ms (lá đã nổi lên)
+  setTimeout(() => {
+    // Override transition của deck-card-inner để lật chậm hơn
+    const inner = slot.querySelector('.deck-card-inner');
+    if (inner) inner.style.transition = 'transform 1.1s cubic-bezier(0.4,0,0.2,1)';
+    slot.classList.add('flipped');
+    spawnParticles(slot);
+  }, 100);
+
+  // Chuyển sang kết quả sau khi lật xong
+  setTimeout(() => showDailyResult(sec, card, reversed, imgSrc), 1600);
+}
+
+function showDailyResult(sec, card, reversed, imgSrc) {
+  const { affirmation } = getDailyCard();
+  const roleData = currentDailyRole && ROLE_READINGS[currentDailyRole];
+  const roleEntry = roleData ? roleData[card.id] : null;
+  const meaning = roleEntry
+    ? (reversed ? roleEntry.r : roleEntry.u)
+    : (reversed ? card.reversed : card.upright);
+
+  sec.innerHTML = `
+    <div class="daily-result-content" id="dailyResultContent" style="display:flex;flex-direction:column;align-items:center">
+    <canvas id="dailySmokeCanvas"></canvas>
+      <div class="daily-phase daily-layout-mini" style="margin-bottom:0;padding-bottom:0;width:100%">
+        <div class="daily-card-wrap" id="dailyWrap">
+          <div class="daily-card flipped" id="dailyCardEl">
+            <div class="daily-card-back"><img src="cards/mat-sau.jpg" alt="mặt sau"></div>
+            <div class="daily-card-front">
+              <div class="card-img-wrap">
+                <img src="${imgSrc}" alt="${card.nameVi}" class="${reversed?'reversed-img':''}"
+                  onerror="this.src='cards/mat-sau.jpg'">
+              </div>
+              <div class="daily-card-name">${card.nameVi}${reversed?' ↓':''}</div>
+            </div>
+          </div>
+        </div>
+        <div class="daily-info" id="dailyInfo" style="animation:fadeInUp 0.6s ease">
+          ${currentDailyRole ? `<div style="font-family:'Be Vietnam Pro',sans-serif;font-size:0.68rem;letter-spacing:3px;color:var(--gold);opacity:0.8;margin-bottom:8px;">✦ ${currentDailyRole.replace('SAN_XUAT','SẢN XUẤT')} ✦</div>` : ''}
+          <div class="daily-card-title">
+            <span class="daily-numeral">${card.numeral}</span>
+            <span class="daily-name">${card.name} · ${card.nameVi}</span>
+            ${reversed ? '<span class="reversed-badge">↓ Ngược</span>' : ''}
+          </div>
+          <div class="daily-affirmation">
+            <span class="affirmation-label">✦ Lời Khẳng Định Hôm Nay ✦</span>
+            <p class="affirmation-text">"${meaning}"</p>
+          </div>
+        </div>
+      </div>
+      <div class="daily-candle-wrap" id="dailyCandleWrap">
+        <div class="daily-candle-stage">
+          <svg id="dailyCandleSVG" width="140" height="180" viewBox="0 0 280 360" style="display:block;width:140px;height:180px;">
+            <defs>
+              <radialGradient id="dcHalo" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#ffcf85" stop-opacity="0.5"/>
+                <stop offset="40%" stop-color="#ff9b3a" stop-opacity="0.22"/>
+                <stop offset="100%" stop-color="#ff7a00" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="dcBodyG" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#cdbd9a"/>
+                <stop offset="14%" stop-color="#f3ead2"/>
+                <stop offset="42%" stop-color="#fdf8ec"/>
+                <stop offset="70%" stop-color="#f0e6cd"/>
+                <stop offset="100%" stop-color="#c4b491"/>
+              </linearGradient>
+              <linearGradient id="dcBodyShade" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+                <stop offset="78%" stop-color="#ffffff" stop-opacity="0"/>
+                <stop offset="100%" stop-color="#8f8164" stop-opacity="0.5"/>
+              </linearGradient>
+              <radialGradient id="dcTopG" cx="50%" cy="50%" r="60%">
+                <stop offset="0%" stop-color="#d8c9a6"/>
+                <stop offset="60%" stop-color="#efe6cd"/>
+                <stop offset="100%" stop-color="#f7f0dd"/>
+              </radialGradient>
+              <radialGradient id="dcWellG" cx="50%" cy="40%" r="65%">
+                <stop offset="0%" stop-color="#bba978"/>
+                <stop offset="55%" stop-color="#d3c5a0"/>
+                <stop offset="100%" stop-color="#e4d7b3"/>
+              </radialGradient>
+              <linearGradient id="dcFlameOut" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffe9a8"/>
+                <stop offset="45%" stop-color="#ffae2e"/>
+                <stop offset="100%" stop-color="#e8740c"/>
+              </linearGradient>
+              <linearGradient id="dcFlameIn" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#fff6d8"/>
+                <stop offset="100%" stop-color="#ffc24a"/>
+              </linearGradient>
+            </defs>
+            <ellipse id="dcHaloEl" cx="140" cy="200" rx="120" ry="110" fill="url(#dcHalo)"/>
+            <g id="dcSmoke" opacity="0">
+              <path d="M140 0 C133 -22 148 -34 140 -55 C132 -74 148 -86 140 -107" fill="none" stroke="#d2d2d2" stroke-width="5" stroke-linecap="round"/>
+              <path d="M140 0 C148 -20 132 -33 142 -53 C150 -72 134 -84 144 -105" fill="none" stroke="#aaaaaa" stroke-width="3.5" stroke-linecap="round" opacity="0.8"/>
+            </g>
+            <ellipse cx="140" cy="332" rx="78" ry="13" fill="#000" opacity="0.4"/>
+            <rect x="62" y="214" width="156" height="118" fill="url(#dcBodyG)"/>
+            <rect x="62" y="214" width="156" height="118" fill="url(#dcBodyShade)"/>
+            <ellipse cx="140" cy="332" rx="78" ry="15" fill="#e9ddbf"/>
+            <ellipse cx="140" cy="332" rx="78" ry="15" fill="#000" opacity="0.06"/>
+            <rect x="78" y="220" width="20" height="106" rx="10" fill="#ffffff" opacity="0.4"/>
+            <ellipse cx="140" cy="214" rx="78" ry="20" fill="url(#dcTopG)"/>
+            <ellipse cx="140" cy="216" rx="50" ry="12" fill="#bdac87"/>
+            <ellipse cx="140" cy="215" rx="50" ry="12" fill="url(#dcWellG)"/>
+            <ellipse cx="140" cy="214" rx="34" ry="8" fill="#cbb98c"/>
+            <ellipse cx="140" cy="213.5" rx="34" ry="7.5" fill="#b9a876"/>
+            <path id="dcWick" d="M140 212 C139 205 141 200 140 194" fill="none" stroke="#241c14" stroke-width="3.4" stroke-linecap="round"/>
+            <g id="dcFlame">
+              <ellipse cx="140" cy="180" rx="30" ry="46" fill="url(#dcHalo)" opacity="0.85"/>
+              <path id="dcFout" d="M140 132 C162 156 160 188 140 198 C120 188 118 156 140 132 Z" fill="url(#dcFlameOut)"/>
+              <path id="dcFin" d="M140 152 C152 166 151 186 140 196 C129 186 128 166 140 152 Z" fill="url(#dcFlameIn)"/>
+              <path id="dcFblue" d="M140 178 C148 184 148 196 140 202 C132 196 132 184 140 178 Z" fill="#5e8bff" opacity="0.85"/>
+              <ellipse id="dcFcore" cx="140" cy="172" rx="3" ry="8" fill="#fffdf3"/>
+            </g>
+          </svg>
+        </div>
+        <div class="daily-candle-progress">
+          <div class="daily-candle-track"><div class="daily-candle-bar" id="dailyCandleBar"></div></div>
+          <span class="daily-candle-timer" id="dailyCandleTimer">0:20</span>
+        </div>
+      </div>
+    </div>
+    <div class="daily-work-now" id="dailyWorkNow">
+      <div class="daily-work-now-text">Làm việc ngay !</div>
+    </div>`;
+
+  markDailyRevealed(currentDailyRole);
+  spawnParticles(document.getElementById('dailyWrap'));
+  triggerAffirmationBurst();
+  startDailyCandle();
+}
+
+function startDailyCandle() {
+  const DURATION   = 20000;
+  const FLAME_OUT  = 800;   // ms để lửa tắt
+  const SMOKE_FILL = 3500;  // ms khói bao trùm toàn khung
+
+  const flame   = document.getElementById('dcFlame');
+  const fout    = document.getElementById('dcFout');
+  const fin     = document.getElementById('dcFin');
+  const fblue   = document.getElementById('dcFblue');
+  const fcore   = document.getElementById('dcFcore');
+  const halo    = document.getElementById('dcHaloEl');
+  const wick    = document.getElementById('dcWick');
+  const bar     = document.getElementById('dailyCandleBar');
+  const timer   = document.getElementById('dailyCandleTimer');
+  const content = document.getElementById('dailyResultContent');
+  const workNow = document.getElementById('dailyWorkNow');
+  const smokeCanvas = document.getElementById('dailySmokeCanvas');
+
+  if (!flame || !smokeCanvas) return;
+
+  // Khớp kích thước canvas với container
+  function resizeCanvas() {
+    smokeCanvas.width  = content.offsetWidth  || 600;
+    smokeCanvas.height = content.offsetHeight || 300;
+  }
+  resizeCanvas();
+  const ctx = smokeCanvas.getContext('2d');
+
+  function flamePath(topY, w, lean) {
+    const cx = 140, l = cx + lean, base = topY + 66;
+    return 'M' + l + ' ' + topY +
+      ' C' + (cx+w) + ' ' + (topY+26) + ' ' + (cx+w*0.82) + ' ' + (base-8) + ' ' + cx + ' ' + base +
+      ' C' + (cx-w*0.82) + ' ' + (base-8) + ' ' + (cx-w) + ' ' + (topY+26) + ' ' + l + ' ' + topY + ' Z';
+  }
+  function fmt(ms) {
+    const s = Math.max(0, Math.ceil(ms / 1000));
+    const m = Math.floor(s / 60);
+    return m + ':' + ((s % 60) < 10 ? '0' : '') + (s % 60);
+  }
+
+  // ── Smoke particle system ──
+  const particles = [];
+  function spawnSmokePuff(progress) {
+    const W = smokeCanvas.width, H = smokeCanvas.height;
+    // Xuất phát từ vị trí nến (bottom-center của canvas)
+    const originX = W / 2;
+    const originY = H;           // bắt từ đáy canvas (ngay chỗ nến)
+    const spread  = progress;    // 0→1: lan rộng dần theo progress
+
+    // Số puff mỗi frame tăng dần
+    const count = Math.floor(2 + progress * 8);
+    for (let i = 0; i < count; i++) {
+      const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * (0.6 + spread * 1.2);
+      const speed = 0.4 + Math.random() * 1.2 + spread * 2;
+      const size  = 30 + Math.random() * 80 + progress * 160;
+      particles.push({
+        x: originX + (Math.random() - 0.5) * 40,
+        y: originY - 10,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 0.5,
+        size,
+        maxSize: size * (1.8 + Math.random()),
+        life: 0,
+        maxLife: 80 + Math.random() * 60,
+        alpha: 0.18 + Math.random() * 0.22,
+      });
+    }
+  }
+
+  function updateSmoke() {
+    ctx.clearRect(0, 0, smokeCanvas.width, smokeCanvas.height);
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy -= 0.012; // lơ lửng lên nhẹ
+      p.vx += (Math.random() - 0.5) * 0.08;
+      p.size = Math.min(p.maxSize, p.size + 1.2);
+      p.life++;
+      if (p.life > p.maxLife) { particles.splice(i, 1); continue; }
+
+      const t = p.life / p.maxLife;
+      // fade in rồi fade out
+      const alpha = p.alpha * (t < 0.2 ? t / 0.2 : 1 - (t - 0.2) / 0.8);
+
+      const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+      grad.addColorStop(0,   `rgba(20,15,30,${(alpha * 0.9).toFixed(3)})`);
+      grad.addColorStop(0.4, `rgba(10,8,20,${(alpha * 0.6).toFixed(3)})`);
+      grad.addColorStop(1,   `rgba(5,3,10,0)`);
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
+  }
+
+  // ── Main loop ──
+  let start    = null;
+  let phase    = 'burn';   // 'burn' | 'flameout' | 'smokefill'
+  let phaseStart = 0;
+  let smokeDone  = false;
+
+  function loop(now) {
+    if (start === null) start = now;
+    const t = now - start;
+    const remaining = DURATION - t;
+
+    if (phase === 'burn') {
+      const prog  = Math.min(1, t / DURATION);
+      const lean  = Math.sin(t / 150) * 5 + Math.sin(t / 61) * 2.2;
+      const topY  = 132 + Math.sin(t / 90) * 5;
+      const w     = 22 + Math.sin(t / 110) * 2;
+      const flick = 0.9 + Math.sin(t / 38) * 0.07 + Math.sin(t / 19) * 0.03;
+
+      fout.setAttribute('d', flamePath(topY, w, lean));
+      fin.setAttribute('d',  flamePath(topY + 20, w * 0.55, lean * 0.8));
+      fblue.setAttribute('transform', 'translate(' + (lean * 0.6).toFixed(2) + ',0)');
+      fcore.setAttribute('cx', 140 + lean * 0.7);
+      fcore.setAttribute('cy', topY + 40);
+      flame.style.opacity = flick.toFixed(3);
+      halo.setAttribute('opacity', (0.7 + Math.sin(t / 120) * 0.18).toFixed(2));
+
+      bar.style.width    = (100 * (1 - prog)).toFixed(1) + '%';
+      timer.textContent  = fmt(remaining);
+
+      if (t >= DURATION) {
+        phase = 'flameout';
+        phaseStart = t;
+        bar.style.width   = '0%';
+        timer.textContent = '0:00';
+        wick.setAttribute('stroke', '#d97a2a');
+      }
+
+    } else if (phase === 'flameout') {
+      const e  = (t - phaseStart) / FLAME_OUT;
+      const sh = Math.max(0, 1 - e);
+      const jit = Math.sin(t / 26) * 6 * sh;
+
+      flame.setAttribute('transform',
+        'translate(' + jit.toFixed(1) + ',' + (e * 12).toFixed(1) + ')' +
+        ' scale(' + (1 - e * 0.3).toFixed(3) + ',' + Math.max(0.02, sh).toFixed(3) + ')');
+      flame.style.opacity = Math.max(0, sh - 0.05).toFixed(2);
+      halo.setAttribute('opacity', (0.6 * sh).toFixed(2));
+
+      if (e >= 1) {
+        flame.style.opacity = '0';
+        halo.setAttribute('opacity', '0');
+        // resize canvas sau khi layout ổn định
+        resizeCanvas();
+        phase = 'smokefill';
+        phaseStart = t;
+      }
+
+    } else if (phase === 'smokefill') {
+      const elapsed  = t - phaseStart;
+      const progress = Math.min(1, elapsed / SMOKE_FILL);
+
+      // Sinh puff liên tục, nhiều hơn ở cuối
+      if (Math.random() < 0.6 + progress * 0.4) spawnSmokePuff(progress);
+
+      updateSmoke();
+
+      // Khi khói bao trùm ~70%: fade content xuống
+      if (progress > 0.55 && !smokeDone) {
+        smokeDone = true;
+        content.style.transition = 'opacity 1.4s ease';
+        content.style.opacity    = '0';
+      }
+
+      if (progress >= 1) {
+        // Xóa canvas khói, hiện "Làm việc ngay"
+        setTimeout(() => {
+          ctx.clearRect(0, 0, smokeCanvas.width, smokeCanvas.height);
+          const wrap = document.getElementById('dailyCandleWrap');
+          if (wrap) wrap.style.display = 'none';
+          content.style.display = 'none';
+          workNow.classList.add('show');
+        }, 400);
+        return; // dừng RAF
+      }
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  requestAnimationFrame(loop);
+}
+
+function initDailyShuffleCanvas(onDone) {
+  const canvas = document.getElementById('dailyShuffleCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H / 2 + 8;
+  const CW = 52, CH = 84;
+  const TOTAL = 14;
+  const SWIPE_NEEDED = 4;
+
+  const LABELS = [
+    'Di chuyển tay qua bộ bài để xáo',
+    'Tốt lắm! Tiếp tục...',
+    'Năng lượng đang hoà quyện...',
+    'Gần xong rồi...',
+    '✦ Bộ bài đã sẵn sàng ✦',
+  ];
+
+  const backImg = new Image();
+  backImg.src = 'cards/mat-sau.jpg';
+
+  function makeStack() {
+    return Array.from({length: TOTAL}, (_, i) => ({
+      x: cx + (Math.random() - 0.5) * 2,
+      y: cy + (TOTAL - 1 - i) * 0.8,
+      angle: (Math.random() - 0.5) * 0.06,
+      tx: cx, ty: cy, ta: 0,
+      vx: 0, vy: 0, va: 0,
+      z: i,
+    }));
+  }
+
+  let cards = makeStack();
+  let swipeCount = 0, lastX = 0, dirChanges = 0, prevDir = 0, trail = [];
+
+  function getPos(e) {
+    const r = canvas.getBoundingClientRect();
+    if (e.touches) return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top };
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+
+  function onMove(e) {
+    if (swipeCount >= SWIPE_NEEDED) return;
+    e.preventDefault();
+    const p = getPos(e);
+    const dx = p.x - lastX;
+    lastX = p.x;
+    if (Math.abs(dx) < 1) return;
+
+    trail.push({ x: p.x, y: p.y, age: 0 });
+
+    cards.forEach((c, i) => {
+      const depth = i / TOTAL;
+      c.va += dx * 0.018 * (0.3 + depth * 0.7) + (Math.random() - 0.5) * 0.01;
+      c.vx += dx * 0.06 * depth;
+      c.vy += (Math.random() - 0.5) * 1.2 * depth;
+    });
+
+    const dir = dx > 2 ? 1 : dx < -2 ? -1 : 0;
+    if (dir !== 0 && dir !== prevDir) {
+      dirChanges++;
+      prevDir = dir;
+      if (dirChanges % 2 === 0 && swipeCount < SWIPE_NEEDED) {
+        swipeCount++;
+        document.getElementById('dailyShuffleBar').style.width = (swipeCount / SWIPE_NEEDED * 100) + '%';
+        document.getElementById('dailyShuffleLabel').textContent = LABELS[Math.min(swipeCount, LABELS.length - 1)];
+        cards.forEach((c, i) => {
+          const side = i % 2 === 0 ? -1 : 1;
+          c.vx += side * (4 + Math.random() * 8);
+          c.vy -= (2 + Math.random() * 6);
+          c.va += side * (0.05 + Math.random() * 0.15);
+        });
+        if (swipeCount >= SWIPE_NEEDED) {
+          canvas.removeEventListener('mousemove', onMove);
+          canvas.removeEventListener('touchmove', onMove);
+          setTimeout(onDone, 700);
+        }
+      }
+    }
+  }
+
+  canvas.addEventListener('mousemove', onMove, { passive: false });
+  canvas.addEventListener('touchmove', onMove, { passive: false });
+
+  function drawCard(c) {
+    ctx.save();
+    ctx.translate(c.x, c.y);
+    ctx.rotate(c.angle);
+    ctx.shadowColor = 'rgba(212,169,67,0.35)';
+    ctx.shadowBlur = 10;
+    if (backImg.complete && backImg.naturalWidth) {
+      const r = 5;
+      ctx.beginPath();
+      ctx.moveTo(-CW/2+r, -CH/2);
+      ctx.lineTo(CW/2-r, -CH/2); ctx.arcTo(CW/2, -CH/2, CW/2, -CH/2+r, r);
+      ctx.lineTo(CW/2, CH/2-r);  ctx.arcTo(CW/2, CH/2, CW/2-r, CH/2, r);
+      ctx.lineTo(-CW/2+r, CH/2); ctx.arcTo(-CW/2, CH/2, -CW/2, CH/2-r, r);
+      ctx.lineTo(-CW/2, -CH/2+r);ctx.arcTo(-CW/2, -CH/2, -CW/2+r, -CH/2, r);
+      ctx.closePath(); ctx.clip();
+      ctx.drawImage(backImg, -CW/2, -CH/2, CW, CH);
+    } else {
+      ctx.fillStyle = '#1a0a2e';
+      ctx.fillRect(-CW/2, -CH/2, CW, CH);
+    }
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(212,169,67,0.5)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(-CW/2, -CH/2, CW, CH);
+    ctx.restore();
+  }
+
+  function tick() {
+    ctx.clearRect(0, 0, W, H);
+    trail = trail.filter(t => { t.age++; return t.age < 18; });
+    trail.forEach(t => {
+      const a = Math.max(0, 1 - t.age / 18);
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, 5 * a, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(212,169,67,${a * 0.5})`;
+      ctx.fill();
+    });
+    cards.forEach(c => {
+      c.va += (c.ta - c.angle) * 0.04;
+      c.vx += (c.tx - c.x) * 0.03;
+      c.vy += (c.ty - c.y) * 0.03;
+      c.va *= 0.84; c.vx *= 0.80; c.vy *= 0.80;
+      c.x += c.vx; c.y += c.vy; c.angle += c.va;
+    });
+    [...cards].sort((a, b) => a.z - b.z).forEach(drawCard);
+    const grd = ctx.createRadialGradient(cx, cy, 5, cx, cy, 80);
+    grd.addColorStop(0, 'rgba(212,169,67,0.07)');
+    grd.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+    dailyShuffleRAF = requestAnimationFrame(tick);
+  }
+
+  tick();
 }
 
 function triggerAffirmationBurst() {
@@ -2831,3 +4198,4 @@ document.addEventListener('DOMContentLoaded', renderDailyCard);
 </script>
 </body>
 </html>
+
