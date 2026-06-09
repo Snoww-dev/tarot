@@ -3372,84 +3372,33 @@ function getDailyCard() {
   const now = new Date();
   const key = `daily_${now.getFullYear()}_${now.getMonth()+1}_${now.getDate()}`;
   const stored = JSON.parse(localStorage.getItem('tarot_daily') || 'null');
-  let cardIndex, reversed, affIdx, role, revealed;
+  let cardIndex, reversed, affIdx;
   if (stored && stored.date === key) {
     cardIndex = stored.cardIndex; reversed = stored.reversed;
-    affIdx    = stored.affirmationIndex; role = stored.role || null;
-    revealed  = stored.revealed || false;
+    affIdx    = stored.affirmationIndex;
   } else {
     cardIndex = Math.floor(Math.random() * CARDS.length);
     reversed  = Math.random() < 0.3;
     affIdx    = Math.floor(Math.random() * DAILY_AFFIRMATIONS.length);
-    role = null; revealed = false;
-    localStorage.setItem('tarot_daily', JSON.stringify({ date: key, cardIndex, reversed, affirmationIndex: affIdx, role, revealed }));
+    localStorage.setItem('tarot_daily', JSON.stringify({ date: key, cardIndex, reversed, affirmationIndex: affIdx }));
   }
   return {
     card: CARDS[cardIndex], cardIndex, reversed,
     affirmation: DAILY_AFFIRMATIONS[affIdx],
-    role, revealed,
     dateStr: now.toLocaleDateString('vi-VN', { weekday:'long', year:'numeric', month:'long', day:'numeric' })
   };
-}
-
-function markDailyRevealed(role) {
-  const stored = JSON.parse(localStorage.getItem('tarot_daily') || 'null');
-  if (stored) {
-    stored.revealed = true;
-    stored.role = role || null;
-    localStorage.setItem('tarot_daily', JSON.stringify(stored));
-  }
 }
 
 let dailyShuffleRAF = null;
 let currentDailyRole = null;
 
 function renderDailyCard() {
-  const { dateStr, revealed, card, cardIndex, reversed, role, affirmation } = getDailyCard();
+  const { dateStr, card, cardIndex, reversed, affirmation } = getDailyCard();
   const sec = document.getElementById('dailyCardSection');
   if (!sec) return;
 
   const titleEl = document.getElementById('dailyBarTitle');
   if (titleEl) titleEl.innerHTML = `✦ LÁ BÀI TRONG NGÀY <span class="daily-title-date">— ${dateStr}</span>`;
-
-  // Đã rút hôm nay → hiện thẳng kết quả, không nến, không shuffle
-  if (revealed) {
-    currentDailyRole = role;
-    const imgSrc = CARD_IMAGES[cardIndex] || 'cards/mat-sau.jpg';
-    const roleData  = role && ROLE_READINGS[role];
-    const roleEntry = roleData ? roleData[card.id] : null;
-    const meaning   = roleEntry
-      ? (reversed ? roleEntry.r : roleEntry.u)
-      : (reversed ? card.reversed : card.upright);
-    sec.innerHTML = `
-      <div class="daily-phase daily-layout-mini">
-        <div class="daily-card-wrap">
-          <div class="daily-card flipped">
-            <div class="daily-card-back"><img src="cards/mat-sau.jpg" alt="mặt sau"></div>
-            <div class="daily-card-front">
-              <div class="card-img-wrap">
-                <img src="${imgSrc}" alt="${card.nameVi}" class="${reversed?'reversed-img':''}"
-                  onerror="this.src='cards/mat-sau.jpg'">
-              </div>
-              <div class="daily-card-name">${card.nameVi}${reversed?' ↓':''}</div>
-            </div>
-          </div>
-        </div>
-        <div class="daily-info">
-          ${role ? `<div style="font-family:'Be Vietnam Pro',sans-serif;font-size:0.68rem;letter-spacing:3px;color:var(--gold);opacity:0.8;margin-bottom:8px;">✦ ${role.replace('SAN_XUAT','SẢN XUẤT')} ✦</div>` : ''}
-          <div class="daily-card-title">
-            <span class="daily-numeral">${card.numeral}</span>
-            <span class="daily-name">${card.name} · ${card.nameVi}</span>
-            ${reversed ? '<span class="reversed-badge">↓ Ngược</span>' : ''}
-          </div>
-          <div class="daily-affirmation">
-            <span class="affirmation-label">✦ Lời Khẳng Định Hôm Nay ✦</span>
-            <p class="affirmation-text">"${meaning}"</p>
-          </div>
-        </div>
-      </div>`;
-    return;
-  }
 
   const ROLES = [
     {key:'SEO',       label:'SEO'},
@@ -3726,7 +3675,6 @@ function showDailyResult(sec, card, reversed, imgSrc) {
       <img src="leader.png" alt="Leader" style="width:100%;max-width:480px;display:block;margin:12px auto 0;border-radius:12px;">
     </div>`;
 
-  markDailyRevealed(currentDailyRole);
   spawnParticles(document.getElementById('dailyWrap'));
   triggerAffirmationBurst();
   startDailyCandle();
