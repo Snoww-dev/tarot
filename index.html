@@ -1317,7 +1317,6 @@
   <!-- Daily card -->
   <div class="daily-bar">
     <div class="daily-bar-body open" id="dailyBarBody">
-      <div class="daily-bar-title" id="dailyBarTitle">✦ LÁ BÀI TRONG NGÀY</div>
       <div id="dailyCardSection"></div>
     </div>
   </div>
@@ -3406,9 +3405,6 @@ function renderDailyCard() {
   const { dateStr, card, cardIndex, reversed, affirmation } = getDailyCard();
   const sec = document.getElementById('dailyCardSection');
   if (!sec) return;
-
-  const titleEl = document.getElementById('dailyBarTitle');
-  if (titleEl) titleEl.innerHTML = `✦ LÁ BÀI TRONG NGÀY <span class="daily-title-date">— ${dateStr}</span>`;
 
   const ROLES = [
     {key:'CEO',       label:'CEO'},
